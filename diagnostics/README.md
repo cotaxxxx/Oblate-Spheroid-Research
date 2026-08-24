@@ -13,6 +13,7 @@ Every diagnostic artifact must record:
 - parameter domain;
 - mesh or subdivision;
 - arithmetic and precision;
+- derivation class for every recorded number;
 - stopping criteria;
 - unresolved or failed cells;
 - creation date.

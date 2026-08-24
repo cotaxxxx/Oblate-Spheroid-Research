@@ -1,7 +1,8 @@
 {
   "schema_version": "1.0",
-  "evidence_class": "EXACT_POSITIVE_CONTROL",
-  "certification_status": "NOT_BINDING",
+  "evidence_class": "NOT_BINDING",
+  "derivation_class": "EXACT",
+  "artifact_role": "EXPECTATION",
   "quantity": "b_ob",
   "parameter": {
     "lambda": "1"
@@ -16,5 +17,6 @@
     "lhs": "-mu*q - (1 - t*mu)*(t - mu)",
     "rhs": "-t*(1 - mu^2)"
   },
-  "note": "Expectations fixed before implementation; do not regenerate from the production evaluator."
+  "promotion_condition": "A test must call the implementation, and the expectation must be independent of that implementation.",
+  "note": "Expectation fixed before implementation; do not regenerate from the production evaluator."
 }

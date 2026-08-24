@@ -159,7 +159,7 @@ b_{\mathrm{ob}}'
 }.
 $$
 
-## Exact sphere controls
+## Exact sphere expectations
 
 At $\lambda=1$, the axial derivative geometry satisfies
 
@@ -169,7 +169,7 @@ $$
 -t(1-\mu^2).
 $$
 
-The exact positive control is
+The exact expectation is
 
 $$
 \boxed{
@@ -192,20 +192,36 @@ $$
 These expectations were fixed before implementation and must never be
 regenerated from the production evaluator.
 
-## Diagnostic predictions — not certified
+An expectation is promoted to a control only when a test exists that actually
+calls the implementation, and the expectation is demonstrably independent of
+that implementation. Renaming alone does not promote an expectation.
 
-Current exploratory calculations suggest
+## Candidate numerical evidence — not certified
+
+Current candidate computations give
 
 $$
 \lambda_{\mathrm{entry,ob}}
-\approx 0.64430,
+= 0.6435457703666799690435,
 \qquad
 \lambda_{\mathrm{axis,ob}}
-\approx 0.4079,
+= 0.40795886030094636425,
 \qquad
 C_{\mathrm{ob}}
-\approx 0.6965.
+\approx 0.757064.
 $$
+
+These are `HIGH_PRECISION` candidate values, not certified enclosures. The
+boundary-entry and center-axis values were evaluated with `mpmath`, `dps=40`,
+and tanh-sinh quadrature. The derivative estimates
+$b_{\mathrm{ob}}'\approx+1.10246$ and
+$\partial_tg_{\mathrm{axis,ob}}(1,\lambda_{\mathrm{entry,ob}})
+\approx-1.45623$ used, respectively, a centered difference with
+$h=10^{-12}$ and a one-sided Richardson difference. The slope is their ratio.
+
+The boundary-entry value currently has one computational source. The
+center-axis value independently agrees with an earlier floating-point search
+near $0.40796$. All remain candidate evidence until independently recomputed.
 
 Expected boundary signs are
 
@@ -224,7 +240,7 @@ points are not nonexistence proofs.
 ## Certification roadmap
 
 1. Implement the endpoint-regular axial evaluator.
-2. Reproduce the exact sphere controls independently.
+2. Connect the fixed sphere expectations to tests that call the evaluator.
 3. Certify existence, uniqueness, and transversality of
    $\lambda_{\mathrm{entry,ob}}$.
 4. Certify the center-axis degeneracy
@@ -242,5 +258,6 @@ and independent audit have all been fixed and reviewed.
 
 - [Research status](STATUS.md)
 - [Naming conventions](NAMING_CONVENTIONS.md)
-- [Exact controls](controls/README.md)
+- [Exact expectations](controls/README.md)
 - [Diagnostic-artifact rules](diagnostics/README.md)
+- [Research rules](RESEARCH_RULES.md)
