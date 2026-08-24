@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "evidence_class": "EXACT_POSITIVE_CONTROL",
+  "certification_status": "NOT_BINDING",
+  "quantity": "b_ob",
+  "parameter": {
+    "lambda": "1"
+  },
+  "exact_value": "pi^2/32",
+  "decimal_prefix": "0.3084251375340424",
+  "symbolic_identity": {
+    "assumptions": [
+      "lambda = 1",
+      "q = 1 - mu^2 + (mu - t)^2"
+    ],
+    "lhs": "-mu*q - (1 - t*mu)*(t - mu)",
+    "rhs": "-t*(1 - mu^2)"
+  },
+  "note": "Expectations fixed before implementation; do not regenerate from the production evaluator."
+}
