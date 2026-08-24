@@ -1,7 +1,6 @@
 # Oblate Spheroid Research
 
-Research on stationary base points of the cone-volume-weighted radial–normal
-angle functional on oblate spheroids.
+Stationary basepoint structure of oblate spheroids — research materials; no certification claims unless explicitly stated.
 
 > **Repository status: `NOT_BINDING / DIAGNOSTIC_ONLY`**
 >
