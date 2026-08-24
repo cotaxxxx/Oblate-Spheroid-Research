@@ -3,7 +3,7 @@
 Research on stationary base points of the cone-volume-weighted radial–normal
 angle functional on oblate spheroids.
 
-> **Repository status: \`NOT_BINDING / DIAGNOSTIC_ONLY\`**
+> **Repository status: `NOT_BINDING / DIAGNOSTIC_ONLY`**
 >
 > This repository currently contains no certified theorem, approved production
 > kernel, or Actions-produced clean-room certificate.
@@ -234,7 +234,7 @@ points are not nonexistence proofs.
 6. Treat the singular limit $\lambda\to0$ as a separate analytic tail
    obligation.
 
-A result may be labelled \`CERTIFIED\` only after its formulas, interval
+A result may be labelled `CERTIFIED` only after its formulas, interval
 implementation, configuration, workflow run, machine-readable certificate,
 and independent audit have all been fixed and reviewed.
 
