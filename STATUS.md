@@ -199,6 +199,18 @@ lambda    t                     z=lambda*t            Q_perp_ob
 0.6435    0.9999653387083598    0.6434776954588295    +0.8007594212804716
 ```
 
+At the center-axis threshold, the direct center evaluation gives
+
+```text
+Q_perp_ob(0,lambda_axis_ob) = +1.552401991182093646603194122...
+```
+
+This is close to the first branch sample `+1.518841...` at `lambda=0.42`
+and supports continuous connection of the branch transverse eigenvalue to the
+positive center transverse eigenvalue. Thus the candidate center degeneracy is
+purely axial: the axial eigenvalue vanishes while the transverse double
+eigenvalue remains positive.
+
 All sampled transverse eigenvalues are positive and remain separated from
 zero. Together with the negative axial second variation, this supports Morse
 index 1 for the sampled noncentral stationary points. The machine-readable
@@ -206,7 +218,7 @@ record is
 [diagnostics/oblate_transverse_index_result.json](diagnostics/oblate_transverse_index_result.json).
 
 Evidence status is `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
-`HIGH_PRECISION`. GitHub Actions run #67 succeeded. Finite sampling does not
+`HIGH_PRECISION`. GitHub Actions runs #67 and #73 succeeded. Finite sampling does not
 prove positivity on the entire branch and does not exclude additional
 stationary points.
 
