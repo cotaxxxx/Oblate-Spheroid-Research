@@ -43,6 +43,22 @@ def _unit_interval_value(value: mp.mpf) -> mp.mpf:
     return value
 
 
+def _transformed_s2(s: mp.mpf) -> mp.mpf:
+    """Project only a roundoff-sized tanh-sinh upper-endpoint excursion."""
+    zero = mp.mpf("0")
+    two = mp.mpf("2")
+    if s < zero:
+        raise ValueError("transformed endpoint coordinate must be nonnegative")
+    s2 = s * s
+    if s2 > two:
+        if s2 - two > mp.sqrt(mp.eps):
+            raise ValueError(
+                "transformed endpoint coordinate must satisfy s^2 <= 2"
+            )
+        return two
+    return s2
+
+
 def _alpha_over_sin_alpha(gamma: mp.mpf) -> tuple[mp.mpf, mp.mpf]:
     gamma = _unit_interval_value(gamma)
     alpha = mp.acos(gamma)
@@ -56,19 +72,7 @@ def _transformed_geometry(s: mp.mpf, lam: mp.mpf) -> tuple[mp.mpf, ...]:
     zero = mp.mpf("0")
     one = mp.mpf("1")
     two = mp.mpf("2")
-    if s < zero:
-        raise ValueError("transformed endpoint coordinate must be nonnegative")
-
-    s2 = s * s
-    # tanh-sinh can present the rounded upper endpoint with s^2 slightly
-    # above 2.  Accept only a roundoff-scale excess, then project to the
-    # exact analytic endpoint.  A substantial domain error still fails closed.
-    if s2 > two:
-        if s2 - two > mp.sqrt(mp.eps):
-            raise ValueError(
-                "transformed endpoint coordinate must satisfy s^2 <= 2"
-            )
-        s2 = two
+    s2 = _transformed_s2(s)
     mu = one - s2
     w2 = lam * lam * (one - mu * mu) + mu * mu
     qhat = two + (lam * lam - one) * s2
@@ -153,11 +157,27 @@ def g_axis_ob(t, lam, *, dps: int = 50):
         def density(s):
             if s == 0:
                 return mp.mpf("0")
-            mu = 1 - s * s
-            a = 1 - t * mu
-            q = 1 - mu * mu + lam * lam * (mu - t) ** 2
-            w = mp.sqrt(lam * lam * (1 - mu * mu) + mu * mu)
-            gamma = _unit_interval_value(lam * a / (w * mp.sqrt(q)))
+            one = mp.mpf("1")
+            two = mp.mpf("2")
+            s2 = _transformed_s2(s)
+            mu = one - s2
+            radial = s2 * (two - s2)
+            a = one - t * mu
+            q = radial + lam * lam * (mu - t) ** 2
+            w2 = lam * lam * radial + mu * mu
+            w = mp.sqrt(w2)
+
+            # Exact identity for every -1 < t < 1:
+            #   1-gamma^2
+            #   = (1-mu^2)*((1-lambda^2)*mu+lambda^2*t)^2/(w^2*q).
+            # This reduces to the endpoint factorization when t=1 and avoids
+            # a rounded direct quotient slightly above one at either pole.
+            complement_factor = (one - lam * lam) * mu + lam * lam * t
+            one_minus_gamma2 = (
+                radial * complement_factor * complement_factor / (w2 * q)
+            )
+            gamma2 = min(one, max(mp.mpf("0"), one - one_minus_gamma2))
+            gamma = mp.sqrt(gamma2)
             alpha, ratio = _alpha_over_sin_alpha(gamma)
             numerator = -mu * q - a * lam * lam * (t - mu)
             gamma_t = lam * numerator / (w * q ** mp.mpf("1.5"))
