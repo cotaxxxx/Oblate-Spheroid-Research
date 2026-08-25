@@ -84,13 +84,28 @@ Measured diagnostic values for the first two signs were approximately
 to reproduce the signs requires investigation; agreement does not constitute
 certification.
 
-## Finite-window fold diagnostic
+## Full-window axial census
 
-A direct scan on `lambda in [0.630,0.650]` observed one positive-axis root
-through `lambda=0.643`, no root from `lambda=0.644` onward, and a branch
-approaching `t=1` at `lambda_entry_ob`. No interior fold signature was
-observed in this window. This is not a global no-fold result: the scan does not
-cover lambda outside this window and is not interval arithmetic.
+An independent binary64 composite-Simpson scan sampled the full positive axial
+branch window at `lambda=0.408` and at 0.01 increments from `0.410` through
+`0.640`, followed by the existing fine endpoint refinement.
+
+At all 25 full-window samples:
+
+- exactly one sign-changing root was observed on `0<t<1`;
+- the root increased monotonically from `t=0.019825...` to `t=0.997268...`;
+- `partial_t g_axis_ob` at the root was negative;
+- no additional positive-axis root or interior-fold signature was observed.
+
+The endpoint refinement continues this branch to `t=1` at
+`lambda_entry_ob`. GitHub Actions run #85 succeeded. The machine-readable
+record is
+[diagnostics/oblate_fold_scan_result.json](diagnostics/oblate_fold_scan_result.json).
+
+This remains `DIAGNOSTIC_ONLY / NOT_BINDING`. Finite sampling cannot exclude
+an arbitrarily narrow root pair, prove negativity between nodes, or exclude
+off-axis meridian stationary points. A binding conclusion requires interval
+coverage of the full branch region and its complement.
 
 ## Precision-robustness correction
 
