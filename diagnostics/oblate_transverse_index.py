@@ -21,7 +21,7 @@ from checker.oblate_axis_prototype import (
 
 DPS = 40
 LAMBDA_AXIS_OB_TEXT = "0.4079588603009463642491058701855256993"
-LAMBDA_SAMPLES = ("0.42", "0.45", "0.50", "0.55", "0.60", "0.63", "0.6435")
+LAMBDA_SAMPLES = ("0.42", "0.45", "0.50", "0.55", "0.60", "0.63", "0.6435", "0.64354", "0.643545", "0.6435457")
 
 
 def h_second(gamma, alpha):
