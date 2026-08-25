@@ -1,0 +1,35 @@
+{
+  "schema": "oblate-axis-nondegeneracy-diagnostic-v1",
+  "evidence_class": ["DIAGNOSTIC_ONLY", "NOT_BINDING"],
+  "derivation_class": "HIGH_PRECISION",
+  "dps": 50,
+  "lambda_axis_ob": "0.4079588603009463642491058701855256993",
+  "A_ob_at_axis": "-5.5512001944065118403997249226e-25",
+  "A_ob_prime_raw": [
+    "2.49103368034696675157792859529",
+    "2.49110778133084934408428255478",
+    "2.49112630626935395167176675185",
+    "2.49113093748476371677145315857"
+  ],
+  "A_ob_prime_richardson": "2.491132481221525520635103855036329501076",
+  "C_ob_raw": [
+    "-0.261419512957969659776161751591",
+    "-0.261402539111324571383315626928",
+    "-0.261398298484236991882150402745",
+    "-0.26139723850451406432838749431",
+    "-0.261396973520647146089492823868"
+  ],
+  "C_ob_richardson": "-0.2613968851936749173528062503187062342201",
+  "minus_Aprime_over_C": "9.530077144476257310077726937892587812146",
+  "interpretation": "Candidate normal-form coefficients give t^2 approximately 9.5300771445*(lambda-lambda_axis_ob), so the noncentral axial branch lies on the lambda > lambda_axis_ob side.",
+  "producer": {
+    "repository": "cotaxxxx/bg-oblate-spheroid",
+    "branch": "implementation/endpoint-regular-axis-v1",
+    "source_commit": "c38066d804c34befc1ac875f7b7d49ae9c44a48a",
+    "diagnostic_blob_sha": "d3b7a2faeaddcb1cd6c3e3d7ebb6b9ab8eeb8f74",
+    "workflow_run_number": 53,
+    "workflow_run_id": 32838901776,
+    "workflow_conclusion": "success"
+  },
+  "claim_limit": "This diagnostic does not prove nondegeneracy, certify a coefficient enclosure, establish uniqueness, or promote the prototype source."
+}
