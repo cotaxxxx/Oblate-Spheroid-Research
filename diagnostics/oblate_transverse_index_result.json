@@ -49,17 +49,35 @@
       "t": "0.99996533870835978755843",
       "z": "0.64347769545882952329385",
       "Q_perp_ob": "0.800759421280471617679998040973"
+    },
+    {
+      "lambda": "0.64354",
+      "t": "0.999995631271953238086911",
+      "z": "0.64353718854875278683845",
+      "Q_perp_ob": "0.800640068840038671150565054635"
+    },
+    {
+      "lambda": "0.643545",
+      "t": "0.999999416777790236120867",
+      "z": "0.643544624670263017504404",
+      "Q_perp_ob": "0.800625150416996106074941655916"
+    },
+    {
+      "lambda": "0.6435457",
+      "t": "0.999999946727716273287892",
+      "z": "0.643545665716850878494448",
+      "Q_perp_ob": "0.800623061849812521316462751658"
     }
   ],
-  "observed_minimum_Q_perp_ob": "0.800759421280471617679998040973",
+  "observed_minimum_Q_perp_ob": "0.800623061849812521316462751658",
   "interpretation": "The center transverse Hessian is positive at lambda_axis_ob, and the sampled noncentral branch connects to it with positive transverse Hessian. Combined with negative axial second variation, this supports Morse index 1 at the sampled noncentral points and a purely axial center degeneracy.",
   "producer": {
     "repository": "cotaxxxx/bg-oblate-spheroid",
     "branch": "implementation/endpoint-regular-axis-v1",
-    "source_commit": "9b2752e654c57db7a177c3d07c8f2970e5f90d53",
-    "diagnostic_blob_sha": "61553b8944d4ecbe7847a33b3b493ac09d00c084",
-    "workflow_run_number": 73,
-    "workflow_run_id": 32846095720,
+    "source_commit": "2879ab2cdbd928d9d6c82c649d483846e2f25191",
+    "diagnostic_blob_sha": "a69c08624c0f1274788c04588dee88dbf3c57c04",
+    "workflow_run_number": 79,
+    "workflow_run_id": 32848101773,
     "workflow_conclusion": "success"
   },
   "claim_limit": "Finite sampling does not prove positivity on the full branch, exclude additional stationary points, or provide a certified enclosure.",
@@ -68,5 +86,6 @@
     "t": "0",
     "z": "0",
     "Q_perp_ob": "1.55240199118209364660319412195"
-  }
+  },
+  "boundary_entry_limit_diagnostic": "The sequence through lambda=0.6435457 approaches a positive finite value near 0.800623 and does not trend toward zero."
 }
