@@ -34,4 +34,4 @@ jobs:
       - name: Run non-binding fold diagnostic
         run: python diagnostics/oblate_fold_scan.py
       - name: Run non-binding axis nondegeneracy diagnostic
-        run: python diagnostics/oblate_axis_nondegeneracy.py
+        run: PYTHONPATH=. python diagnostics/oblate_axis_nondegeneracy.py
