@@ -1,6 +1,6 @@
 # Research Status
 
-Updated: 2026-08-25
+Updated: 2026-08-26
 
 ## Global status
 
@@ -249,6 +249,31 @@ Evidence status is `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
 `HIGH_PRECISION`. GitHub Actions runs #67, #73, and #79 succeeded. Finite sampling does not
 prove positivity on the entire branch and does not exclude additional
 stationary points.
+
+## Endpoint analytic reduction and exact controls
+
+The boundary functional is now defined explicitly as the one-sided limit
+`B_ob(lambda)=lim[t->1-] partial_t E_lambda(t)`. The direct endpoint integral,
+including cone weight and Jacobian, is derived in
+[analysis/endpoint_kernel_lemma.md](analysis/endpoint_kernel_lemma.md).
+
+The reduction uses two analytic charts split at `s=1`. This is necessary
+because `u=1-gamma^2` has an internal double zero at
+`s^2=1/(1-lambda^2)` throughout the present oblate window. The note fixes the
+positive branch of `gamma`, records uniform denominator and chart bounds,
+includes the full endpoint-order checks, and justifies differentiation under
+the integral on compact rational lambda intervals. It also distinguishes the
+fixed-ball static normalization from any metric or gradient-flow choice.
+
+Exact rational controls were added before an interval implementation. They
+check the complement identity, endpoint values, internal double zero, seam
+targets, and the `A*gamma_t` factorization without calling an integrator or
+the prototype evaluator. GitHub Actions run #95 succeeded, with these controls
+executed before all implementation-calling checks.
+
+Status remains `PROTOTYPE / NOT_AUDITED` and
+`DIAGNOSTIC_ONLY / NOT_BINDING`. No interval enclosure or uniqueness claim
+has been produced.
 
 ## Open obligations
 
