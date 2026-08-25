@@ -133,6 +133,36 @@ The earlier split-versus-unsplit quadrature comparison is now optional
 diagnostic work rather than a blocking obligation, because the unsplit
 quadrature displays precision-proportional convergence over the tested range.
 
+## Candidate center-axis nondegeneracy
+
+A 50-dps centered-difference and Richardson diagnostic at
+`lambda_axis_ob` produced
+
+```text
+A_ob(lambda_axis_ob)       = -5.55e-25
+A_ob_prime(lambda_axis_ob) = +2.491132481221525520635103855...
+C_ob                       = -0.261396885193674917352806250...
+-A_ob_prime/C_ob           = +9.530077144476257310077726938...
+```
+
+Here `A_ob(lambda)=partial_t g_axis_ob(0,lambda)` and `C_ob` is the
+coefficient of `t^3` in the odd expansion of `g_axis_ob` at the center.
+The raw sequences converge with stable positive sign for `A_ob_prime` and
+stable negative sign for `C_ob`. The candidate normal form is therefore
+
+```text
+t^2 approximately 9.5300771445*(lambda-lambda_axis_ob),
+```
+
+so the candidate noncentral axial branch lies on the
+`lambda > lambda_axis_ob` side, consistent with absorption into the center as
+lambda decreases. The full diagnostic record is
+[diagnostics/oblate_axis_nondegeneracy_result.json](diagnostics/oblate_axis_nondegeneracy_result.json).
+
+Evidence status remains `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
+`HIGH_PRECISION`. GitHub Actions run #53 succeeded. These calculations do not
+prove nondegeneracy or supply certified coefficient enclosures.
+
 ## Open obligations
 
 - independently audit and intervalize the endpoint-regular axial prototype;
