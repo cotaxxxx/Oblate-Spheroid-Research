@@ -193,8 +193,8 @@
         "lambda_interval": {
           "type": "array",
           "prefixItems": [
-            {"$ref": "#/$defs/s_coordinate"},
-            {"$ref": "#/$defs/s_coordinate"}
+            {"$ref": "#/$defs/rational"},
+            {"$ref": "#/$defs/rational"}
           ],
           "items": false
         },
