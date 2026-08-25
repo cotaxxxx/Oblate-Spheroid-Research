@@ -37,6 +37,17 @@ class EndpointEvaluatorSphereControl(unittest.TestCase):
                 ):
                     g_axis_ob(invalid_t, 1, dps=self.DPs)
 
+    def test_g_axis_ob_is_stable_at_previously_failing_precisions(self):
+        values = {}
+        for dps in (30, 50, 80):
+            with self.subTest(dps=dps):
+                value = g_axis_ob("0.99", "0.63", dps=dps)
+                self.assertTrue(mp.isfinite(value))
+                values[dps] = value
+        with mp.workdps(80):
+            self.assertLess(abs(values[30] - values[80]), mp.mpf("1e-25"))
+            self.assertLess(abs(values[50] - values[80]), mp.mpf("1e-45"))
+
     def test_b_ob_is_stable_at_previously_failing_precisions(self):
         values = {}
         for dps in (30, 50, 80):
