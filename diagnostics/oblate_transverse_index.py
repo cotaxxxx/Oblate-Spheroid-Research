@@ -20,6 +20,7 @@ from checker.oblate_axis_prototype import (
 
 
 DPS = 40
+LAMBDA_AXIS_OB_TEXT = "0.4079588603009463642491058701855256993"
 LAMBDA_SAMPLES = ("0.42", "0.45", "0.50", "0.55", "0.60", "0.63", "0.6435")
 
 
@@ -119,6 +120,18 @@ def main():
         print("EVIDENCE_CLASS DIAGNOSTIC_ONLY / NOT_BINDING")
         print("DERIVATION_CLASS HIGH_PRECISION")
         print("DPS", DPS)
+        lambda_axis = mp.mpf(LAMBDA_AXIS_OB_TEXT)
+        center_q_perp = transverse_hessian_ob(mp.mpf("0"), lambda_axis)
+        print(
+            "CENTER_AXIS",
+            mp.nstr(lambda_axis, 40),
+            "t",
+            "0",
+            "z",
+            "0",
+            "Q_perp_ob",
+            mp.nstr(center_q_perp, 30),
+        )
         for lam_text in LAMBDA_SAMPLES:
             lam = mp.mpf(lam_text)
             t = positive_axis_root(lam)
