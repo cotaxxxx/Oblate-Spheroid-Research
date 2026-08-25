@@ -1,0 +1,28 @@
+{
+  "schema": "oblate-transverse-index-diagnostic-v1",
+  "evidence_class": ["DIAGNOSTIC_ONLY", "NOT_BINDING"],
+  "derivation_class": "HIGH_PRECISION",
+  "dps": 40,
+  "quantity": "Q_perp_ob = E_rr(0,t,lambda) for p=(r,0,lambda*t)",
+  "samples": [
+    {"lambda":"0.42","t":"0.32994852396489091931827","z":"0.138578380065254186113674","Q_perp_ob":"1.51884101617011264067095983426"},
+    {"lambda":"0.45","t":"0.57937085196773054590677","z":"0.260716883385478745658046","Q_perp_ob":"1.42791757601278040859118305937"},
+    {"lambda":"0.50","t":"0.780278395843017172134583","z":"0.390139197921508586067292","Q_perp_ob":"1.26396352995524085430200538001"},
+    {"lambda":"0.55","t":"0.890989997139444984689863","z":"0.490044498426694741579425","Q_perp_ob":"1.09683773482332762711106974248"},
+    {"lambda":"0.60","t":"0.959901002039686994422032","z":"0.575940601223812196653219","Q_perp_ob":"0.93461642283855084335054419813"},
+    {"lambda":"0.63","t":"0.989077544497075513788765","z":"0.623118853033157573686922","Q_perp_ob":"0.841458073702606192910847809713"},
+    {"lambda":"0.6435","t":"0.99996533870835978755843","z":"0.64347769545882952329385","Q_perp_ob":"0.800759421280471617679998040973"}
+  ],
+  "observed_minimum_Q_perp_ob": "0.800759421280471617679998040973",
+  "interpretation": "All sampled noncentral axial stationary points have positive transverse Hessian. Combined with negative axial second variation, this supports Morse index 1 at the sampled points.",
+  "producer": {
+    "repository": "cotaxxxx/bg-oblate-spheroid",
+    "branch": "implementation/endpoint-regular-axis-v1",
+    "source_commit": "86219162925fa52924fa03ca6cf39f5f32b6b2d2",
+    "diagnostic_blob_sha": "99766e94027ed3e19f0a12c77f1881aff7fe558d",
+    "workflow_run_number": 67,
+    "workflow_run_id": 32843665814,
+    "workflow_conclusion": "success"
+  },
+  "claim_limit": "Finite sampling does not prove positivity on the full branch, exclude additional stationary points, or provide a certified enclosure."
+}
