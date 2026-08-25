@@ -45,8 +45,8 @@ The following values are candidate evidence, not certified enclosures:
 ```text
 lambda_entry_ob = 0.6435457703666799690435  [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
 lambda_axis_ob  = 0.4079588603009463642491058701855256993  [HIGH_PRECISION; two-source agreement]
-b_ob_prime      = +1.10246                  [HIGH_PRECISION; centered difference h=1e-12]
-gt_boundary_ob  = -1.45623                  [HIGH_PRECISION; one-sided Richardson difference]
+b_ob_prime      = +1.10246                  [HIGH_PRECISION; two-source agreement]
+gt_boundary_ob  = -1.45623019               [HIGH_PRECISION; mpmath dps=50; one-sided differences]
 entry_slope_ob  = 0.757064                  [HIGH_PRECISION; ratio b_ob_prime/(-gt_boundary_ob)]
 b_ob(1)         = pi^2/32                   [EXACT]
 ```
@@ -60,8 +60,16 @@ tanh-sinh quadrature, centered slopes, and Richardson extrapolation at 50 and
 80 decimal digits. The two native precision settings agree through the stable
 prefix printed above, and the result agrees with the original recorded value
 through all 20 of its decimal places. `lambda_entry_ob` also has an
-independent Decimal/tanh-sinh reproduction of the endpoint equation, but none
-of these agreements promotes a value to `CERTIFIED_ENCLOSURE`.
+independent Decimal/tanh-sinh reproduction of the endpoint equation.
+
+The `b_ob_prime` candidate now has a second numerical source: the binary64
+Simpson fold diagnostic reproduces local difference ratios approximately
+`1.10247` to `1.10250` across the boundary sign change, consistent with
+the prior high-precision value `1.10246`. The endpoint derivative candidate
+uses the independently audited one-sided sequence
+`-1.45550032, -1.45622003, -1.45623006, -1.45623019, -1.45623019` for
+steps `1e-4, 1e-6, 1e-8, 1e-10, 1e-12`. None of these agreements promotes
+a value to `CERTIFIED_ENCLOSURE`.
 
 Expected signs:
 
@@ -76,11 +84,19 @@ Measured diagnostic values for the first two signs were approximately
 to reproduce the signs requires investigation; agreement does not constitute
 certification.
 
+## Finite-window fold diagnostic
+
+A direct scan on `lambda in [0.630,0.650]` observed one positive-axis root
+through `lambda=0.643`, no root from `lambda=0.644` onward, and a branch
+approaching `t=1` at `lambda_entry_ob`. No interior fold signature was
+observed in this window. This is not a global no-fold result: the scan does not
+cover lambda outside this window and is not interval arithmetic.
+
 ## Open obligations
 
 - independently audit and intervalize the endpoint-regular axial prototype;
 - certify existence, uniqueness, and transversality of `lambda_entry_ob`;
 - certify `b_ob_prime > 0` and `gt_boundary_ob < 0`;
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
-- exclude interior folds and additional meridian stationary points;
+- exclude interior folds and additional meridian stationary points globally;
 - keep the `lambda -> 0` uniform tail outside the present finite-window claim.
