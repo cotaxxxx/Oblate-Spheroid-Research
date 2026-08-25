@@ -1,6 +1,9 @@
 name: Oblate endpoint prototype checks
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - implementation/endpoint-regular-axis-v1
