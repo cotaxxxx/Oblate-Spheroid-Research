@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "evidence_class": "DIAGNOSTIC_ONLY",
+  "derivation_class": "HIGH_PRECISION",
+  "implementation": "Python Decimal; independent tanh-sinh quadrature; no mpmath import",
+  "source_path": "diagnostics/oblate_endpoint_convergence_decimal.py",
+  "cases": [
+    {
+      "decimal_precision": 50,
+      "tanh_sinh_step": "0.04",
+      "unsplit_interval": "[0,sqrt(2)]",
+      "split_intervals": [
+        "[0,1]",
+        "[1,sqrt(2)]"
+      ],
+      "b_ob_1_unsplit": "0.30842513753404245683857784374612972297855310647627",
+      "b_ob_1_split": "0.30842513753404245683857784374612972297855310647627",
+      "b_ob_1_exact": "0.30842513753404245683857784374612972297855310647628",
+      "split_minus_unsplit": "0E-50",
+      "unsplit_minus_exact": "-1E-50",
+      "root_unsplit": "0.643545770366679969043548721173498071698181327283194389627245",
+      "root_split": "0.643545770366679969043548717284450056779646325198572643788002",
+      "root_split_minus_unsplit": "-3.889048014918535002084621745839243E-27"
+    },
+    {
+      "decimal_precision": 80,
+      "tanh_sinh_step": "0.025",
+      "unsplit_interval": "[0,sqrt(2)]",
+      "split_intervals": [
+        "[0,1]",
+        "[1,sqrt(2)]"
+      ],
+      "b_ob_1_unsplit": "0.30842513753404245683857784374612972297855310647627470707541716800687640070060016",
+      "b_ob_1_split": "0.30842513753404245683857784374612972297855310647627470707541716800687640070060016",
+      "b_ob_1_exact": "0.30842513753404245683857784374612972297855310647627470707541716800687640070060017",
+      "split_minus_unsplit": "0E-80",
+      "unsplit_minus_exact": "-1E-80",
+      "root_unsplit": "0.643545770366679969043548717284450056779647111958314402406015464652338965083840812127311603",
+      "root_split": "0.643545770366679969043548717284450056779646325328826423386496514669621409632554291547407890",
+      "root_split_minus_unsplit": "-7.86629487979019518949982717555451286520579903713E-43"
+    }
+  ],
+  "conclusion": "Split and unsplit endpoint integrals agree to the working precision for b_ob(1). The boundary root stabilizes to 0.643545770366679969043548717284450056779646...; this is diagnostic high-precision evidence, not a certified enclosure."
+}
