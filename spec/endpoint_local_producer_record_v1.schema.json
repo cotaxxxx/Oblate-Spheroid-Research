@@ -107,6 +107,12 @@
       "type": "string",
       "pattern": "^-?[0-9]+/[1-9][0-9]*$"
     },
+    "s_coordinate": {
+      "oneOf": [
+        {"$ref": "#/$defs/rational"},
+        {"const": "sqrt2"}
+      ]
+    },
     "arb_ball": {
       "type": "object",
       "additionalProperties": false,
@@ -146,8 +152,8 @@
         "s_interval": {
           "type": "array",
           "prefixItems": [
-            {"$ref": "#/$defs/rational"},
-            {"$ref": "#/$defs/rational"}
+            {"$ref": "#/$defs/s_coordinate"},
+            {"$ref": "#/$defs/s_coordinate"}
           ],
           "items": false
         },
@@ -187,8 +193,8 @@
         "lambda_interval": {
           "type": "array",
           "prefixItems": [
-            {"$ref": "#/$defs/rational"},
-            {"$ref": "#/$defs/rational"}
+            {"$ref": "#/$defs/s_coordinate"},
+            {"$ref": "#/$defs/s_coordinate"}
           ],
           "items": false
         },
