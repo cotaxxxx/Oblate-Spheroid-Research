@@ -1,10 +1,10 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "evidence_class": "DIAGNOSTIC_ONLY",
   "derivation_class": "NUMERICAL_DIAGNOSTIC",
-  "claim_scope": "Direct non-interval scan for sign-changing positive-axis roots; not a certified no-fold theorem.",
+  "claim_scope": "Direct non-interval scan for sign-changing positive-axis roots in lambda=[0.630,0.650]; not a global or certified no-fold theorem.",
   "source_path": "diagnostics/oblate_fold_scan.py",
-  "implementation": "Python standard-library binary64; composite Simpson quadrature with 1200 panels; 200 t-subintervals; bisection; centered finite-difference branch slope h=1e-5",
+  "implementation": "Python standard-library binary64; composite Simpson quadrature with 1200 panels; 200 t-subintervals; bisection; centered branch slopes only when the complete h=1e-5 stencil remains in 0<t<=1",
   "parameter_window": {
     "lambda": "[0.630,0.650]",
     "lambda_step": "0.001",
@@ -21,19 +21,28 @@
   ],
   "endpoint_refinement": [
     {"lambda": "0.64350000", "positive_root_t": "0.999965314961", "partial_t_g_at_root": "-1.45469773", "g_at_1": "-5.046146085e-05"},
-    {"lambda": "0.64354000", "positive_root_t": "0.999995627967", "partial_t_g_at_root": "-1.45505559", "g_at_1": "-6.361634031e-06"},
-    {"lambda": "0.64354500", "positive_root_t": "0.999999416331", "partial_t_g_at_root": "-1.45510008", "g_at_1": "-8.492982620e-07"},
-    {"lambda": "0.64354570", "positive_root_t": "0.999999946689", "partial_t_g_at_root": "-1.45510630", "g_at_1": "-7.757378289e-08"},
-    {"lambda": "0.64354577", "positive_root_t": "0.999999999724", "partial_t_g_at_root": "-1.45510692", "g_at_1": "-4.013691365e-10"},
+    {"lambda": "0.64354000", "positive_root_t": "0.999995627967", "partial_t_g_at_root": null, "g_at_1": "-6.361634031e-06"},
+    {"lambda": "0.64354500", "positive_root_t": "0.999999416331", "partial_t_g_at_root": null, "g_at_1": "-8.492982620e-07"},
+    {"lambda": "0.64354570", "positive_root_t": "0.999999946689", "partial_t_g_at_root": null, "g_at_1": "-7.757378289e-08"},
+    {"lambda": "0.64354577", "positive_root_t": "0.999999999724", "partial_t_g_at_root": null, "g_at_1": "-4.013691365e-10"},
     {"lambda": "0.64354600", "positive_root_t": null, "g_at_1": "2.531650894e-07"}
   ],
-  "sampled_outer_rectangle": {
-    "lambda": "[0.63,0.64355]",
-    "t": "[0.98,1]",
-    "lambda_nodes": 28,
-    "t_nodes": 41,
-    "observed_partial_t_g_range": "[-1.4550741612,-1.2811249044]"
+  "endpoint_derivative": {
+    "quantity": "partial_t_g(1-,lambda_entry_ob)",
+    "canonical_candidate": "-1.45623019",
+    "method": "independent mpmath dps=50 one-sided differences",
+    "difference_steps": ["1e-4", "1e-6", "1e-8", "1e-10", "1e-12"],
+    "convergence_values": ["-1.45550032", "-1.45622003", "-1.45623006", "-1.45623019", "-1.45623019"],
+    "note": "This replaces the invalid near-boundary binary64 centered-difference values. The canonical candidate remains HIGH_PRECISION, not a certified enclosure."
   },
-  "observed_conclusion": "Exactly one sign-changing positive-axis root was observed for every coarse lambda node from 0.630 through 0.643; none was observed from 0.644 through 0.650. Endpoint refinement shows that branch approaching t=1 with a nonzero negative slope and disappearing when b_ob(lambda)=g(1,lambda) changes sign. No numerical signature of an interior fold was observed.",
-  "certification_gap": "The scan cannot exclude an arbitrarily narrow unobserved root pair. A binding no-fold result requires interval coverage proving partial_t g<0 on the outer branch region and sign/root exclusion on its complement."
+  "boundary_transversality_cross_check": {
+    "quantity": "b_ob_prime(lambda_entry_ob)",
+    "prior_high_precision_candidate": "1.10246",
+    "binary64_simpson_local_ratios": "approximately 1.10247 to 1.10250 across the sign change",
+    "status": "two-source candidate agreement",
+    "entry_slope_ob": "0.757064"
+  },
+  "observed_conclusion": "Exactly one sign-changing positive-axis root was observed for every coarse lambda node from 0.630 through 0.643; none was observed from 0.644 through 0.650. Endpoint refinement shows that the branch approaches t=1 while the independently evaluated one-sided endpoint derivative stays finite and negative. No numerical signature of an interior fold was observed in the scanned window.",
+  "certification_gap": "The scan cannot exclude an arbitrarily narrow unobserved root pair, and it says nothing about lambda outside [0.630,0.650]. A binding global no-fold result requires interval coverage proving partial_t g<0 on the branch region, sign/root exclusion on its complement, and a separate treatment of the unscanned lambda range.",
+  "audit_note": "Project-owner audit on 2026-08-25 identified the invalid near-boundary centered stencil and supplied the converged one-sided dps=50 endpoint derivative sequence recorded above."
 }
