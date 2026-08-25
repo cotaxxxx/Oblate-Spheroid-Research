@@ -1,38 +1,100 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "evidence_class": "DIAGNOSTIC_ONLY",
   "derivation_class": "NUMERICAL_DIAGNOSTIC",
-  "claim_scope": "Direct non-interval scan for sign-changing positive-axis roots in lambda=[0.630,0.650]; not a global or certified no-fold theorem.",
+  "claim_scope": "Direct non-interval scan for sign-changing positive-axis roots across the sampled full branch window lambda=0.408 and 0.410:0.010:0.640, with separate endpoint refinement; not a certified no-fold theorem.",
   "source_path": "diagnostics/oblate_fold_scan.py",
   "implementation": "Python standard-library binary64; composite Simpson quadrature with 1200 panels; 200 t-subintervals; bisection; centered branch slopes only when the complete h=1e-5 stencil remains in 0<t<=1",
   "parameter_window": {
-    "lambda": "[0.630,0.650]",
-    "lambda_step": "0.001",
     "t": "[0.0001,1]",
-    "endpoint_refinement_t": "[0.98,1]"
+    "endpoint_refinement_t": "[0.98,1]",
+    "lambda_samples": "0.408 plus 0.410 through 0.640 in steps of 0.010"
   },
   "coarse_scan": [
-    {"lambda": "0.630", "positive_root_t": "0.989077541575", "partial_t_g_at_root": "-1.33812338"},
-    {"lambda": "0.635", "positive_root_t": "0.993261602240", "partial_t_g_at_root": "-1.37822945"},
-    {"lambda": "0.640", "positive_root_t": "0.997267672733", "partial_t_g_at_root": "-1.42098003"},
-    {"lambda": "0.643", "positive_root_t": "0.999585461678", "partial_t_g_at_root": "-1.44997281"},
-    {"lambda": "0.644", "positive_root_t": null},
-    {"lambda": "0.650", "positive_root_t": null}
+    {
+      "lambda": "0.630",
+      "positive_root_t": "0.989077541575",
+      "partial_t_g_at_root": "-1.33812338"
+    },
+    {
+      "lambda": "0.635",
+      "positive_root_t": "0.993261602240",
+      "partial_t_g_at_root": "-1.37822945"
+    },
+    {
+      "lambda": "0.640",
+      "positive_root_t": "0.997267672733",
+      "partial_t_g_at_root": "-1.42098003"
+    },
+    {
+      "lambda": "0.643",
+      "positive_root_t": "0.999585461678",
+      "partial_t_g_at_root": "-1.44997281"
+    },
+    {
+      "lambda": "0.644",
+      "positive_root_t": null
+    },
+    {
+      "lambda": "0.650",
+      "positive_root_t": null
+    }
   ],
   "endpoint_refinement": [
-    {"lambda": "0.64350000", "positive_root_t": "0.999965314961", "partial_t_g_at_root": "-1.45469773", "g_at_1": "-5.046146085e-05"},
-    {"lambda": "0.64354000", "positive_root_t": "0.999995627967", "partial_t_g_at_root": null, "g_at_1": "-6.361634031e-06"},
-    {"lambda": "0.64354500", "positive_root_t": "0.999999416331", "partial_t_g_at_root": null, "g_at_1": "-8.492982620e-07"},
-    {"lambda": "0.64354570", "positive_root_t": "0.999999946689", "partial_t_g_at_root": null, "g_at_1": "-7.757378289e-08"},
-    {"lambda": "0.64354577", "positive_root_t": "0.999999999724", "partial_t_g_at_root": null, "g_at_1": "-4.013691365e-10"},
-    {"lambda": "0.64354600", "positive_root_t": null, "g_at_1": "2.531650894e-07"}
+    {
+      "lambda": "0.64350000",
+      "positive_root_t": "0.999965314961",
+      "partial_t_g_at_root": "-1.45469773",
+      "g_at_1": "-5.046146085e-05"
+    },
+    {
+      "lambda": "0.64354000",
+      "positive_root_t": "0.999995627967",
+      "partial_t_g_at_root": null,
+      "g_at_1": "-6.361634031e-06"
+    },
+    {
+      "lambda": "0.64354500",
+      "positive_root_t": "0.999999416331",
+      "partial_t_g_at_root": null,
+      "g_at_1": "-8.492982620e-07"
+    },
+    {
+      "lambda": "0.64354570",
+      "positive_root_t": "0.999999946689",
+      "partial_t_g_at_root": null,
+      "g_at_1": "-7.757378289e-08"
+    },
+    {
+      "lambda": "0.64354577",
+      "positive_root_t": "0.999999999724",
+      "partial_t_g_at_root": null,
+      "g_at_1": "-4.013691365e-10"
+    },
+    {
+      "lambda": "0.64354600",
+      "positive_root_t": null,
+      "g_at_1": "2.531650894e-07"
+    }
   ],
   "endpoint_derivative": {
     "quantity": "partial_t_g(1-,lambda_entry_ob)",
     "canonical_candidate": "-1.45623019",
     "method": "independent mpmath dps=50 one-sided differences",
-    "difference_steps": ["1e-4", "1e-6", "1e-8", "1e-10", "1e-12"],
-    "convergence_values": ["-1.45550032", "-1.45622003", "-1.45623006", "-1.45623019", "-1.45623019"],
+    "difference_steps": [
+      "1e-4",
+      "1e-6",
+      "1e-8",
+      "1e-10",
+      "1e-12"
+    ],
+    "convergence_values": [
+      "-1.45550032",
+      "-1.45622003",
+      "-1.45623006",
+      "-1.45623019",
+      "-1.45623019"
+    ],
     "note": "This replaces the invalid near-boundary binary64 centered-difference values. The canonical candidate remains HIGH_PRECISION, not a certified enclosure."
   },
   "boundary_transversality_cross_check": {
@@ -42,7 +104,166 @@
     "status": "two-source candidate agreement",
     "entry_slope_ob": "0.757064"
   },
-  "observed_conclusion": "Exactly one sign-changing positive-axis root was observed for every coarse lambda node from 0.630 through 0.643; none was observed from 0.644 through 0.650. Endpoint refinement shows that the branch approaches t=1 while the independently evaluated one-sided endpoint derivative stays finite and negative. No numerical signature of an interior fold was observed in the scanned window.",
-  "certification_gap": "The scan cannot exclude an arbitrarily narrow unobserved root pair, and it says nothing about lambda outside [0.630,0.650]. A binding global no-fold result requires interval coverage proving partial_t g<0 on the branch region, sign/root exclusion on its complement, and a separate treatment of the unscanned lambda range.",
-  "audit_note": "Project-owner audit on 2026-08-25 identified the invalid near-boundary centered stencil and supplied the converged one-sided dps=50 endpoint derivative sequence recorded above."
+  "observed_conclusion": "Exactly one sign-changing positive-axis root was observed at every one of the 25 sampled lambda values across the full axial branch window. The root t increased monotonically from 0.019825 at lambda=0.408 to 0.997268 at lambda=0.640, and partial_t g at the root remained negative throughout. Endpoint refinement continues the same branch to t=1. No numerical signature of an interior axial fold or additional positive-axis root was observed.",
+  "certification_gap": "Finite sampling cannot exclude an arbitrarily narrow unobserved root pair or prove partial_t g<0 between sampled nodes. A binding global no-fold result requires interval coverage of the full (t,lambda) branch region and sign/root exclusion on its complement. This axial census also does not exclude off-axis meridian stationary points.",
+  "audit_note": "Project-owner audit on 2026-08-25 identified the invalid near-boundary centered stencil and supplied the converged one-sided dps=50 endpoint derivative sequence recorded above.",
+  "full_branch_scan": [
+    {
+      "lambda": "0.408",
+      "positive_root_t": "0.01982506341750284",
+      "partial_t_g_at_root": "-0.00020582600708193727",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.410",
+      "positive_root_t": "0.13884204005230938",
+      "partial_t_g_at_root": "-0.010189833116602416",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.420",
+      "positive_root_t": "0.3299485380042",
+      "partial_t_g_at_root": "-0.06068823018744214",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.430",
+      "positive_root_t": "0.43702114859101354",
+      "partial_t_g_at_root": "-0.11211842473021608",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.440",
+      "positive_root_t": "0.5161136441414066",
+      "partial_t_g_at_root": "-0.16444876141531176",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.450",
+      "positive_root_t": "0.5793708527940729",
+      "partial_t_g_at_root": "-0.21765213471929157",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.460",
+      "positive_root_t": "0.6320229461990754",
+      "partial_t_g_at_root": "-0.2717060210638275",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.470",
+      "positive_root_t": "0.6769271109495322",
+      "partial_t_g_at_root": "-0.32659262082913776",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.480",
+      "positive_root_t": "0.7158607120979561",
+      "partial_t_g_at_root": "-0.38229908711694455",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.490",
+      "positive_root_t": "0.7500247039518839",
+      "partial_t_g_at_root": "-0.43881786232367376",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.500",
+      "positive_root_t": "0.7802783959050177",
+      "partial_t_g_at_root": "-0.4961471539196756",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.510",
+      "positive_root_t": "0.8072629581649876",
+      "partial_t_g_at_root": "-0.5542915947401427",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.520",
+      "positive_root_t": "0.8314722989065175",
+      "partial_t_g_at_root": "-0.6132631541945063",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.530",
+      "positive_root_t": "0.8532965126359351",
+      "partial_t_g_at_root": "-0.673082400020467",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.540",
+      "positive_root_t": "0.8730499301096182",
+      "partial_t_g_at_root": "-0.7337802641961334",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.550",
+      "positive_root_t": "0.8909899971120192",
+      "partial_t_g_at_root": "-0.7954005579245689",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.560",
+      "positive_root_t": "0.9073304197064515",
+      "partial_t_g_at_root": "-0.8580036415463468",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.570",
+      "positive_root_t": "0.9222505748133643",
+      "partial_t_g_at_root": "-0.9216719544640751",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.580",
+      "positive_root_t": "0.9359023975103569",
+      "partial_t_g_at_root": "-0.9865187020271967",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.590",
+      "positive_root_t": "0.9484155008515839",
+      "partial_t_g_at_root": "-1.0527022619194162",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.600",
+      "positive_root_t": "0.9599010018420894",
+      "partial_t_g_at_root": "-1.120451861515035",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.610",
+      "positive_root_t": "0.970454327087349",
+      "partial_t_g_at_root": "-1.1901181381864985",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.620",
+      "positive_root_t": "0.9801570687097925",
+      "partial_t_g_at_root": "-1.2622884689873577",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.630",
+      "positive_root_t": "0.9890775415749333",
+      "partial_t_g_at_root": "-1.338123376162411",
+      "sign_changing_root_count": 1
+    },
+    {
+      "lambda": "0.640",
+      "positive_root_t": "0.9972676727327491",
+      "partial_t_g_at_root": "-1.420980029058448",
+      "sign_changing_root_count": 1
+    }
+  ],
+  "producer": {
+    "source_commit": "18b6848338a7767af5ae2c4ebd1275567b954806",
+    "source_blob_sha": "4cefd77d737da29bf0dd94a0ed28092caf660eaa",
+    "workflow_run_number": 85,
+    "workflow_run_id": 32863890304,
+    "workflow_conclusion": "success"
+  }
 }
