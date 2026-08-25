@@ -52,13 +52,32 @@ def _alpha_over_sin_alpha(gamma: mp.mpf) -> tuple[mp.mpf, mp.mpf]:
 
 
 def _transformed_geometry(s: mp.mpf, lam: mp.mpf) -> tuple[mp.mpf, ...]:
-    """Geometry at t=1 after mu=1-s^2, with q=s^2*qhat."""
-    mu = 1 - s * s
-    w2 = lam * lam * (1 - mu * mu) + mu * mu
-    qhat = 2 + (lam * lam - 1) * s * s
+    """Geometry at t=1 after mu=1-s^2, using a stable complement for gamma."""
+    zero = mp.mpf("0")
+    one = mp.mpf("1")
+    two = mp.mpf("2")
+    upper = mp.sqrt(two)
+    if not (zero <= s <= upper):
+        raise ValueError("transformed endpoint coordinate must satisfy 0 <= s <= sqrt(2)")
+
+    s2 = s * s
+    mu = one - s2
+    w2 = lam * lam * (one - mu * mu) + mu * mu
+    qhat = two + (lam * lam - one) * s2
     w = mp.sqrt(w2)
-    gamma = lam * s / (w * mp.sqrt(qhat))
-    return mu, w, qhat, _unit_interval_value(gamma)
+
+    # Exact factorization:
+    #   1-gamma^2
+    #   = (2-s^2)*(1-(1-lambda^2)*s^2)^2 / (w^2*qhat).
+    # Evaluating the nonnegative complement avoids a rounded quotient slightly
+    # above one near s=sqrt(2).  The projections cover only endpoint roundoff;
+    # the exact factors put gamma^2 in [0,1] on the validated domain.
+    endpoint_gap = max(zero, two - s2)
+    factor = one - (one - lam * lam) * s2
+    one_minus_gamma2 = endpoint_gap * factor * factor / (w2 * qhat)
+    gamma2 = min(one, max(zero, one - one_minus_gamma2))
+    gamma = mp.sqrt(gamma2)
+    return mu, w, qhat, gamma
 
 
 def boundary_energy_ob(lam, *, dps: int = 50):
