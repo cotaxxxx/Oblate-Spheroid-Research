@@ -77,8 +77,9 @@ def roots_at(lam, lo=0.0001, hi=1.0, samples=200):
 
 
 def main():
-    for milli in range(630, 651):
-        lam = milli / 1000.0
+    print("full axial branch window")
+    full_window = [0.408] + [k / 100.0 for k in range(41, 65)]
+    for lam in full_window:
         print(f"{lam:.3f}", roots_at(lam))
     print("fine endpoint window")
     for lam in (
