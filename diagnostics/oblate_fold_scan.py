@@ -8,6 +8,10 @@ This standard-library implementation uses composite Simpson quadrature and does
 not import the mpmath prototype. It excludes the symmetry-forced root t=0 and
 counts sign-changing roots on 0<t<1. A certified no-fold statement still
 requires interval bounds for g and partial_t g.
+
+Near t=1 this binary64 path records roots and g(1), but deliberately does not
+estimate partial_t g: a centered stencil would leave the documented domain and
+the endpoint derivative needs the endpoint-regular high-precision path.
 """
 
 import math
@@ -30,6 +34,8 @@ def density(s, t, lam):
 
 
 def g_value(t, lam, panels=1200):
+    if not (0.0 < t <= 1.0):
+        raise ValueError("fold scan requires 0 < t <= 1")
     if panels % 2:
         raise ValueError("Simpson panel count must be even")
     lo, hi = 0.0, math.sqrt(2.0)
@@ -52,6 +58,13 @@ def bisect_root(lam, lo, hi):
     return (lo + hi) / 2.0
 
 
+def safe_centered_slope(root, lam, h=1.0e-5):
+    """Return a centered diagnostic only when the stencil stays in-domain."""
+    if root - h <= 0.0 or root + h > 1.0:
+        return None
+    return (g_value(root + h, lam) - g_value(root - h, lam)) / (2.0 * h)
+
+
 def roots_at(lam, lo=0.0001, hi=1.0, samples=200):
     nodes = [lo + i * (hi - lo) / samples for i in range(samples + 1)]
     values = [g_value(t, lam) for t in nodes]
@@ -59,9 +72,7 @@ def roots_at(lam, lo=0.0001, hi=1.0, samples=200):
     for a, b, fa, fb in zip(nodes, nodes[1:], values, values[1:]):
         if fa * fb < 0.0:
             root = bisect_root(lam, a, b)
-            h = 1.0e-5
-            slope = (g_value(root + h, lam) - g_value(root - h, lam)) / (2.0 * h)
-            roots.append((root, slope))
+            roots.append((root, safe_centered_slope(root, lam)))
     return roots
 
 
