@@ -10,7 +10,7 @@ extrapolates that slope, and solves for its zero in lambda.
 
 from decimal import Decimal, localcontext
 
-from oblate_convergence_decimal import (
+from oblate_endpoint_convergence_decimal import (
     alpha_and_ratio,
     constants,
     tanh_sinh,
