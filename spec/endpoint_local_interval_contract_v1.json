@@ -1,0 +1,47 @@
+{
+  "schema": "bg-oblate-spheroid.endpoint-local-interval-contract.v1",
+  "status": {
+    "evidence_class": "NOT_BINDING",
+    "derivation_class": "PROTOTYPE",
+    "is_certificate": false
+  },
+  "source_function": {
+    "name": "B_ob",
+    "definition": "lim_{t->1-} partial_t E_lambda(t)",
+    "analytic_reduction": "analysis/endpoint_kernel_lemma.md"
+  },
+  "parameter": {
+    "name": "lambda",
+    "domain": {
+      "lower": {"numerator": 16, "denominator": 25},
+      "upper": {"numerator": 13, "denominator": 20}
+    }
+  },
+  "required_enclosures": [
+    {
+      "quantity": "B_ob(16/25)",
+      "required_relation": "upper_bound < 0"
+    },
+    {
+      "quantity": "B_ob(13/20)",
+      "required_relation": "lower_bound > 0"
+    },
+    {
+      "quantity": "B_ob_prime([16/25,13/20])",
+      "required_relation": "lower_bound > 0"
+    }
+  ],
+  "conclusion_if_all_checks_pass": "B_ob has exactly one zero in [16/25,13/20].",
+  "excluded_claims": [
+    "No global uniqueness claim outside [16/25,13/20].",
+    "No certified decimal value for the zero.",
+    "No exclusion of other stationary points away from the boundary functional.",
+    "No analytic lemma is established by the machine result."
+  ],
+  "producer_checker_separation": {
+    "producer_output_required": true,
+    "checker_reconstructs_enclosures": true,
+    "checker_precision_not_less_than_producer": true,
+    "clean_room_run_required_for_certified_status": true
+  }
+}
