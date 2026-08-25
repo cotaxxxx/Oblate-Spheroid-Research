@@ -44,18 +44,24 @@ The following values are candidate evidence, not certified enclosures:
 
 ```text
 lambda_entry_ob = 0.6435457703666799690435  [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
-lambda_axis_ob  = 0.40795886030094636425    [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
+lambda_axis_ob  = 0.4079588603009463642491058701855256993  [HIGH_PRECISION; two-source agreement]
 b_ob_prime      = +1.10246                  [HIGH_PRECISION; centered difference h=1e-12]
 gt_boundary_ob  = -1.45623                  [HIGH_PRECISION; one-sided Richardson difference]
 entry_slope_ob  = 0.757064                  [HIGH_PRECISION; ratio b_ob_prime/(-gt_boundary_ob)]
 b_ob(1)         = pi^2/32                   [EXACT]
 ```
 
-These computations were supplied through chat and are candidate evidence under
-the two-layer certification rule. `lambda_axis_ob` independently agrees with
-an earlier floating-point search near `0.40796`; `lambda_entry_ob` currently
-has one computational source. Independent agreement does not promote either
-value to `CERTIFIED_ENCLOSURE`.
+The original values were supplied through chat and remain candidate evidence
+under the two-layer certification rule. `lambda_axis_ob` now has two direct
+computational sources: the original `mpmath` evaluation (`dps=40`,
+tanh-sinh) and a native axial-equation calculation of
+`partial_t g_axis_ob(0,lambda)=0` using Python `Decimal`, split standalone
+tanh-sinh quadrature, centered slopes, and Richardson extrapolation at 50 and
+80 decimal digits. The two native precision settings agree through the stable
+prefix printed above, and the result agrees with the original recorded value
+through all 20 of its decimal places. `lambda_entry_ob` also has an
+independent Decimal/tanh-sinh reproduction of the endpoint equation, but none
+of these agreements promotes a value to `CERTIFIED_ENCLOSURE`.
 
 Expected signs:
 
@@ -72,7 +78,7 @@ certification.
 
 ## Open obligations
 
-- implement the endpoint-regular axial evaluator;
+- independently audit and intervalize the endpoint-regular axial prototype;
 - certify existence, uniqueness, and transversality of `lambda_entry_ob`;
 - certify `b_ob_prime > 0` and `gt_boundary_ob < 0`;
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
