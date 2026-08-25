@@ -92,6 +92,47 @@ approaching `t=1` at `lambda_entry_ob`. No interior fold signature was
 observed in this window. This is not a global no-fold result: the scan does not
 cover lambda outside this window and is not interval arithmetic.
 
+## Precision-robustness correction
+
+A precision-dependent endpoint failure was reproduced in the prototype
+`b_ob` evaluator. The former `64*mp.eps` post-division slack admitted or
+rejected a rounded value of `gamma` non-monotonically as the requested
+precision changed. Failures were observed at dps 30, 35, 60, and 80.
+
+The regression test was committed before the implementation correction. The
+endpoint geometry now evaluates the exact factorization
+
+```text
+1 - gamma^2
+  = (2 - s^2)*(1 - (1 - lambda^2)*s^2)^2/(w^2*qhat).
+```
+
+This exposes the endpoint factor `2-s^2` and avoids forming a quotient that
+can round above one. A tanh-sinh node whose rounded `s^2` exceeds 2 only by
+at most `sqrt(eps)` is projected to the exact endpoint; a larger excursion
+fails closed.
+
+Correction checkpoint:
+
+```text
+branch head = 5cc212d47145704d39cb486df28eefc2e3938d79
+workflow run = #43, success
+status       = PROTOTYPE / NOT_AUDITED
+```
+
+The project owner independently checked the factorization and reran the
+corrected evaluator at ten precision settings from dps 20 through 120. All
+previously failing settings completed, and the observed error decreased from
+approximately `1e-22` to `1e-122` with increasing precision. Values at
+`lambda=0.408` and the reported root agreed across dps 30, 50, and 80.
+This verifies the robustness correction but does not promote the evaluator or
+any numerical value to `AUDITED_SOURCE`, `CERTIFIED_ENCLOSURE`, or
+`CERTIFIED`.
+
+The earlier split-versus-unsplit quadrature comparison is now optional
+diagnostic work rather than a blocking obligation, because the unsplit
+quadrature displays precision-proportional convergence over the tested range.
+
 ## Open obligations
 
 - independently audit and intervalize the endpoint-regular axial prototype;
