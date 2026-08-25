@@ -181,6 +181,35 @@ Evidence status remains `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
 `HIGH_PRECISION`. GitHub Actions run #53 succeeded. These calculations do not
 prove nondegeneracy or supply certified coefficient enclosures.
 
+## Candidate transverse index on the axial branch
+
+For a transverse displacement `p=(r,0,lambda*t)`, the second derivative
+`Q_perp_ob=E_rr(0,t,lambda)` was reduced analytically to a one-dimensional
+azimuthally averaged integral and evaluated at seven positive-axis branch
+points.
+
+```text
+lambda    t                     z=lambda*t            Q_perp_ob
+0.42      0.3299485239648909    0.1385783800652542    +1.5188410161701126
+0.45      0.5793708519677305    0.2607168833854787    +1.4279175760127804
+0.50      0.7802783958430172    0.3901391979215086    +1.2639635299552409
+0.55      0.8909899971394450    0.4900444984266947    +1.0968377348233276
+0.60      0.9599010020396870    0.5759406012238122    +0.9346164228385508
+0.63      0.9890775444970755    0.6231188530331576    +0.8414580737026062
+0.6435    0.9999653387083598    0.6434776954588295    +0.8007594212804716
+```
+
+All sampled transverse eigenvalues are positive and remain separated from
+zero. Together with the negative axial second variation, this supports Morse
+index 1 for the sampled noncentral stationary points. The machine-readable
+record is
+[diagnostics/oblate_transverse_index_result.json](diagnostics/oblate_transverse_index_result.json).
+
+Evidence status is `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
+`HIGH_PRECISION`. GitHub Actions run #67 succeeded. Finite sampling does not
+prove positivity on the entire branch and does not exclude additional
+stationary points.
+
 ## Open obligations
 
 - independently audit and intervalize the endpoint-regular axial prototype;
