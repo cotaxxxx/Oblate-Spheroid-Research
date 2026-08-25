@@ -56,11 +56,19 @@ def _transformed_geometry(s: mp.mpf, lam: mp.mpf) -> tuple[mp.mpf, ...]:
     zero = mp.mpf("0")
     one = mp.mpf("1")
     two = mp.mpf("2")
-    upper = mp.sqrt(two)
-    if not (zero <= s <= upper):
-        raise ValueError("transformed endpoint coordinate must satisfy 0 <= s <= sqrt(2)")
+    if s < zero:
+        raise ValueError("transformed endpoint coordinate must be nonnegative")
 
     s2 = s * s
+    # tanh-sinh can present the rounded upper endpoint with s^2 slightly
+    # above 2.  Accept only a roundoff-scale excess, then project to the
+    # exact analytic endpoint.  A substantial domain error still fails closed.
+    if s2 > two:
+        if s2 - two > mp.sqrt(mp.eps):
+            raise ValueError(
+                "transformed endpoint coordinate must satisfy s^2 <= 2"
+            )
+        s2 = two
     mu = one - s2
     w2 = lam * lam * (one - mu * mu) + mu * mu
     qhat = two + (lam * lam - one) * s2
