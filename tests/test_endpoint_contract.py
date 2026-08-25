@@ -10,10 +10,10 @@ from pathlib import Path
 import unittest
 
 
-CONTRACT = (
-    Path(__file__).resolve().parents[1]
-    / "spec"
-    / "endpoint_local_interval_contract_v1.json"
+ROOT = Path(__file__).resolve().parents[1]
+CONTRACT = ROOT / "spec" / "endpoint_local_interval_contract_v1.json"
+PRODUCER_SCHEMA = (
+    ROOT / "spec" / "endpoint_local_producer_record_v1.schema.json"
 )
 
 
@@ -25,6 +25,9 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.document = json.loads(CONTRACT.read_text(encoding="utf-8"))
+        cls.producer_schema = json.loads(
+            PRODUCER_SCHEMA.read_text(encoding="utf-8")
+        )
 
     def test_file_cannot_be_mistaken_for_a_certificate(self):
         status = self.document["status"]
@@ -69,6 +72,65 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
         self.assertEqual(policy["method"], "interval_newton")
         self.assertIs(policy["starts_only_after_broad_bracket_passes"], True)
         self.assertIs(policy["reuses_certified_derivative_enclosure"], True)
+
+
+    def test_producer_schema_fixes_independent_checker_inputs(self):
+        schema = self.producer_schema
+        self.assertFalse(schema["additionalProperties"])
+        required = set(schema["required"])
+        self.assertEqual(
+            required,
+            {
+                "schema",
+                "status",
+                "provenance",
+                "precision",
+                "contract",
+                "controls",
+                "evaluations",
+            },
+        )
+        control_required = set(
+            schema["properties"]["controls"]["required"]
+        )
+        self.assertEqual(
+            control_required,
+            {
+                "endpoint_values",
+                "global_complement",
+                "internal_double_zero",
+                "seam_rational_targets",
+                "A_gamma_t_factorization",
+            },
+        )
+        provenance_required = set(
+            schema["properties"]["provenance"]["required"]
+        )
+        self.assertTrue(
+            {
+                "source_commit",
+                "producer_sha256",
+                "checker_sha256",
+                "contract_sha256",
+                "workflow_sha256",
+                "requirements_sha256",
+                "wheel_filename",
+                "wheel_sha256",
+            }.issubset(provenance_required)
+        )
+        cell_required = set(schema["$defs"]["cell"]["required"])
+        self.assertTrue(
+            {
+                "s_interval",
+                "lambda_interval",
+                "chart",
+                "series",
+                "kernel_enclosure",
+                "lambda_derivative_enclosure",
+                "weighted_integral_enclosure",
+                "weighted_derivative_integral_enclosure",
+            }.issubset(cell_required)
+        )
 
     def test_precision_and_clean_room_obligations_are_explicit(self):
         separation = self.document["producer_checker_separation"]
