@@ -117,10 +117,10 @@ def g_axis_ob(t, lam, *, dps: int = 50):
         t = mp.mpf(t)
         lam = mp.mpf(lam)
         _validate_lambda(lam)
+        if not (-1 < t <= 1):
+            raise ValueError("t must satisfy -1 < t <= 1")
         if t == 1:
             return b_ob(lam, dps=dps)
-        if not (-1 < t < 1):
-            raise ValueError("t must satisfy -1 < t <= 1")
         upper = mp.sqrt(2)
 
         def density(s):
