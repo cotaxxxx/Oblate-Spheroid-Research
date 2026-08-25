@@ -17,7 +17,7 @@ import mpmath as mp
 from checker.oblate_axis_prototype import g_axis_ob
 
 
-LAMBDA_AXIS_OB = mp.mpf("0.4079588603009463642491058701855256993")
+LAMBDA_AXIS_OB_TEXT = "0.4079588603009463642491058701855256993"
 DPS = 50
 
 
@@ -46,14 +46,14 @@ def transverse_lambda_sequence():
     estimates = []
     for k in range(4):
         h = h0 / 2**k
-        estimate = (a_ob(LAMBDA_AXIS_OB + h) - a_ob(LAMBDA_AXIS_OB - h)) / (2 * h)
+        estimate = (a_ob(mp.mpf(LAMBDA_AXIS_OB_TEXT) + h) - a_ob(mp.mpf(LAMBDA_AXIS_OB_TEXT) - h)) / (2 * h)
         estimates.append(estimate)
     return estimates, richardson(estimates)[-1][-1]
 
 
 def cubic_sequence():
     h0 = mp.mpf("0.04")
-    slopes = [centered_slope(LAMBDA_AXIS_OB, h0 / 2**k) for k in range(6)]
+    slopes = [centered_slope(mp.mpf(LAMBDA_AXIS_OB_TEXT), h0 / 2**k) for k in range(6)]
     estimates = []
     for k in range(5):
         h = h0 / 2**k
@@ -63,7 +63,7 @@ def cubic_sequence():
 
 def main():
     with mp.workdps(DPS):
-        a_axis = a_ob(LAMBDA_AXIS_OB, levels=5)
+        a_axis = a_ob(mp.mpf(LAMBDA_AXIS_OB_TEXT), levels=5)
         aprime_values, aprime = transverse_lambda_sequence()
         cubic_values, cubic = cubic_sequence()
         branch_ratio = -aprime / cubic
@@ -71,7 +71,7 @@ def main():
         print("EVIDENCE_CLASS DIAGNOSTIC_ONLY / NOT_BINDING")
         print("DERIVATION_CLASS HIGH_PRECISION")
         print("DPS", DPS)
-        print("lambda_axis_ob", mp.nstr(LAMBDA_AXIS_OB, 45))
+        print("lambda_axis_ob", mp.nstr(mp.mpf(LAMBDA_AXIS_OB_TEXT), 45))
         print("A_ob_at_axis", mp.nstr(a_axis, 30))
         for k, value in enumerate(aprime_values):
             print("A_ob_prime_raw", k, mp.nstr(value, 30))
