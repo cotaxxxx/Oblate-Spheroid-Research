@@ -108,7 +108,7 @@ def b_ob(lam, *, dps: int = 50):
 
 
 def g_axis_ob(t, lam, *, dps: int = 50):
-    """Return partial_t E_lambda(t) for -1<t<1.
+    """Return partial_t E_lambda(t) for -1 < t <= 1.
 
     The same s substitution is used.  The exact endpoint t=1 is delegated to
     b_ob, whose factored formula is the canonical endpoint path.
