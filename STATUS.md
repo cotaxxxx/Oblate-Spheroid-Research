@@ -133,6 +133,24 @@ The earlier split-versus-unsplit quadrature comparison is now optional
 diagnostic work rather than a blocking obligation, because the unsplit
 quadrature displays precision-proportional convergence over the tested range.
 
+A second occurrence of the same robustness defect was subsequently found in
+the interior `g_axis_ob` path for `t<1`. The case
+`g_axis_ob(0.99,0.63)` reproduced the former dps-dependent failure pattern.
+The general identity
+
+```text
+1 - gamma^2
+  = (1 - mu^2)*((1 - lambda^2)*mu + lambda^2*t)^2/(w^2*q)
+```
+
+now replaces the direct quotient on that path. It reduces exactly to the
+endpoint factorization when `t=1`. A dps 30, 50, and 80 regression was
+committed before the implementation change. GitHub Actions run #61 succeeded,
+and the previously recorded center-axis nondegeneracy sequence was unchanged
+at all printed digits. The correction checkpoint is
+`c9fb76ebdb94fd16bdbe9414107693952874cc9f`. Evidence status remains
+`PROTOTYPE / NOT_AUDITED`.
+
 ## Candidate center-axis nondegeneracy
 
 A 50-dps centered-difference and Richardson diagnostic at
