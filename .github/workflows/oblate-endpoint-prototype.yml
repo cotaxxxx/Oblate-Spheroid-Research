@@ -29,3 +29,5 @@ jobs:
         run: python -m unittest controls/test_sphere_expectations.py
       - name: Run implementation-calling endpoint controls
         run: python -m unittest controls/test_endpoint_evaluator.py
+      - name: Import diagnostic modules
+        run: PYTHONPATH=diagnostics python -c "import oblate_endpoint_convergence_decimal; import oblate_axis_native_decimal"
