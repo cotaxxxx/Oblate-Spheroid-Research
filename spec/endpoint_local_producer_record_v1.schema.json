@@ -143,6 +143,7 @@
         "s_interval",
         "lambda_interval",
         "chart",
+        "u_construction",
         "series",
         "kernel_enclosure",
         "lambda_derivative_enclosure",
@@ -168,6 +169,9 @@
           "items": false
         },
         "chart": {"enum": ["gamma_lower", "u_upper"]},
+        "u_construction": {
+          "enum": ["not_used", "factorized_complement"]
+        },
         "series": {
           "type": "array",
           "items": {"$ref": "#/$defs/series"}
@@ -176,7 +180,29 @@
         "lambda_derivative_enclosure": {"$ref": "#/$defs/arb_ball"},
         "weighted_integral_enclosure": {"$ref": "#/$defs/arb_ball"},
         "weighted_derivative_integral_enclosure": {"$ref": "#/$defs/arb_ball"}
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"chart": {"const": "gamma_lower"}},
+            "required": ["chart"]
+          },
+          "then": {
+            "properties": {"u_construction": {"const": "not_used"}}
+          }
+        },
+        {
+          "if": {
+            "properties": {"chart": {"const": "u_upper"}},
+            "required": ["chart"]
+          },
+          "then": {
+            "properties": {
+              "u_construction": {"const": "factorized_complement"}
+            }
+          }
+        }
+      ]
     },
     "evaluation": {
       "type": "object",
