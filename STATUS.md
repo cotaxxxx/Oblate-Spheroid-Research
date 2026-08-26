@@ -320,3 +320,8 @@ Classification remains `NOT_BINDING / PROTOTYPE` for this new implementation
 unit. The enclosures must not be called CERTIFIED until the producer/checker
 source is independently audited, pinned, and rerun through the clean-room
 receipt chain.
+
+The receipt conclusion is explicitly conditional on the endpoint analytic
+lemma and on the one-sided `t -> 1` limit/interchange needed to identify the
+zero with the boundary passage of the interior census branch. That latter
+identification remains an analytic obligation.
