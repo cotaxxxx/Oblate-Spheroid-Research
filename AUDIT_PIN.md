@@ -31,3 +31,32 @@ quadrature data rather than trust the producer's PASS label.
 
 The commit that adds this administrative pin is not a replacement audited
 source hash. Any source change requires a new audit pin.
+
+## Certified endpoint enclosure pin
+
+The independently reproduced differential audit accepted the Arb
+producer/checker checkpoint below for the endpoint sign enclosure only.
+
+~~~text
+evidence class   = CERTIFIED_ENCLOSURE
+source commit    = 7bdcbdcba3dab51c8ddbe72dac02c6307e1b5064
+audit result     = PASS
+tests reproduced = 52
+claim domain     = [5/8, 33/50]
+~~~
+
+The certified claim is conditional on (i) the endpoint analytic and
+one-sided-limit interchange lemma and (ii) identification of the endpoint
+zero with the boundary passage of the census branch. It certifies the signs
+of the two endpoint values and the positive derivative enclosure, hence one
+transverse zero under those assumptions. It does not certify the census
+identification, the full axial branch, or any diagnostic value.
+
+This pin supersedes `701a2e8a54e57c3259973c20f44bb5abe355a628` without
+removing its audit history. The accepted differential audit covered the
+lower-endpoint domain guard and removal of the unused derivative-cell `Phi`
+series.
+
+The successor receipt-binding unit adds the canonical record SHA-256 and
+source commit to every receipt. It must be audited separately before replacing
+this pin.

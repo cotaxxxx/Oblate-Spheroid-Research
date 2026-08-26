@@ -42,3 +42,6 @@ The default grid uses 1024 panels per unit in the transformed coordinate and
 160-bit Arb arithmetic. A PASS receipt is an interval-certificate candidate,
 not a promotion by itself. The new producer/checker source requires its own
 audit and clean-room receipt before any result is labelled CERTIFIED.
+The receipt includes the SHA-256 of the exact canonical record bytes and the
+record's source commit; the checker rejects noncanonical bytes and verifies
+both bindings before writing the receipt.

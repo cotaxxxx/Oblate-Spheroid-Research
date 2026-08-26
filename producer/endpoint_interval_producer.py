@@ -73,7 +73,11 @@ def _ball_record(value):
     }
 
 
-def _series(u, name, degree):
+def _series(u, name, degree, *, clamped_nonnegative=False):
+    if not u.upper() < 1:
+        raise ValueError(f"{name} series requires u < 1")
+    if not clamped_nonnegative and u.lower() < 0:
+        raise ValueError(f"{name} series requires u >= 0")
     if name == "Phi":
         partial = arb(0)
         for n in range(1, degree + 1):
@@ -154,26 +158,27 @@ def _kernel_box(s, lam, chart, derivative, degree):
                 + p_lam * psi
                 + p * psi_lam
             )
-        records.append({
-            "function": "Phi" if not derivative else "Psi",
-            "degree": 0,
-            "partial_sum": _ball_record(alpha * alpha if not derivative else psi),
-            "remainder_bound": _ball_record(arb(0)),
-        })
     else:
-        u = gap * h * h / (w2 * qhat)
-        phi, phi_record = _series(u, "Phi", degree)
-        psi, psi_record = _series(u, "Psi", degree)
-        records.extend([phi_record, psi_record])
-        value = -s * (1 - e) * phi + p * psi
+        u = _clamp_nonnegative(gap * h * h / (w2 * qhat))
+        psi, psi_record = _series(
+            u, "Psi", degree, clamped_nonnegative=True
+        )
         if derivative:
-            psi_prime, prime_record = _series(u, "Psi_prime", degree)
-            records.append(prime_record)
+            psi_prime, prime_record = _series(
+                u, "Psi_prime", degree, clamped_nonnegative=True
+            )
+            records.extend([psi_record, prime_record])
             value = (
                 2 * s * (1 - e) * gamma * r * psi
                 + p_lam * psi
                 - 2 * p * gamma2 * r * psi_prime
             )
+        else:
+            phi, phi_record = _series(
+                u, "Phi", degree, clamped_nonnegative=True
+            )
+            records.extend([phi_record, psi_record])
+            value = -s * (1 - e) * phi + p * psi
     return value, records
 
 
@@ -221,16 +226,13 @@ def _evaluation(label, lam_left, lam_right, derivative, panels, degree):
                 else "factorized_complement"
             ),
             "series": series,
-            "kernel_enclosure": _ball_record(kernel if not derivative else zero),
-            "lambda_derivative_enclosure": _ball_record(
-                kernel if derivative else zero
-            ),
-            "weighted_integral_enclosure": _ball_record(
-                integral if not derivative else zero
-            ),
-            "weighted_derivative_integral_enclosure": _ball_record(
-                integral if derivative else zero
-            ),
+            **({
+                "lambda_derivative_enclosure": _ball_record(kernel),
+                "weighted_derivative_integral_enclosure": _ball_record(integral),
+            } if derivative else {
+                "kernel_enclosure": _ball_record(kernel),
+                "weighted_integral_enclosure": _ball_record(integral),
+            }),
         })
     return {
         "label": label,

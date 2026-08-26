@@ -269,11 +269,7 @@
         "lambda_interval",
         "chart",
         "u_construction",
-        "series",
-        "kernel_enclosure",
-        "lambda_derivative_enclosure",
-        "weighted_integral_enclosure",
-        "weighted_derivative_integral_enclosure"
+        "series"
       ],
       "properties": {
         "ordinal": {
@@ -320,8 +316,7 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/series"
-          },
-          "minItems": 1
+          }
         },
         "kernel_enclosure": {
           "$ref": "#/$defs/arb_ball"
@@ -352,6 +347,9 @@
             "properties": {
               "u_construction": {
                 "const": "not_used"
+              },
+              "series": {
+                "maxItems": 0
               }
             }
           }
@@ -431,7 +429,57 @@
             "required": ["label"]
           },
           "then": {
-            "properties": {"purpose": {"const": "B_ob"}}
+            "properties": {
+              "purpose": {"const": "B_ob"},
+              "cells": {
+                "items": {
+                  "required": [
+                    "kernel_enclosure",
+                    "weighted_integral_enclosure"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {"required": ["lambda_derivative_enclosure"]},
+                      {"required": ["weighted_derivative_integral_enclosure"]}
+                    ]
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {"chart": {"const": "u_upper"}},
+                        "required": ["chart"]
+                      },
+                      "then": {
+                        "properties": {
+                          "series": {
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "allOf": [
+                              {
+                                "contains": {
+                                  "properties": {"function": {"const": "Phi"}},
+                                  "required": ["function"]
+                                },
+                                "minContains": 1,
+                                "maxContains": 1
+                              },
+                              {
+                                "contains": {
+                                  "properties": {"function": {"const": "Psi"}},
+                                  "required": ["function"]
+                                },
+                                "minContains": 1,
+                                "maxContains": 1
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
         {
@@ -444,23 +492,52 @@
               "purpose": {"const": "B_ob_prime"},
               "cells": {
                 "items": {
-                  "if": {
-                    "properties": {"chart": {"const": "u_upper"}},
-                    "required": ["chart"]
+                  "required": [
+                    "lambda_derivative_enclosure",
+                    "weighted_derivative_integral_enclosure"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {"required": ["kernel_enclosure"]},
+                      {"required": ["weighted_integral_enclosure"]}
+                    ]
                   },
-                  "then": {
-                    "properties": {
-                      "series": {
-                        "contains": {
-                          "properties": {
-                            "function": {"const": "Psi_prime"}
-                          },
-                          "required": ["function"]
-                        },
-                        "minContains": 1
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {"chart": {"const": "u_upper"}},
+                        "required": ["chart"]
+                      },
+                      "then": {
+                        "properties": {
+                          "series": {
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "allOf": [
+                              {
+                                "contains": {
+                                  "properties": {"function": {"const": "Psi"}},
+                                  "required": ["function"]
+                                },
+                                "minContains": 1,
+                                "maxContains": 1
+                              },
+                              {
+                                "contains": {
+                                  "properties": {
+                                    "function": {"const": "Psi_prime"}
+                                  },
+                                  "required": ["function"]
+                                },
+                                "minContains": 1,
+                                "maxContains": 1
+                              }
+                            ]
+                          }
+                        }
                       }
                     }
-                  }
+                  ]
                 }
               }
             }

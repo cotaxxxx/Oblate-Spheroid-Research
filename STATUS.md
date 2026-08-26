@@ -277,9 +277,9 @@ Its seven load-bearing controls are recorded as six exact families plus one
 implementation-calling quadrature family. The audit receipt and remaining
 producer-stage limitations are fixed in [AUDIT_PIN.md](AUDIT_PIN.md).
 
-Evidence remains `DIAGNOSTIC_ONLY / NOT_BINDING`. No interval enclosure or
-uniqueness claim has been produced; `AUDITED_SOURCE` applies only to the
-pinned source bytes and is not a numerical certification.
+The analytic-source pin remains distinct from the later numerical enclosure
+pin. See the Arb endpoint-local section below for the conditionally certified
+numerical result.
 
 ## Open obligations
 
@@ -316,7 +316,21 @@ in [5/8,33/50]. The record also rechecks transformed quadrature bookkeeping
 on the producer partition, while the mpmath implementation-calling control
 shares its s**3 weight with the production energy density.
 
-Classification remains `NOT_BINDING / PROTOTYPE` for this new implementation
-unit. The enclosures must not be called CERTIFIED until the producer/checker
-source is independently audited, pinned, and rerun through the clean-room
-receipt chain.
+Independent differential audit of checkpoint
+`7bdcbdcba3dab51c8ddbe72dac02c6307e1b5064` returned `AUDIT = PASS` after
+byte-for-byte receipt reproduction, all 52 tests, provenance reconstruction,
+and independent 40-digit endpoint evaluations. The three displayed sign
+enclosures are therefore promoted to `CERTIFIED_ENCLOSURE`, conditional on
+the two analytic identifications stated in the receipt. This promotion does
+not upgrade the diagnostic census or any other numerical value.
+
+The receipt conclusion is explicitly conditional on the endpoint analytic
+lemma and on the one-sided `t -> 1` limit/interchange needed to identify the
+zero with the boundary passage of the interior census branch. That latter
+identification remains an analytic obligation.
+
+The next source unit binds each receipt to the canonical producer record with
+`record_sha256` and `source_commit`. It rejects noncanonical record bytes and
+receipt reuse against a different record. It is a successor to, not a byte
+change in, the certified checkpoint and requires its own audit before replacing
+the pin above.

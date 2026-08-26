@@ -88,7 +88,11 @@ def _require_contains(record, independently_computed, label):
         raise VerificationError(f"{label} does not contain checker enclosure")
 
 
-def _series(u, name, degree):
+def _series(u, name, degree, *, clamped_nonnegative=False):
+    if not u.upper() < 1:
+        raise VerificationError(f"{name} series requires u < 1")
+    if not clamped_nonnegative and u.lower() < 0:
+        raise VerificationError(f"{name} series requires u >= 0")
     if name == "Phi":
         partial = arb(0)
         for n in range(1, degree + 1):
@@ -148,8 +152,7 @@ def _kernel_box(s, lam, chart, derivative, series_records):
     p_lam = 2 * e * gap * j / (w2.sqrt() * qhat_3_2)
 
     if chart == "gamma_lower":
-        expected_name = "Psi" if derivative else "Phi"
-        if len(series_records) != 1 or series_records[0].get("function") != expected_name:
+        if series_records:
             raise VerificationError("lower-chart record inventory mismatch")
         u = 1 - gamma * gamma
         sqrt_u = u.sqrt()
@@ -163,28 +166,29 @@ def _kernel_box(s, lam, chart, derivative, series_records):
             + p_lam * psi + p * psi_lam
         )
 
-    u = gap * h * h / (w2 * qhat)
+    u = _clamp_nonnegative(gap * h * h / (w2 * qhat))
     by_name = {}
     for record in series_records:
         name = record["function"]
         degree = record["degree"]
-        value, partial, remainder = _series(u, name, degree)
+        value, partial, remainder = _series(
+            u, name, degree, clamped_nonnegative=True
+        )
         _require_contains(record["partial_sum"], partial, f"{name} partial sum")
         _require_contains(
             record["remainder_bound"], remainder, f"{name} remainder"
         )
         by_name[name] = value
-    required = {"Phi", "Psi"} | ({"Psi_prime"} if derivative else set())
+    required = {"Psi", "Psi_prime"} if derivative else {"Phi", "Psi"}
     if set(by_name) != required:
         raise VerificationError("series inventory mismatch")
-    value = -s * (1 - e) * by_name["Phi"] + p * by_name["Psi"]
     if derivative:
-        value = (
+        return (
             2 * s * (1 - e) * gamma * r * by_name["Psi"]
             + p_lam * by_name["Psi"]
             - 2 * p * gamma2 * r * by_name["Psi_prime"]
         )
-    return value
+    return -s * (1 - e) * by_name["Phi"] + p * by_name["Psi"]
 
 
 def _endpoint(text):
@@ -209,6 +213,20 @@ def _verify_evaluation(evaluation):
     derivative = evaluation["purpose"] == "B_ob_prime"
     checker_total = arb(0)
     for cell in cells:
+        common_fields = {
+            "ordinal", "s_interval", "lambda_interval", "chart",
+            "u_construction", "series",
+        }
+        purpose_fields = (
+            {
+                "lambda_derivative_enclosure",
+                "weighted_derivative_integral_enclosure",
+            }
+            if derivative
+            else {"kernel_enclosure", "weighted_integral_enclosure"}
+        )
+        if set(cell) != common_fields | purpose_fields:
+            raise VerificationError("cell field inventory mismatch")
         left, right = map(_endpoint, cell["s_interval"])
         lam_left, lam_right = map(
             lambda text: _point(Fraction(text)),
@@ -253,7 +271,13 @@ def _sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def verify_interval_record(record):
+def _canonical_record_bytes(record):
+    return (
+        json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode("utf-8")
+
+
+def verify_interval_record(record, *, record_sha256=None):
     if not isinstance(record, dict) or set(record) != TOP_KEYS:
         raise VerificationError("top-level record shape mismatch")
     if record["schema"] != "bg-oblate-spheroid.endpoint-local-producer-record.v1":
@@ -323,14 +347,63 @@ def verify_interval_record(record):
         raise VerificationError("right endpoint is not strictly positive")
     if not totals["derivative_domain"].lower() > 0:
         raise VerificationError("derivative is not strictly positive")
+    canonical_sha256 = hashlib.sha256(_canonical_record_bytes(record)).hexdigest()
+    if record_sha256 is not None and record_sha256 != canonical_sha256:
+        raise VerificationError("record byte hash does not match canonical record")
     return {
         "status": "PASS",
-        "conclusion": "B_ob has exactly one zero in [5/8,33/50].",
+        "record_sha256": canonical_sha256,
+        "source_commit": record["provenance"]["source_commit"],
+        "conclusion": (
+            "Conditional on the endpoint analytic and one-sided-limit "
+            "identification lemmas, B_ob has exactly one zero in [5/8,33/50]."
+        ),
+        "conditional_on": [
+            (
+                "The endpoint-regular two-chart kernel is the analytic "
+                "representation of B_ob and differentiation under the "
+                "integral is valid."
+            ),
+            (
+                "The t->1 one-sided limit/interchange identifies this B_ob "
+                "zero with the boundary passage of the interior census branch."
+            ),
+        ],
         "checker_totals": {
             key: {"lower": value.lower().str(50), "upper": value.upper().str(50)}
             for key, value in totals.items()
         },
     }
+
+
+def verify_interval_record_bytes(record_bytes):
+    try:
+        record = json.loads(record_bytes)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise VerificationError("record is not valid UTF-8 JSON") from exc
+    if record_bytes != _canonical_record_bytes(record):
+        raise VerificationError("record bytes are not canonical JSON")
+    return verify_interval_record(
+        record,
+        record_sha256=hashlib.sha256(record_bytes).hexdigest(),
+    )
+
+
+def verify_receipt_binding(receipt, record_bytes):
+    try:
+        record = json.loads(record_bytes)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise VerificationError("record is not valid UTF-8 JSON") from exc
+    if record_bytes != _canonical_record_bytes(record):
+        raise VerificationError("record bytes are not canonical JSON")
+    actual_sha256 = hashlib.sha256(record_bytes).hexdigest()
+    if receipt.get("record_sha256") != actual_sha256:
+        raise VerificationError("receipt/record SHA-256 mismatch")
+    if receipt.get("source_commit") != record.get("provenance", {}).get(
+        "source_commit"
+    ):
+        raise VerificationError("receipt/record source commit mismatch")
+    return True
 
 
 def main():
@@ -339,8 +412,9 @@ def main():
     parser.add_argument("record", type=Path)
     parser.add_argument("--receipt", type=Path)
     args = parser.parse_args()
-    record = json.loads(args.record.read_text(encoding="utf-8"))
-    receipt = verify_interval_record(record)
+    record_bytes = args.record.read_bytes()
+    receipt = verify_interval_record_bytes(record_bytes)
+    verify_receipt_binding(receipt, record_bytes)
     output = json.dumps(receipt, sort_keys=True, separators=(",", ":")) + "\n"
     if args.receipt:
         args.receipt.write_text(output, encoding="utf-8")

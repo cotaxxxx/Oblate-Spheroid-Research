@@ -76,9 +76,10 @@ The checker fails closed unless all of the following hold.
     inf B'_{\rm ob}([5/8,33/50])>0.
     ]
 
-Only these three inequalities imply the contract conclusion: exactly one zero
-of (B_{\rm ob}) in ([5/8,33/50]), conditional on the separately audited
-analytic lemma.
+These three inequalities imply exactly one zero of (B_{\rm ob}) in
+([5/8,33/50]) only conditional on the endpoint analytic lemma. Identifying
+that zero with the boundary passage of the interior census branch additionally
+requires the one-sided (t->1) limit/interchange lemma.
 
 ## Newton gate
 
@@ -88,6 +89,12 @@ derivative enclosure and cannot replace or weaken the broad-bracket proof.
 The interval ([16/25,13/20]) remains a non-binding diagnostic waypoint.
 
 ## Artifact and receipt chain
+
+Each checker receipt must contain `record_sha256` for the exact canonical JSON
+record bytes and `source_commit` copied from the verified provenance. The
+checker rejects noncanonical record serialization and verifies both bindings
+before emitting the receipt. A receipt from another record or checkpoint is
+therefore not reusable even when its numerical totals happen to coincide.
 
 The clean-room workflow follows the existing B-TUBE pattern:
 
