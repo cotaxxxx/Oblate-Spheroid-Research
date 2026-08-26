@@ -2,8 +2,10 @@
 
 Status: **PROTOTYPE / NOT_AUDITED** and **NOT_BINDING**.
 
-This document fixes the verification boundary before either the producer or
-checker exists. It does not certify an enclosure.
+This document fixes the verification boundary. A prototype producer and
+independent checker now implement it, but their output remains NOT_BINDING
+until source audit and clean-room execution. This document alone does not
+certify an enclosure.
 
 ## Chosen architecture
 
