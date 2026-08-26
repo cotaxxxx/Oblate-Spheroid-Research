@@ -4,9 +4,13 @@
 import copy
 import unittest
 
+from flint import arb
+
+from checker.endpoint_interval_checker import _series as checker_series
 from checker.endpoint_interval_checker import verify_interval_record
 from checker.endpoint_local_checker import VerificationError
 from producer.endpoint_interval_producer import produce_record
+from producer.endpoint_interval_producer import _series as producer_series
 
 
 class EndpointIntervalCertificateCandidate(unittest.TestCase):
@@ -19,8 +23,21 @@ class EndpointIntervalCertificateCandidate(unittest.TestCase):
         self.assertEqual(receipt["status"], "PASS")
         self.assertEqual(
             receipt["conclusion"],
-            "B_ob has exactly one zero in [5/8,33/50].",
+            (
+                "Conditional on the endpoint analytic and one-sided-limit "
+                "identification lemmas, B_ob has exactly one zero "
+                "in [5/8,33/50]."
+            ),
         )
+        self.assertEqual(len(receipt["conditional_on"]), 2)
+
+    def test_series_domain_is_fail_closed_at_and_above_one(self):
+        for invalid_u in (arb(1), arb("1.2")):
+            with self.subTest(u=invalid_u):
+                with self.assertRaisesRegex(ValueError, "requires u < 1"):
+                    producer_series(invalid_u, "Psi", 10)
+                with self.assertRaisesRegex(VerificationError, "requires u < 1"):
+                    checker_series(invalid_u, "Psi", 10)
 
     def test_producer_reported_sum_is_not_trusted(self):
         record = copy.deepcopy(self.record)
@@ -52,6 +69,14 @@ class EndpointIntervalCertificateCandidate(unittest.TestCase):
             if item["function"] != "Psi_prime"
         ]
         with self.assertRaisesRegex(VerificationError, "series inventory"):
+            verify_interval_record(record)
+
+    def test_unused_enclosure_field_is_rejected(self):
+        record = copy.deepcopy(self.record)
+        record["evaluations"][0]["cells"][0][
+            "lambda_derivative_enclosure"
+        ] = {"midpoint": "0", "radius": "0"}
+        with self.assertRaisesRegex(VerificationError, "field inventory"):
             verify_interval_record(record)
 
     def test_duplicate_evaluation_label_is_rejected(self):
