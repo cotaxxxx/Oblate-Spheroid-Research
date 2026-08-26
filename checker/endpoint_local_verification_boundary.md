@@ -76,9 +76,10 @@ The checker fails closed unless all of the following hold.
     inf B'_{\rm ob}([5/8,33/50])>0.
     ]
 
-Only these three inequalities imply the contract conclusion: exactly one zero
-of (B_{\rm ob}) in ([5/8,33/50]), conditional on the separately audited
-analytic lemma.
+These three inequalities imply exactly one zero of (B_{\rm ob}) in
+([5/8,33/50]) only conditional on the endpoint analytic lemma. Identifying
+that zero with the boundary passage of the interior census branch additionally
+requires the one-sided (t->1) limit/interchange lemma.
 
 ## Newton gate
 
