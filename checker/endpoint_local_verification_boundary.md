@@ -58,9 +58,11 @@ The checker fails closed unless all of the following hold.
    u=\frac{lambda^2}{1+lambda^2}
    ]
    and verifies overlap of the lower and upper chart enclosures.
-10. The six exact control families are executed by checker-owned code:
+10. The seven exact control families are executed by checker-owned code:
    endpoint values, global complement identity, internal double zero, seam
-   rational targets, and the (Agamma_t) factorization. A producer-supplied
+   rational targets, the (Agamma_t) factorization, the gamma-lambda
+   factorization, and the exact quadrature bookkeeping identity
+   (integral_0^{sqrt2}s^3 ds=1). A producer-supplied
    control status is informational only.
 11. The independently reconstructed totals satisfy
     [
