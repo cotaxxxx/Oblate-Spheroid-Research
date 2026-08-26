@@ -54,6 +54,12 @@ def algebra(lam, eps):
         - lam * eps * (2 - eps) / w
         - lam * eps / q
     )
+    r_factored = -(
+        (2 - eps)
+        * h
+        * ((1 + lam2) * eps - 1)
+        / (lam * w * q)
+    )
     j_product = (
         h
         + lam * h_lam
@@ -76,6 +82,7 @@ def algebra(lam, eps):
         "gamma2_lam": gamma2_lam,
         "u_lam": u_lam,
         "r": r,
+        "r_factored": r_factored,
         "j_product": j_product,
         "j_factored": j_factored,
     }
@@ -99,6 +106,16 @@ class EndpointLambdaDerivativeExactAlgebra(unittest.TestCase):
                         data["gamma2_lam"] + data["u_lam"],
                         0,
                     )
+
+    def test_gamma_lambda_log_derivative_factorization(self):
+        for lam in LAMBDAS:
+            for eps in EPSILONS:
+                with self.subTest(lam=lam, eps=eps):
+                    data = algebra(lam, eps)
+                    self.assertEqual(data["r"], data["r_factored"])
+
+            eps_third_zero = 1 / (1 + lam * lam)
+            self.assertEqual(algebra(lam, eps_third_zero)["r"], 0)
 
     def test_P_lambda_product_rule_has_no_division_by_H(self):
         for lam in LAMBDAS:
