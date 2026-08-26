@@ -101,6 +101,7 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
                 "internal_double_zero",
                 "seam_rational_targets",
                 "A_gamma_t_factorization",
+                "gamma_lambda_factorization",
             },
         )
         provenance_required = set(
