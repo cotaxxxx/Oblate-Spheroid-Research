@@ -92,6 +92,11 @@ def _transformed_geometry(s: mp.mpf, lam: mp.mpf) -> tuple[mp.mpf, ...]:
     return mu, w, qhat, gamma
 
 
+def _transformed_cone_jacobian_weight(s):
+    """Shared transformed cone/Jacobian bookkeeping factor."""
+    return s**3
+
+
 def boundary_energy_ob(lam, *, dps: int = 50):
     """Return E_lambda(1) by endpoint-regular tanh-sinh quadrature."""
     with _workdps(dps):
@@ -105,7 +110,7 @@ def boundary_energy_ob(lam, *, dps: int = 50):
             _, _, _, gamma = _transformed_geometry(s, lam)
             alpha = mp.acos(gamma)
             # (1/2)dmu becomes s ds, and 1-mu=s^2 at t=1.
-            return s**3 * alpha**2
+            return _transformed_cone_jacobian_weight(s) * alpha**2
 
         return +mp.quad(density, [0, upper], method="tanh-sinh")
 
@@ -114,7 +119,11 @@ def quadrature_bookkeeping_ob(*, dps: int = 50):
     """Exercise the transformed quadrature path on integral s^3 ds = 1."""
     with _workdps(dps):
         upper = mp.sqrt(2)
-        return +mp.quad(lambda s: s**3, [0, upper], method="tanh-sinh")
+        return +mp.quad(
+            _transformed_cone_jacobian_weight,
+            [0, upper],
+            method="tanh-sinh",
+        )
 
 
 def b_ob(lam, *, dps: int = 50):
