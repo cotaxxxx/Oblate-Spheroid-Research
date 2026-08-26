@@ -293,3 +293,30 @@ pinned source bytes and is not a numerical certification.
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
 - exclude interior folds and additional meridian stationary points globally;
 - keep the `lambda -> 0` uniform tail outside the present finite-window claim.
+
+## Arb endpoint-local implementation candidate
+
+An Arb producer and a source-independent checker are now implemented on top
+of the pinned audited analytic source. The producer emits 1024-panel-per-unit
+cell records at 160-bit precision. The checker ignores producer PASS labels
+and final sums and independently reconstructs series tails, kernel ranges,
+cell integrals, totals, and the three binding signs.
+
+The first end-to-end candidate run gave:
+
+~~~text
+B_ob(5/8)              subset [-0.02548935, -0.01580721]
+B_ob(33/50)            subset [ 0.01336182,  0.02259274]
+B_ob_prime([5/8,33/50]) subset [ 0.41835218,  1.88100252]
+~~~
+
+Thus the machine path presently separates all three required quantities from
+zero and returns the conditional conclusion that B_ob has exactly one zero
+in [5/8,33/50]. The record also rechecks transformed quadrature bookkeeping
+on the producer partition, while the mpmath implementation-calling control
+shares its s**3 weight with the production energy density.
+
+Classification remains `NOT_BINDING / PROTOTYPE` for this new implementation
+unit. The enclosures must not be called CERTIFIED until the producer/checker
+source is independently audited, pinned, and rerun through the clean-room
+receipt chain.
