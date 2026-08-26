@@ -2,6 +2,8 @@
 """Tests for checker-owned controls and exact cell-cover validation."""
 
 import copy
+import subprocess
+import sys
 from fractions import Fraction
 import unittest
 
@@ -17,6 +19,7 @@ from checker.endpoint_local_controls import (
     ControlFailure,
     run_exact_controls,
     verify_gamma_lambda_factorization,
+    verify_quadrature_bookkeeping,
 )
 
 
@@ -46,7 +49,7 @@ def valid_cells():
 
 
 class CheckerOwnedEndpointControls(unittest.TestCase):
-    def test_all_six_exact_control_families_pass(self):
+    def test_all_seven_exact_control_families_pass(self):
         self.assertEqual(
             run_exact_controls(),
             {name: "PASS" for name in CONTROL_NAMES},
@@ -70,6 +73,21 @@ class CheckerOwnedEndpointControls(unittest.TestCase):
             "gamma_lambda factorization failed",
         ):
             verify_gamma_lambda_factorization(lam, eps, sign_reversed)
+
+    def test_wrong_quadrature_bookkeeping_is_rejected(self):
+        with self.assertRaisesRegex(
+            ControlFailure,
+            "quadrature bookkeeping failed",
+        ):
+            verify_quadrature_bookkeeping(Fraction(3, 4))
+
+    def test_package_import_does_not_load_prototype_or_mpmath(self):
+        code = (
+            "import checker, sys; "
+            "assert 'mpmath' not in sys.modules; "
+            "assert 'checker.oblate_axis_prototype' not in sys.modules"
+        )
+        subprocess.run([sys.executable, "-c", code], check=True)
 
     def test_exact_cover_accepts_unique_seam_and_sqrt2_terminal(self):
         verify_exact_cell_cover(valid_cells())
