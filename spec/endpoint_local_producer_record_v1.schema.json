@@ -45,6 +45,8 @@
         "source_commit",
         "producer_sha256",
         "checker_sha256",
+        "prototype_sha256",
+        "controls_sha256",
         "contract_sha256",
         "workflow_sha256",
         "requirements_sha256",
@@ -59,6 +61,12 @@
           "$ref": "#/$defs/sha256"
         },
         "checker_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "prototype_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "controls_sha256": {
           "$ref": "#/$defs/sha256"
         },
         "contract_sha256": {
