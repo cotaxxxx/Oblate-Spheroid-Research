@@ -39,23 +39,30 @@ The checker fails closed unless all of the following hold.
 5. Series partial sums and remainder bounds are reconstructed independently
    from their recorded rational domains and degrees. Producer-supplied
    `PASS` labels or final sums are never trusted.
-6. Kernel and derivative enclosures are checked from the recorded elementary
+6. On every `u_upper` cell, (u) must be constructed from the nonnegative
+   factorization
+   [
+   u=(2-s^2)(1-as^2)^2/(w^2widehat q).
+   ]
+   Constructing (u) as (1-gamma^2) is forbidden except for independent
+   control comparison.
+7. Kernel and derivative enclosures are checked from the recorded elementary
    factor enclosures and the independently reconstructed series bounds. A
    cell enclosure that is merely self-reported is rejected.
-7. Cell integral balls are recomputed from the checked cell range and exact
+8. Cell integral balls are recomputed from the checked cell range and exact
    cell width. The checker independently sums them and requires containment
    in, but not equality with, the producer's reported sum.
-8. At (s=1), the checker evaluates the exact rational targets
+9. At (s=1), the checker evaluates the exact rational targets
    [
    gamma^2=\frac1{1+lambda^2},qquad
    u=\frac{lambda^2}{1+lambda^2}
    ]
    and verifies overlap of the lower and upper chart enclosures.
-9. The six exact control families are executed by checker-owned code:
+10. The six exact control families are executed by checker-owned code:
    endpoint values, global complement identity, internal double zero, seam
    rational targets, and the (Agamma_t) factorization. A producer-supplied
    control status is informational only.
-10. The independently reconstructed totals satisfy
+11. The independently reconstructed totals satisfy
     [
     sup B_{\rm ob}(5/8)<0,qquad
     inf B_{\rm ob}(33/50)>0,qquad
