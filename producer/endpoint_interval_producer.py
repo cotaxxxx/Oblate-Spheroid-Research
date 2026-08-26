@@ -74,6 +74,10 @@ def _ball_record(value):
 
 
 def _series(u, name, degree):
+    if not u.upper() < 1:
+        raise ValueError(f"{name} series requires u < 1")
+    if u.upper() < 0:
+        raise ValueError(f"{name} series requires u >= 0")
     if name == "Phi":
         partial = arb(0)
         for n in range(1, degree + 1):
@@ -154,14 +158,8 @@ def _kernel_box(s, lam, chart, derivative, degree):
                 + p_lam * psi
                 + p * psi_lam
             )
-        records.append({
-            "function": "Phi" if not derivative else "Psi",
-            "degree": 0,
-            "partial_sum": _ball_record(alpha * alpha if not derivative else psi),
-            "remainder_bound": _ball_record(arb(0)),
-        })
     else:
-        u = gap * h * h / (w2 * qhat)
+        u = _clamp_nonnegative(gap * h * h / (w2 * qhat))
         phi, phi_record = _series(u, "Phi", degree)
         psi, psi_record = _series(u, "Psi", degree)
         records.extend([phi_record, psi_record])
@@ -221,16 +219,13 @@ def _evaluation(label, lam_left, lam_right, derivative, panels, degree):
                 else "factorized_complement"
             ),
             "series": series,
-            "kernel_enclosure": _ball_record(kernel if not derivative else zero),
-            "lambda_derivative_enclosure": _ball_record(
-                kernel if derivative else zero
-            ),
-            "weighted_integral_enclosure": _ball_record(
-                integral if not derivative else zero
-            ),
-            "weighted_derivative_integral_enclosure": _ball_record(
-                integral if derivative else zero
-            ),
+            **({
+                "lambda_derivative_enclosure": _ball_record(kernel),
+                "weighted_derivative_integral_enclosure": _ball_record(integral),
+            } if derivative else {
+                "kernel_enclosure": _ball_record(kernel),
+                "weighted_integral_enclosure": _ball_record(integral),
+            }),
         })
     return {
         "label": label,
