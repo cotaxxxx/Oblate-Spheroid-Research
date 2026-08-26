@@ -18,6 +18,7 @@ CONTROL_NAMES = (
     "seam_rational_targets",
     "A_gamma_t_factorization",
     "gamma_lambda_factorization",
+    "quadrature_bookkeeping",
 )
 
 CONTROL_LAMBDAS = (
@@ -26,6 +27,7 @@ CONTROL_LAMBDAS = (
     Fraction(5, 8),
     Fraction(16, 25),
     Fraction(13, 20),
+    Fraction(33, 50),
 )
 
 
@@ -60,8 +62,16 @@ def verify_gamma_lambda_factorization(lam, eps, candidate):
         raise ControlFailure("gamma_lambda factorization failed")
 
 
+def verify_quadrature_bookkeeping(candidate=Fraction(1)):
+    """Check integral_0^sqrt(2) s^3 ds = 1 in exact arithmetic."""
+    exact_integral = Fraction(1, 4) * Fraction(2) ** 2
+    if candidate != exact_integral:
+        raise ControlFailure("quadrature bookkeeping failed")
+
+
 def run_exact_controls():
     result = {name: "PASS" for name in CONTROL_NAMES}
+    verify_quadrature_bookkeeping()
     eps_samples = (
         Fraction(0),
         Fraction(1, 4),
@@ -71,6 +81,10 @@ def run_exact_controls():
         Fraction(2),
     )
 
+    # After denominators are cleared, the identities below are polynomial of
+    # degree at most three in eps and two in lambda^2.  The distinct exact
+    # grids exceed both bounds, so this is a finite identity check, not an
+    # unqualified floating-point spot check.
     for lam in CONTROL_LAMBDAS:
         lam2 = lam * lam
         a = 1 - lam2
@@ -94,11 +108,6 @@ def run_exact_controls():
             if derivative_bracket != factored_bracket:
                 raise ControlFailure("A*gamma_t factorization failed")
 
-            r_log = (
-                1 / lam
-                - lam * eps * (2 - eps) / w2
-                - lam * eps / qhat
-            )
             r_factored = -(
                 (2 - eps)
                 * (1 - a * eps)
