@@ -89,7 +89,8 @@ def verification_layers():
     """Machine-readable trust-boundary wording for the final report."""
     return {
         "controls_check": (
-            "exact endpoint/complement/internal-zero/seam/A-gamma_t identities"
+            "exact endpoint/complement/internal-zero/seam/A-gamma_t/gamma-lambda "
+            "identities and quadrature bookkeeping"
         ),
         "controls_do_not_check": (
             "geometric derivation of the kernel, analytic two-chart lemma, "
