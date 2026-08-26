@@ -102,6 +102,7 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
                 "seam_rational_targets",
                 "A_gamma_t_factorization",
                 "gamma_lambda_factorization",
+                "quadrature_bookkeeping",
             },
         )
         provenance_required = set(
@@ -139,6 +140,18 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
             upper_rule["then"]["properties"]["u_construction"]["const"],
             "factorized_complement",
         )
+        series_schema = cell_schema["properties"]["series"]
+        self.assertEqual(series_schema["minItems"], 1)
+        self.assertIn(
+            "Psi_prime",
+            schema["$defs"]["series"]["properties"]["function"]["enum"],
+        )
+        upper_series = upper_rule["then"]["properties"]["series"]
+        self.assertEqual(
+            upper_series["contains"]["properties"]["function"]["const"],
+            "Psi_prime",
+        )
+        self.assertEqual(upper_series["minContains"], 1)
         self.assertNotIn(
             "one_minus_gamma_squared",
             cell_schema["properties"]["u_construction"]["enum"],
