@@ -11,15 +11,17 @@ producer, prototype evaluator, quadrature code, or python-flint.
 from fractions import Fraction
 
 
-CONTROL_NAMES = (
+EXACT_CONTROL_NAMES = (
     "endpoint_values",
     "global_complement",
     "internal_double_zero",
     "seam_rational_targets",
     "A_gamma_t_factorization",
     "gamma_lambda_factorization",
-    "quadrature_bookkeeping",
 )
+
+IMPLEMENTATION_CONTROL_NAMES = ("quadrature_bookkeeping",)
+CONTROL_NAMES = EXACT_CONTROL_NAMES + IMPLEMENTATION_CONTROL_NAMES
 
 CONTROL_LAMBDAS = (
     Fraction(1, 2),
@@ -62,16 +64,24 @@ def verify_gamma_lambda_factorization(lam, eps, candidate):
         raise ControlFailure("gamma_lambda factorization failed")
 
 
-def verify_quadrature_bookkeeping(candidate=Fraction(1)):
-    """Check integral_0^sqrt(2) s^3 ds = 1 in exact arithmetic."""
+def verify_quadrature_bookkeeping(candidate, tolerance):
+    """Compare an implementation-produced quadrature value to the exact 1."""
+    if tolerance <= 0:
+        raise ValueError("quadrature tolerance must be positive")
     exact_integral = Fraction(1, 4) * Fraction(2) ** 2
-    if candidate != exact_integral:
+    if abs(candidate - exact_integral) > tolerance:
         raise ControlFailure("quadrature bookkeeping failed")
 
 
+def run_quadrature_bookkeeping_control(evaluator, tolerance):
+    """Run the implementation path; no default or self-supplied candidate."""
+    candidate = evaluator()
+    verify_quadrature_bookkeeping(candidate, tolerance)
+    return {"quadrature_bookkeeping": "PASS"}
+
+
 def run_exact_controls():
-    result = {name: "PASS" for name in CONTROL_NAMES}
-    verify_quadrature_bookkeeping()
+    result = {name: "PASS" for name in EXACT_CONTROL_NAMES}
     eps_samples = (
         Fraction(0),
         Fraction(1, 4),
