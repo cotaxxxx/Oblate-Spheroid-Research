@@ -16,8 +16,12 @@ LAMBDAS = (
     Fraction(5, 8),
     Fraction(16, 25),
     Fraction(13, 20),
+    Fraction(33, 50),
 )
 
+# Once denominators are cleared, the controlled numerators have degree at
+# most three in eps and two in lambda^2.  These distinct exact grids exceed
+# those bounds, so the comparisons are finite polynomial identity checks.
 EPSILONS = (
     Fraction(1, 4),
     Fraction(1),
