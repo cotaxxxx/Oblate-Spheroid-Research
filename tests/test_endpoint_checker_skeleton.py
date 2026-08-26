@@ -16,6 +16,8 @@ from checker.endpoint_local_checker import (
 )
 from checker.endpoint_local_controls import (
     CONTROL_NAMES,
+    EXACT_CONTROL_NAMES,
+    IMPLEMENTATION_CONTROL_NAMES,
     ControlFailure,
     run_exact_controls,
     verify_gamma_lambda_factorization,
@@ -49,11 +51,19 @@ def valid_cells():
 
 
 class CheckerOwnedEndpointControls(unittest.TestCase):
-    def test_all_seven_exact_control_families_pass(self):
+    def test_all_six_exact_control_families_pass(self):
         self.assertEqual(
             run_exact_controls(),
-            {name: "PASS" for name in CONTROL_NAMES},
+            {name: "PASS" for name in EXACT_CONTROL_NAMES},
         )
+        self.assertEqual(
+            len(CONTROL_NAMES),
+            7,
+        )
+
+    def test_quadrature_control_cannot_run_without_implementation_value(self):
+        with self.assertRaises(TypeError):
+            verify_quadrature_bookkeeping()
 
     def test_sign_reversed_gamma_lambda_factorization_is_rejected(self):
         lam = Fraction(5, 8)
@@ -79,7 +89,7 @@ class CheckerOwnedEndpointControls(unittest.TestCase):
             ControlFailure,
             "quadrature bookkeeping failed",
         ):
-            verify_quadrature_bookkeeping(Fraction(3, 4))
+            verify_quadrature_bookkeeping(Fraction(3, 4), Fraction(1, 100))
 
     def test_package_import_does_not_load_prototype_or_mpmath(self):
         code = (
