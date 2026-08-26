@@ -146,7 +146,32 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
             "Psi_prime",
             schema["$defs"]["series"]["properties"]["function"]["enum"],
         )
-        upper_series = upper_rule["then"]["properties"]["series"]
+        evaluations_schema = schema["properties"]["evaluations"]
+        self.assertEqual(evaluations_schema["minItems"], 3)
+        self.assertEqual(evaluations_schema["maxItems"], 3)
+        required_labels = {
+            rule["contains"]["properties"]["label"]["const"]
+            for rule in evaluations_schema["allOf"]
+        }
+        self.assertEqual(
+            required_labels,
+            {"left_endpoint", "right_endpoint", "derivative_domain"},
+        )
+        self.assertTrue(
+            all(
+                rule["minContains"] == rule["maxContains"] == 1
+                for rule in evaluations_schema["allOf"]
+            )
+        )
+        derivative_rule = schema["$defs"]["evaluation"]["allOf"][1]
+        self.assertEqual(
+            derivative_rule["then"]["properties"]["purpose"]["const"],
+            "B_ob_prime",
+        )
+        upper_series = (
+            derivative_rule["then"]["properties"]["cells"]["items"]["then"]
+            ["properties"]["series"]
+        )
         self.assertEqual(
             upper_series["contains"]["properties"]["function"]["const"],
             "Psi_prime",
