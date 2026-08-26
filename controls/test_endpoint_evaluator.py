@@ -1,15 +1,33 @@
 #!/usr/bin/env python3
 """Implementation-calling checks against pre-existing sphere expectations."""
 
+from fractions import Fraction
 import unittest
 
 import mpmath as mp
 
-from checker.oblate_axis_prototype import b_ob, boundary_energy_ob, g_axis_ob
+from checker.endpoint_local_controls import run_quadrature_bookkeeping_control
+from checker.oblate_axis_prototype import (
+    b_ob,
+    boundary_energy_ob,
+    g_axis_ob,
+    quadrature_bookkeeping_ob,
+)
 
 
 class EndpointEvaluatorSphereControl(unittest.TestCase):
     DPs = 50
+
+    def test_quadrature_bookkeeping_calls_transformed_integration_path(self):
+        def implementation_candidate():
+            actual = quadrature_bookkeeping_ob(dps=self.DPs)
+            return Fraction(mp.nstr(actual, n=self.DPs))
+
+        result = run_quadrature_bookkeeping_control(
+            implementation_candidate,
+            Fraction(1, 10**40),
+        )
+        self.assertEqual(result, {"quadrature_bookkeeping": "PASS"})
 
     def test_b_ob_calls_implementation_and_matches_exact_expectation(self):
         with mp.workdps(self.DPs):
