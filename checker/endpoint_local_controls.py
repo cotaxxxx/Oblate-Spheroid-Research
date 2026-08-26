@@ -46,6 +46,20 @@ def _quantities(lam: Fraction, eps: Fraction):
     return a, w2, qhat, gamma2, u
 
 
+def verify_gamma_lambda_factorization(lam, eps, candidate):
+    lam2 = lam * lam
+    a = 1 - lam2
+    w2 = 1 - 2 * a * eps + a * eps * eps
+    qhat = 2 - a * eps
+    expected = (
+        1 / lam
+        - lam * eps * (2 - eps) / w2
+        - lam * eps / qhat
+    )
+    if candidate != expected:
+        raise ControlFailure("gamma_lambda factorization failed")
+
+
 def run_exact_controls():
     result = {name: "PASS" for name in CONTROL_NAMES}
     eps_samples = (
@@ -91,8 +105,7 @@ def run_exact_controls():
                 * ((1 + lam2) * eps - 1)
                 / (lam * w2 * qhat)
             )
-            if r_log != r_factored:
-                raise ControlFailure("gamma_lambda factorization failed")
+            verify_gamma_lambda_factorization(lam, eps, r_factored)
 
         eps0 = 1 / a
         if not (1 < eps0 < 2):
