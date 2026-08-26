@@ -125,12 +125,23 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
                 "s_interval",
                 "lambda_interval",
                 "chart",
+                "u_construction",
                 "series",
                 "kernel_enclosure",
                 "lambda_derivative_enclosure",
                 "weighted_integral_enclosure",
                 "weighted_derivative_integral_enclosure",
             }.issubset(cell_required)
+        )
+        cell_schema = schema["$defs"]["cell"]
+        upper_rule = cell_schema["allOf"][1]
+        self.assertEqual(
+            upper_rule["then"]["properties"]["u_construction"]["const"],
+            "factorized_complement",
+        )
+        self.assertNotIn(
+            "one_minus_gamma_squared",
+            cell_schema["properties"]["u_construction"]["enum"],
         )
 
     def test_precision_and_clean_room_obligations_are_explicit(self):
