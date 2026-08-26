@@ -64,7 +64,14 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
         )
         self.assertEqual(
             self.document["conclusion_if_all_checks_pass"],
-            "B_ob has exactly one zero in [5/8,33/50].",
+            (
+                "Conditional on the endpoint analytic lemma, B_ob has "
+                "exactly one zero in [5/8,33/50]."
+            ),
+        )
+        self.assertEqual(
+            len(self.document["required_analytic_preconditions"]),
+            3,
         )
 
     def test_newton_cannot_replace_broad_bracket(self):
@@ -113,6 +120,8 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
                 "source_commit",
                 "producer_sha256",
                 "checker_sha256",
+                "prototype_sha256",
+                "controls_sha256",
                 "contract_sha256",
                 "workflow_sha256",
                 "requirements_sha256",
@@ -128,11 +137,15 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
                 "chart",
                 "u_construction",
                 "series",
+            }.issubset(cell_required)
+        )
+        self.assertTrue(
+            {
                 "kernel_enclosure",
                 "lambda_derivative_enclosure",
                 "weighted_integral_enclosure",
                 "weighted_derivative_integral_enclosure",
-            }.issubset(cell_required)
+            }.isdisjoint(cell_required)
         )
         cell_schema = schema["$defs"]["cell"]
         upper_rule = cell_schema["allOf"][1]
@@ -140,8 +153,13 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
             upper_rule["then"]["properties"]["u_construction"]["const"],
             "factorized_complement",
         )
-        series_schema = cell_schema["properties"]["series"]
-        self.assertEqual(series_schema["minItems"], 1)
+        lower_rule = cell_schema["allOf"][0]
+        self.assertEqual(
+            lower_rule["then"]["properties"]["series"]["maxItems"],
+            0,
+        )
+        upper_series_inventory = upper_rule["then"]["properties"]["series"]
+        self.assertEqual(upper_series_inventory["minItems"], 2)
         self.assertIn(
             "Psi_prime",
             schema["$defs"]["series"]["properties"]["function"]["enum"],
@@ -168,15 +186,32 @@ class EndpointLocalIntervalContractLint(unittest.TestCase):
             derivative_rule["then"]["properties"]["purpose"]["const"],
             "B_ob_prime",
         )
+        derivative_items = (
+            derivative_rule["then"]["properties"]["cells"]["items"]
+        )
+        self.assertEqual(
+            set(derivative_items["required"]),
+            {
+                "lambda_derivative_enclosure",
+                "weighted_derivative_integral_enclosure",
+            },
+        )
         upper_series = (
-            derivative_rule["then"]["properties"]["cells"]["items"]["then"]
-            ["properties"]["series"]
+            derivative_items["allOf"][0]["then"]["properties"]["series"]
         )
         self.assertEqual(
             upper_series["contains"]["properties"]["function"]["const"],
             "Psi_prime",
         )
         self.assertEqual(upper_series["minContains"], 1)
+        endpoint_items = (
+            schema["$defs"]["evaluation"]["allOf"][0]["then"]
+            ["properties"]["cells"]["items"]
+        )
+        self.assertEqual(
+            set(endpoint_items["required"]),
+            {"kernel_enclosure", "weighted_integral_enclosure"},
+        )
         self.assertNotIn(
             "one_minus_gamma_squared",
             cell_schema["properties"]["u_construction"]["enum"],
