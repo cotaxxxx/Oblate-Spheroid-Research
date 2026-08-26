@@ -110,6 +110,13 @@ def boundary_energy_ob(lam, *, dps: int = 50):
         return +mp.quad(density, [0, upper], method="tanh-sinh")
 
 
+def quadrature_bookkeeping_ob(*, dps: int = 50):
+    """Exercise the transformed quadrature path on integral s^3 ds = 1."""
+    with _workdps(dps):
+        upper = mp.sqrt(2)
+        return +mp.quad(lambda s: s**3, [0, upper], method="tanh-sinh")
+
+
 def b_ob(lam, *, dps: int = 50):
     """Return b_ob(lambda)=g_axis_ob(1,lambda), without t extrapolation."""
     with _workdps(dps):
