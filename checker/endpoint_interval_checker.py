@@ -89,6 +89,10 @@ def _require_contains(record, independently_computed, label):
 
 
 def _series(u, name, degree):
+    if not u.upper() < 1:
+        raise VerificationError(f"{name} series requires u < 1")
+    if u.upper() < 0:
+        raise VerificationError(f"{name} series requires u >= 0")
     if name == "Phi":
         partial = arb(0)
         for n in range(1, degree + 1):
@@ -148,8 +152,7 @@ def _kernel_box(s, lam, chart, derivative, series_records):
     p_lam = 2 * e * gap * j / (w2.sqrt() * qhat_3_2)
 
     if chart == "gamma_lower":
-        expected_name = "Psi" if derivative else "Phi"
-        if len(series_records) != 1 or series_records[0].get("function") != expected_name:
+        if series_records:
             raise VerificationError("lower-chart record inventory mismatch")
         u = 1 - gamma * gamma
         sqrt_u = u.sqrt()
@@ -163,7 +166,7 @@ def _kernel_box(s, lam, chart, derivative, series_records):
             + p_lam * psi + p * psi_lam
         )
 
-    u = gap * h * h / (w2 * qhat)
+    u = _clamp_nonnegative(gap * h * h / (w2 * qhat))
     by_name = {}
     for record in series_records:
         name = record["function"]
@@ -209,6 +212,20 @@ def _verify_evaluation(evaluation):
     derivative = evaluation["purpose"] == "B_ob_prime"
     checker_total = arb(0)
     for cell in cells:
+        common_fields = {
+            "ordinal", "s_interval", "lambda_interval", "chart",
+            "u_construction", "series",
+        }
+        purpose_fields = (
+            {
+                "lambda_derivative_enclosure",
+                "weighted_derivative_integral_enclosure",
+            }
+            if derivative
+            else {"kernel_enclosure", "weighted_integral_enclosure"}
+        )
+        if set(cell) != common_fields | purpose_fields:
+            raise VerificationError("cell field inventory mismatch")
         left, right = map(_endpoint, cell["s_interval"])
         lam_left, lam_right = map(
             lambda text: _point(Fraction(text)),
@@ -325,7 +342,21 @@ def verify_interval_record(record):
         raise VerificationError("derivative is not strictly positive")
     return {
         "status": "PASS",
-        "conclusion": "B_ob has exactly one zero in [5/8,33/50].",
+        "conclusion": (
+            "Conditional on the endpoint analytic and one-sided-limit "
+            "identification lemmas, B_ob has exactly one zero in [5/8,33/50]."
+        ),
+        "conditional_on": [
+            (
+                "The endpoint-regular two-chart kernel is the analytic "
+                "representation of B_ob and differentiation under the "
+                "integral is valid."
+            ),
+            (
+                "The t->1 one-sided limit/interchange identifies this B_ob "
+                "zero with the boundary passage of the interior census branch."
+            ),
+        ],
         "checker_totals": {
             key: {"lower": value.lower().str(50), "upper": value.upper().str(50)}
             for key, value in totals.items()
