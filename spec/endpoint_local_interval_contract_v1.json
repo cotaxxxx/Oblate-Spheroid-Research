@@ -36,7 +36,12 @@
       "required_relation": "lower_bound > 0"
     }
   ],
-  "conclusion_if_all_checks_pass": "B_ob has exactly one zero in [5/8,33/50].",
+  "conclusion_if_all_checks_pass": "Conditional on the endpoint analytic lemma, B_ob has exactly one zero in [5/8,33/50].",
+  "required_analytic_preconditions": [
+    "The endpoint-regular two-chart kernel represents B_ob and is continuous in lambda.",
+    "Differentiation under the integral gives the recorded B_ob_prime kernel.",
+    "Identifying the zero with the interior census branch additionally requires the t->1 one-sided limit/interchange lemma."
+  ],
   "refinement_policy": {
     "method": "interval_newton",
     "starts_only_after_broad_bracket_passes": true,
