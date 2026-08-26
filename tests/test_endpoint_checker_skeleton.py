@@ -2,6 +2,7 @@
 """Tests for checker-owned controls and exact cell-cover validation."""
 
 import copy
+from fractions import Fraction
 import unittest
 
 from checker.endpoint_local_checker import (
@@ -11,7 +12,12 @@ from checker.endpoint_local_checker import (
     verify_exact_cell_cover,
     verify_record,
 )
-from checker.endpoint_local_controls import CONTROL_NAMES, run_exact_controls
+from checker.endpoint_local_controls import (
+    CONTROL_NAMES,
+    ControlFailure,
+    run_exact_controls,
+    verify_gamma_lambda_factorization,
+)
 
 
 def valid_cells():
@@ -40,11 +46,30 @@ def valid_cells():
 
 
 class CheckerOwnedEndpointControls(unittest.TestCase):
-    def test_all_five_exact_control_families_pass(self):
+    def test_all_six_exact_control_families_pass(self):
         self.assertEqual(
             run_exact_controls(),
             {name: "PASS" for name in CONTROL_NAMES},
         )
+
+    def test_sign_reversed_gamma_lambda_factorization_is_rejected(self):
+        lam = Fraction(5, 8)
+        eps = Fraction(1, 2)
+        lam2 = lam * lam
+        a = 1 - lam2
+        w2 = 1 - 2 * a * eps + a * eps * eps
+        qhat = 2 - a * eps
+        sign_reversed = (
+            (2 - eps)
+            * (1 - a * eps)
+            * ((1 + lam2) * eps - 1)
+            / (lam * w2 * qhat)
+        )
+        with self.assertRaisesRegex(
+            ControlFailure,
+            "gamma_lambda factorization failed",
+        ):
+            verify_gamma_lambda_factorization(lam, eps, sign_reversed)
 
     def test_exact_cover_accepts_unique_seam_and_sqrt2_terminal(self):
         verify_exact_cell_cover(valid_cells())
