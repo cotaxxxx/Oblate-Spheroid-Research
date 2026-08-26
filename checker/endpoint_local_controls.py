@@ -17,6 +17,7 @@ CONTROL_NAMES = (
     "internal_double_zero",
     "seam_rational_targets",
     "A_gamma_t_factorization",
+    "gamma_lambda_factorization",
 )
 
 CONTROL_LAMBDAS = (
@@ -78,6 +79,20 @@ def run_exact_controls():
             factored_bracket = (2 - eps) * (1 - a * eps)
             if derivative_bracket != factored_bracket:
                 raise ControlFailure("A*gamma_t factorization failed")
+
+            r_log = (
+                1 / lam
+                - lam * eps * (2 - eps) / w2
+                - lam * eps / qhat
+            )
+            r_factored = -(
+                (2 - eps)
+                * (1 - a * eps)
+                * ((1 + lam2) * eps - 1)
+                / (lam * w2 * qhat)
+            )
+            if r_log != r_factored:
+                raise ControlFailure("gamma_lambda factorization failed")
 
         eps0 = 1 / a
         if not (1 < eps0 < 2):
