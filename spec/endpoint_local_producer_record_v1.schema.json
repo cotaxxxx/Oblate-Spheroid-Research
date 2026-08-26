@@ -152,9 +152,36 @@
     "evaluations": {
       "type": "array",
       "minItems": 3,
+      "maxItems": 3,
       "items": {
         "$ref": "#/$defs/evaluation"
-      }
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {"label": {"const": "left_endpoint"}},
+            "required": ["label"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {"label": {"const": "right_endpoint"}},
+            "required": ["label"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {"label": {"const": "derivative_domain"}},
+            "required": ["label"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
     }
   },
   "$defs": {
@@ -336,20 +363,6 @@
             "properties": {
               "u_construction": {
                 "const": "factorized_complement"
-              },
-              "series": {
-                "contains": {
-                  "type": "object",
-                  "properties": {
-                    "function": {
-                      "const": "Psi_prime"
-                    }
-                  },
-                  "required": [
-                    "function"
-                  ]
-                },
-                "minContains": 1
               }
             }
           }
@@ -402,7 +415,50 @@
         "reported_sum": {
           "$ref": "#/$defs/arb_ball"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"label": {"enum": ["left_endpoint", "right_endpoint"]}},
+            "required": ["label"]
+          },
+          "then": {
+            "properties": {"purpose": {"const": "B_ob"}}
+          }
+        },
+        {
+          "if": {
+            "properties": {"label": {"const": "derivative_domain"}},
+            "required": ["label"]
+          },
+          "then": {
+            "properties": {
+              "purpose": {"const": "B_ob_prime"},
+              "cells": {
+                "items": {
+                  "if": {
+                    "properties": {"chart": {"const": "u_upper"}},
+                    "required": ["chart"]
+                  },
+                  "then": {
+                    "properties": {
+                      "series": {
+                        "contains": {
+                          "properties": {
+                            "function": {"const": "Psi_prime"}
+                          },
+                          "required": ["function"]
+                        },
+                        "minContains": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
