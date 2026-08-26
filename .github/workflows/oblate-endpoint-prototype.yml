@@ -45,6 +45,8 @@ jobs:
         run: python -m unittest controls/test_endpoint_evaluator.py
       - name: Import diagnostic modules
         run: PYTHONPATH=diagnostics python -c "import oblate_endpoint_convergence_decimal; import oblate_axis_native_decimal; import oblate_fold_scan"
+      - name: Run non-binding endpoint margin diagnostic
+        run: python diagnostics/oblate_endpoint_margin.py
       - name: Run non-binding fold diagnostic
         run: python diagnostics/oblate_fold_scan.py
       - name: Run non-binding axis nondegeneracy diagnostic
