@@ -3,10 +3,13 @@
 
 from fractions import Fraction
 import unittest
+from unittest.mock import patch
 
 import mpmath as mp
 
 from checker.endpoint_local_controls import run_quadrature_bookkeeping_control
+from checker.endpoint_local_controls import ControlFailure
+import checker.oblate_axis_prototype as prototype
 from checker.oblate_axis_prototype import (
     b_ob,
     boundary_energy_ob,
@@ -28,6 +31,23 @@ class EndpointEvaluatorSphereControl(unittest.TestCase):
             Fraction(1, 10**40),
         )
         self.assertEqual(result, {"quadrature_bookkeeping": "PASS"})
+
+    def test_shared_weight_mutation_is_detected(self):
+        with patch.object(
+            prototype,
+            "_transformed_cone_jacobian_weight",
+            side_effect=lambda s: s**2,
+        ):
+            with self.assertRaises(ControlFailure):
+                run_quadrature_bookkeeping_control(
+                    lambda: Fraction(
+                        mp.nstr(
+                            prototype.quadrature_bookkeeping_ob(dps=self.DPs),
+                            n=self.DPs,
+                        )
+                    ),
+                    Fraction(1, 10**40),
+                )
 
     def test_b_ob_calls_implementation_and_matches_exact_expectation(self):
         with mp.workdps(self.DPs):
