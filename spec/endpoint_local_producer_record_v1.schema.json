@@ -78,14 +78,16 @@
         "global_complement",
         "internal_double_zero",
         "seam_rational_targets",
-        "A_gamma_t_factorization"
+        "A_gamma_t_factorization",
+        "gamma_lambda_factorization"
       ],
       "properties": {
         "endpoint_values": {"const": "PASS"},
         "global_complement": {"const": "PASS"},
         "internal_double_zero": {"const": "PASS"},
         "seam_rational_targets": {"const": "PASS"},
-        "A_gamma_t_factorization": {"const": "PASS"}
+        "A_gamma_t_factorization": {"const": "PASS"},
+        "gamma_lambda_factorization": {"const": "PASS"}
       }
     },
     "evaluations": {
