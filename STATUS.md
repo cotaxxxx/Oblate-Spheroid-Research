@@ -271,13 +271,23 @@ targets, and the `A*gamma_t` factorization without calling an integrator or
 the prototype evaluator. GitHub Actions run #95 succeeded, with these controls
 executed before all implementation-calling checks.
 
-Status remains `PROTOTYPE / NOT_AUDITED` and
-`DIAGNOSTIC_ONLY / NOT_BINDING`. No interval enclosure or uniqueness claim
-has been produced.
+The endpoint-local source checkpoint
+`3406baad993701758a74ca9b42976412ca27b781` is `AUDITED_SOURCE`.
+Its seven load-bearing controls are recorded as six exact families plus one
+implementation-calling quadrature family. The audit receipt and remaining
+producer-stage limitations are fixed in [AUDIT_PIN.md](AUDIT_PIN.md).
+
+Evidence remains `DIAGNOSTIC_ONLY / NOT_BINDING`. No interval enclosure or
+uniqueness claim has been produced; `AUDITED_SOURCE` applies only to the
+pinned source bytes and is not a numerical certification.
 
 ## Open obligations
 
-- independently audit and intervalize the endpoint-regular axial prototype;
+- intervalize the audited endpoint-regular axial source;
+- share the transformed `s**3` weight between production density and the
+  implementation-calling bookkeeping control;
+- make the future Arb checker rerun the bookkeeping control on producer data
+  instead of trusting its `PASS` label;
 - certify existence, uniqueness, and transversality of `lambda_entry_ob`;
 - certify `b_ob_prime > 0` and `gt_boundary_ob < 0`;
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
