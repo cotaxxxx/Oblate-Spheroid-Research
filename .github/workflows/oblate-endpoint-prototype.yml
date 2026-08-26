@@ -43,6 +43,10 @@ jobs:
         run: python -m unittest controls/test_endpoint_lambda_derivative_algebra.py
       - name: Run checker-owned controls and skeleton tests
         run: python -m unittest tests/test_endpoint_checker_skeleton.py
+      - name: Build and independently check Arb interval record
+        run: >-
+          python -m unittest
+          tests/test_endpoint_interval_certificate.py
       - name: Run independent expectations
         run: python -m unittest controls/test_sphere_expectations.py
       - name: Run implementation-calling endpoint controls
