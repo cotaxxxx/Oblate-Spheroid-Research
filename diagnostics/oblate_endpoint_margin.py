@@ -9,7 +9,7 @@ endpoint sign margins and finite-difference lambda slopes using the independent
 standard-library Simpson evaluator from oblate_fold_scan.
 """
 
-from diagnostics.oblate_fold_scan import g_value
+from oblate_fold_scan import g_value
 
 
 LOWER = 5.0 / 8.0
