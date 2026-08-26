@@ -21,11 +21,21 @@
     "status": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["evidence_class", "derivation_class", "is_certificate"],
+      "required": [
+        "evidence_class",
+        "derivation_class",
+        "is_certificate"
+      ],
       "properties": {
-        "evidence_class": {"const": "NOT_BINDING"},
-        "derivation_class": {"const": "PROTOTYPE"},
-        "is_certificate": {"const": false}
+        "evidence_class": {
+          "const": "NOT_BINDING"
+        },
+        "derivation_class": {
+          "const": "PROTOTYPE"
+        },
+        "is_certificate": {
+          "const": false
+        }
       }
     },
     "provenance": {
@@ -42,32 +52,65 @@
         "wheel_sha256"
       ],
       "properties": {
-        "source_commit": {"$ref": "#/$defs/git_sha"},
-        "producer_sha256": {"$ref": "#/$defs/sha256"},
-        "checker_sha256": {"$ref": "#/$defs/sha256"},
-        "contract_sha256": {"$ref": "#/$defs/sha256"},
-        "workflow_sha256": {"$ref": "#/$defs/sha256"},
-        "requirements_sha256": {"$ref": "#/$defs/sha256"},
-        "wheel_filename": {"type": "string", "minLength": 1},
-        "wheel_sha256": {"$ref": "#/$defs/sha256"}
+        "source_commit": {
+          "$ref": "#/$defs/git_sha"
+        },
+        "producer_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "checker_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "contract_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "workflow_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "requirements_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "wheel_filename": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wheel_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "precision": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["producer_bits", "checker_bits"],
+      "required": [
+        "producer_bits",
+        "checker_bits"
+      ],
       "properties": {
-        "producer_bits": {"type": "integer", "minimum": 64},
-        "checker_bits": {"type": "integer", "minimum": 64}
+        "producer_bits": {
+          "type": "integer",
+          "minimum": 64
+        },
+        "checker_bits": {
+          "type": "integer",
+          "minimum": 64
+        }
       }
     },
     "contract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["lambda_lower", "lambda_upper"],
+      "required": [
+        "lambda_lower",
+        "lambda_upper"
+      ],
       "properties": {
-        "lambda_lower": {"const": "5/8"},
-        "lambda_upper": {"const": "33/50"}
+        "lambda_lower": {
+          "const": "5/8"
+        },
+        "lambda_upper": {
+          "const": "33/50"
+        }
       }
     },
     "controls": {
@@ -79,21 +122,39 @@
         "internal_double_zero",
         "seam_rational_targets",
         "A_gamma_t_factorization",
-        "gamma_lambda_factorization"
+        "gamma_lambda_factorization",
+        "quadrature_bookkeeping"
       ],
       "properties": {
-        "endpoint_values": {"const": "PASS"},
-        "global_complement": {"const": "PASS"},
-        "internal_double_zero": {"const": "PASS"},
-        "seam_rational_targets": {"const": "PASS"},
-        "A_gamma_t_factorization": {"const": "PASS"},
-        "gamma_lambda_factorization": {"const": "PASS"}
+        "endpoint_values": {
+          "const": "PASS"
+        },
+        "global_complement": {
+          "const": "PASS"
+        },
+        "internal_double_zero": {
+          "const": "PASS"
+        },
+        "seam_rational_targets": {
+          "const": "PASS"
+        },
+        "A_gamma_t_factorization": {
+          "const": "PASS"
+        },
+        "gamma_lambda_factorization": {
+          "const": "PASS"
+        },
+        "quadrature_bookkeeping": {
+          "const": "PASS"
+        }
       }
     },
     "evaluations": {
       "type": "array",
       "minItems": 3,
-      "items": {"$ref": "#/$defs/evaluation"}
+      "items": {
+        "$ref": "#/$defs/evaluation"
+      }
     }
   },
   "$defs": {
@@ -111,28 +172,57 @@
     },
     "s_coordinate": {
       "oneOf": [
-        {"$ref": "#/$defs/rational"},
-        {"const": "sqrt2"}
+        {
+          "$ref": "#/$defs/rational"
+        },
+        {
+          "const": "sqrt2"
+        }
       ]
     },
     "arb_ball": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["midpoint", "radius"],
+      "required": [
+        "midpoint",
+        "radius"
+      ],
       "properties": {
-        "midpoint": {"type": "string"},
-        "radius": {"type": "string"}
+        "midpoint": {
+          "type": "string"
+        },
+        "radius": {
+          "type": "string"
+        }
       }
     },
     "series": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["function", "degree", "partial_sum", "remainder_bound"],
+      "required": [
+        "function",
+        "degree",
+        "partial_sum",
+        "remainder_bound"
+      ],
       "properties": {
-        "function": {"enum": ["Phi", "Psi"]},
-        "degree": {"type": "integer", "minimum": 0},
-        "partial_sum": {"$ref": "#/$defs/arb_ball"},
-        "remainder_bound": {"$ref": "#/$defs/arb_ball"}
+        "function": {
+          "enum": [
+            "Phi",
+            "Psi",
+            "Psi_prime"
+          ]
+        },
+        "degree": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial_sum": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "remainder_bound": {
+          "$ref": "#/$defs/arb_ball"
+        }
       }
     },
     "cell": {
@@ -151,54 +241,116 @@
         "weighted_derivative_integral_enclosure"
       ],
       "properties": {
-        "ordinal": {"type": "integer", "minimum": 0},
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
         "s_interval": {
           "type": "array",
           "prefixItems": [
-            {"$ref": "#/$defs/s_coordinate"},
-            {"$ref": "#/$defs/s_coordinate"}
+            {
+              "$ref": "#/$defs/s_coordinate"
+            },
+            {
+              "$ref": "#/$defs/s_coordinate"
+            }
           ],
           "items": false
         },
         "lambda_interval": {
           "type": "array",
           "prefixItems": [
-            {"$ref": "#/$defs/rational"},
-            {"$ref": "#/$defs/rational"}
+            {
+              "$ref": "#/$defs/rational"
+            },
+            {
+              "$ref": "#/$defs/rational"
+            }
           ],
           "items": false
         },
-        "chart": {"enum": ["gamma_lower", "u_upper"]},
+        "chart": {
+          "enum": [
+            "gamma_lower",
+            "u_upper"
+          ]
+        },
         "u_construction": {
-          "enum": ["not_used", "factorized_complement"]
+          "enum": [
+            "not_used",
+            "factorized_complement"
+          ]
         },
         "series": {
           "type": "array",
-          "items": {"$ref": "#/$defs/series"}
+          "items": {
+            "$ref": "#/$defs/series"
+          },
+          "minItems": 1
         },
-        "kernel_enclosure": {"$ref": "#/$defs/arb_ball"},
-        "lambda_derivative_enclosure": {"$ref": "#/$defs/arb_ball"},
-        "weighted_integral_enclosure": {"$ref": "#/$defs/arb_ball"},
-        "weighted_derivative_integral_enclosure": {"$ref": "#/$defs/arb_ball"}
+        "kernel_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "lambda_derivative_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "weighted_integral_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "weighted_derivative_integral_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        }
       },
       "allOf": [
         {
           "if": {
-            "properties": {"chart": {"const": "gamma_lower"}},
-            "required": ["chart"]
+            "properties": {
+              "chart": {
+                "const": "gamma_lower"
+              }
+            },
+            "required": [
+              "chart"
+            ]
           },
           "then": {
-            "properties": {"u_construction": {"const": "not_used"}}
+            "properties": {
+              "u_construction": {
+                "const": "not_used"
+              }
+            }
           }
         },
         {
           "if": {
-            "properties": {"chart": {"const": "u_upper"}},
-            "required": ["chart"]
+            "properties": {
+              "chart": {
+                "const": "u_upper"
+              }
+            },
+            "required": [
+              "chart"
+            ]
           },
           "then": {
             "properties": {
-              "u_construction": {"const": "factorized_complement"}
+              "u_construction": {
+                "const": "factorized_complement"
+              },
+              "series": {
+                "contains": {
+                  "type": "object",
+                  "properties": {
+                    "function": {
+                      "const": "Psi_prime"
+                    }
+                  },
+                  "required": [
+                    "function"
+                  ]
+                },
+                "minContains": 1
+              }
             }
           }
         }
@@ -216,23 +368,40 @@
       ],
       "properties": {
         "label": {
-          "enum": ["left_endpoint", "right_endpoint", "derivative_domain"]
+          "enum": [
+            "left_endpoint",
+            "right_endpoint",
+            "derivative_domain"
+          ]
         },
         "lambda_interval": {
           "type": "array",
           "prefixItems": [
-            {"$ref": "#/$defs/rational"},
-            {"$ref": "#/$defs/rational"}
+            {
+              "$ref": "#/$defs/rational"
+            },
+            {
+              "$ref": "#/$defs/rational"
+            }
           ],
           "items": false
         },
-        "purpose": {"enum": ["B_ob", "B_ob_prime"]},
+        "purpose": {
+          "enum": [
+            "B_ob",
+            "B_ob_prime"
+          ]
+        },
         "cells": {
           "type": "array",
           "minItems": 2,
-          "items": {"$ref": "#/$defs/cell"}
+          "items": {
+            "$ref": "#/$defs/cell"
+          }
         },
-        "reported_sum": {"$ref": "#/$defs/arb_ball"}
+        "reported_sum": {
+          "$ref": "#/$defs/arb_ball"
+        }
       }
     }
   }
