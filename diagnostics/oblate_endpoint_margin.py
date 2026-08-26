@@ -29,14 +29,18 @@ def centered_lambda_slope(lam, panels, h=1.0e-4):
 def main():
     print("status=DIAGNOSTIC_ONLY/NOT_BINDING derivation=FLOAT")
     for lam in (LOWER, 0.64, 0.65, UPPER):
-        coarse = b_float(lam, 1200)
+        coarse = b_float(lam, 600)
+        medium = b_float(lam, 1200)
         fine = b_float(lam, 2400)
         slope = centered_lambda_slope(lam, 2400)
         print(
             f"lambda={lam:.17g} "
-            f"B_1200={coarse:.17g} "
+            f"B_600={coarse:.17g} "
+            f"B_1200={medium:.17g} "
             f"B_2400={fine:.17g} "
-            f"panel_delta={fine-coarse:.3e} "
+            f"delta_600_1200={medium-coarse:.3e} "
+            f"delta_1200_2400={fine-medium:.3e} "
+            f"delta_ratio={abs((medium-coarse)/(fine-medium)):.6g} "
             f"Bprime_centered={slope:.17g}"
         )
 
