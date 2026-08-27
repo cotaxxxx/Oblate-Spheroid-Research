@@ -1,6 +1,6 @@
 # Research Status
 
-Updated: 2026-08-26
+Updated: 2026-08-27
 
 ## Global status
 
@@ -256,6 +256,27 @@ The boundary functional is now defined explicitly as the one-sided limit
 `B_ob(lambda)=lim[t->1-] partial_t E_lambda(t)`. The direct endpoint integral,
 including cone weight and Jacobian, is derived in
 [analysis/endpoint_kernel_lemma.md](analysis/endpoint_kernel_lemma.md).
+
+A new analytic candidate closes the previously omitted domination step. With
+`t=1-delta`, `mu=1-s^2`, and `d=s^2-delta`, it proves the exact pre-limit
+factorization `N=-s^2*H` and bounds the north-pole density by an explicit
+integrable function independent of both `t` and `lambda`. The complementary
+range `1 <= s <= sqrt(2)` is uniformly regular after fixing
+`delta_0=1/2`, equivalently `1/2 <= t < 1`, with
+`q >= lambda_-^2*(1-delta_0)^2`. The general exact complement
+identity separately supplies `gamma <= 1`; the positive square-root branch
+supplies `gamma >= 0`. Setting `delta=0` in that general identity is checked
+to recover the endpoint complement identity after cancelling the common
+`s^2` factor. Dominated convergence then identifies the one-sided limit with
+the direct endpoint integral. The existing two-chart analyticity on a
+slightly wider lambda interval supplies differentiation under the integral,
+including at the endpoints of `[5/8,33/50]`.
+
+This analytic addition is `PROTOTYPE / NOT_AUDITED`. It does not alter the
+certified numerical checkpoint, record, receipt, or their hashes. The first
+receipt condition remains in force until an independent analytic audit accepts
+this proof unit; the census-branch identification remains a separate open
+condition.
 
 The reduction uses two analytic charts split at `s=1`. This is necessary
 because `u=1-gamma^2` has an internal double zero at
