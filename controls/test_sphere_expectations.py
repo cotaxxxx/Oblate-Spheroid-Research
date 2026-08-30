@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
-"""Independent sphere expectations fixed before an evaluator exists."""
+"""Independent sphere expectations and implementation-connected controls."""
 
 import math
+from pathlib import Path
+import sys
 import unittest
+
+import mpmath as mp
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from axial_endpoint_ob import b_ob
 
 
 class SphereExpectations(unittest.TestCase):
@@ -19,6 +26,21 @@ class SphereExpectations(unittest.TestCase):
             lhs = -mu * q - (1.0 - t * mu) * (t - mu)
             rhs = -t * (1.0 - mu * mu)
             self.assertAlmostEqual(lhs, rhs, places=14)
+
+
+class SphereImplementationControl(unittest.TestCase):
+    def test_b_ob_sphere_control_calls_implementation(self):
+        with mp.workdps(60):
+            expected = mp.pi**2 / 32
+            actual = b_ob(mp.mpf("1"), dps=60)
+            self.assertLess(abs(actual - expected), mp.mpf("1e-50"))
+
+
+class BoundarySignDiagnostics(unittest.TestCase):
+    def test_expected_boundary_signs(self):
+        # Diagnostic targets only; these are not certification claims.
+        self.assertLess(b_ob(mp.mpf("0.60"), dps=50), 0)
+        self.assertGreater(b_ob(mp.mpf("0.70"), dps=50), 0)
 
 
 if __name__ == "__main__":
