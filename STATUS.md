@@ -1,6 +1,6 @@
 # Research Status
 
-Updated: 2026-08-25
+Updated: 2026-08-31
 
 ## Global status
 
@@ -38,6 +38,24 @@ The substitution `mu = 1 - s^2` regularizes the transformed endpoint
 density and supports a one-sided `C^1` extension to `t = 1`. This analytic
 statement still requires a formal manuscript proof and independent audit.
 
+## Endpoint evaluator prototype
+
+`axial_endpoint_ob.py` implements a direct `PROTOTYPE` evaluator for `b_ob`
+using `mu = 1 - s^2`; it does not extrapolate from interior `t` values.
+
+The pre-existing exact sphere expectation
+
+```text
+b_ob(1) = pi^2/32
+```
+
+is now exercised by an implementation-connected test in
+`controls/test_sphere_expectations.py`. This is a prototype control only and
+must not be described as audited, production, or certified.
+
+The same test file checks the previously recorded diagnostic sign targets
+`b_ob(0.60) < 0` and `b_ob(0.70) > 0`. These remain diagnostic evidence.
+
 ## Candidate numerical evidence — not certified
 
 The following values are candidate evidence, not certified enclosures:
@@ -72,7 +90,8 @@ certification.
 
 ## Open obligations
 
-- implement the endpoint-regular axial evaluator;
+- independently audit the endpoint-regular analytic derivation and prototype;
+- replace the prototype with a fixed interval production evaluator;
 - certify existence, uniqueness, and transversality of `lambda_entry_ob`;
 - certify `b_ob_prime > 0` and `gt_boundary_ob < 0`;
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
