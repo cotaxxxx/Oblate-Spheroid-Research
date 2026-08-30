@@ -17,18 +17,33 @@ def _b_ob_integrand_s(s: mp.mpf, lam: mp.mpf) -> mp.mpf:
     if s == 0:
         return mp.mpf("0")
 
-    mu = 1 - s * s
+    u = s * s
+    mu = 1 - u
     lam2 = lam * lam
-    d = 2 + (lam2 - 1) * s * s
+    d = 2 + (lam2 - 1) * u
     w = mp.sqrt(lam2 * (1 - mu * mu) + mu * mu)
+    denom = w * mp.sqrt(d)
 
-    gamma = lam * s / (w * mp.sqrt(d))
-    angle = mp.acos(gamma)
+    # At t=1,
+    #   cos(alpha) = lam*s/denom,
+    #   sin(alpha) = sqrt(2-u)*abs(1+(lam^2-1)u)/denom.
+    # The latter follows from
+    #   w^2*d - lam^2*u = (2-u)*(1+(lam^2-1)u)^2.
+    # Using atan2 avoids loss of domain at points where cos(alpha) -> 1.
+    cos_num = lam * s
+    sin_num = mp.sqrt(max(mp.mpf("0"), 2 - u)) * abs(1 + (lam2 - 1) * u)
+    angle = mp.atan2(sin_num, cos_num)
     h = angle * angle
-    h_prime = -2 * angle / mp.sqrt(1 - gamma * gamma)
 
-    gamma_t = -lam * (mu * d + lam2 * s * s) / (w * s * d ** mp.mpf("1.5"))
-    derivative_density = -mu * h + s * s * h_prime * gamma_t
+    if sin_num == 0:
+        # lim_{alpha->0} -2*alpha/sin(alpha) = -2.
+        h_prime = mp.mpf("-2")
+    else:
+        sin_angle = sin_num / denom
+        h_prime = -2 * angle / sin_angle
+
+    gamma_t = -lam * (mu * d + lam2 * u) / (w * s * d ** mp.mpf("1.5"))
+    derivative_density = -mu * h + u * h_prime * gamma_t
     return s * derivative_density
 
 
