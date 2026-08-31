@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """Independent checker for center-axis coefficient signs. PROTOTYPE / NOT_BINDING."""
 from fractions import Fraction
+from math import isqrt
 from flint import arb,ctx
-from checker.endpoint_interval_checker import _point,_box,_partition,SQRT2
-BITS=192; REG_PANELS=1024; POINT_PANELS=4096; MONO_N=64; DEG=50; USTAR=arb(3)/5
+from checker.endpoint_interval_checker import _point,_box
+BITS=192; REG_PANELS=1024; POINT_PANELS=4096; MONO_N=64; DEG=50; USTAR=arb(3)/5; SQRT2='sqrt2'
+
+def _partition(panels):
+    root=arb(2).sqrt(); rational_end=isqrt(2*panels*panels)
+    vals=[Fraction(i,panels) for i in range(panels+1)]
+    vals.extend(Fraction(i,panels) for i in range(panels+1,rational_end+1))
+    return vals+[SQRT2],root
 
 def _coeffs():
     out=[Fraction(1)]; z=Fraction(1)
