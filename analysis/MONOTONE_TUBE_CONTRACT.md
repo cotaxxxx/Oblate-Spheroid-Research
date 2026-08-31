@@ -138,10 +138,16 @@ Instead use the exact global analytic hulls valid for `0<=gamma<=1`:
 
 ```text
 1 <= R = acos(gamma)/sqrt(1-gamma^2) <= pi/2,
--1 <= R_gamma <= 0.
+-1 <= R_gamma <= -1/3.
 ```
 
-For the second bound, write `gamma=cos(alpha)`, `0<=alpha<=pi/2`. Then `gamma R = alpha cot(alpha) <= 1`, so `R_gamma<=0`; and `R>=gamma` gives `gamma R >= gamma^2`, hence `R_gamma>=-1`. These global bounds remove both endpoint quotient problems and are intentionally coarse; the corner cell contribution is controlled by its small `s` width and the bounded `rho`, `phi`, `Ahat` factors.
+For `gamma=cos(alpha)`, `0<=alpha<=pi/2`, one has
+
+```text
+R_gamma = (alpha cos(alpha)-sin(alpha))/sin(alpha)^3.
+```
+
+Its endpoint values are `-1` at `alpha=pi/2` and `-1/3` as `alpha->0`; the function stays between these values on the interval. This tightened global hull is used only to reduce dependency width in the corner contribution. It is non-gating analytical input and does not replace the exact density identities above.
 
 The corner chart is used only for boxes whose Cartesian product contains `(s,t)=(0,1)`. All other boxes use the ordinary general-t quotient formulas, with the moving `gamma=1` locus handled by the factorized upper `u` chart.
 
@@ -151,7 +157,7 @@ The rigorous cover therefore has three chart labels:
 
 1. `gamma_lower`: ordinary general-t boxes with `u=1-gamma^2` rigorously separated from zero;
 2. `u_upper`: boxes that can meet the moving `h_t=0` locus, with `R=Psi(u)` and `R_gamma=-2 gamma Psi_prime(u)`;
-3. `corner_hull`: only the north-pole corner box(es), using bounded `rho`, `phi`, `Ahat` together with the global angle hulls `R in [1,pi/2]`, `R_gamma in [-1,0]`.
+3. `corner_hull`: only the north-pole corner box(es), using bounded `rho`, `phi`, `Ahat` together with the global angle hulls `R in [1,pi/2]`, `R_gamma in [-1,-1/3]`.
 
 No direct interval division by a `q` box containing zero is permitted in any chart.
 
