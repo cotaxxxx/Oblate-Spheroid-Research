@@ -23,6 +23,9 @@ def _pow(x,n):
 def _contains_zero(x): return x.lower()<=0<=x.upper()
 def _nonfinite(x):
     z=str(x).lower(); return "nan" in z or "inf" in z
+def _nonnegative_sqrt_hull(x):
+    hi=max(arb(0),x.upper()).sqrt()
+    return _box(arb(0),hi)
 def _quantities(s,t,lam):
     e=_square(s); gap=2-e; mu=1-e; delta=1-t; d=e-delta; lam2=_square(lam); A=1-t*mu
     q=_clamp_nonnegative(e*gap+lam2*_square(d)); w2=lam2*e*gap+_square(mu); w=w2.sqrt(); ht=mu+lam2*d
@@ -33,7 +36,8 @@ def _corner(s,t,lam):
     rho_hi=1/gap.lower().sqrt(); rho=_box(arb(0),rho_hi)
     inv_lam_hi=(1/lam).upper(); phi=_box(-inv_lam_hi,inv_lam_hi)
     Ahat=gap*s*rho-mu*phi
-    R=_box(arb(1),arb.pi()/2); Rg=_box(-arb(1),-arb(1)/3); sqrtq=q.sqrt()
+    R=_box(arb(1),arb.pi()/2); Rg=_box(-arb(1),-arb(1)/3)
+    sqrtq=_nonnegative_sqrt_hull(q)
     T1=-4*mu*R*lam*_pow(rho,3)*H/w
     T2=-2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2
     T3=-2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sqrtq)/w
