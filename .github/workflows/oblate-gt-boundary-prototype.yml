@@ -1,9 +1,6 @@
 name: Oblate boundary t-derivative prototype
 
 on:
-  push:
-    branches:
-      - implementation/gt-boundary-two-chart
   pull_request:
     branches:
       - receipt-binding-e5ab171
