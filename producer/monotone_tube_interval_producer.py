@@ -30,9 +30,17 @@ def _quantities(s,t,lam):
     return e,gap,mu,d,lam2,A,q,w2,w,ht,H
 def _corner(s,t,lam):
     e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam); lam3=lam2*lam
-    rho=_box(arb(0),1/gap.lower().sqrt()); phi=arb(0,(1/lam).upper()); Ahat=gap*s*rho-mu*phi
+    rho_hi=1/gap.lower().sqrt(); rho=_box(arb(0),rho_hi)
+    inv_lam_hi=(1/lam).upper(); phi=_box(-inv_lam_hi,inv_lam_hi)
+    Ahat=gap*s*rho-mu*phi
     R=_box(arb(1),arb.pi()/2); Rg=_box(-arb(1),-arb(1)/3); sqrtq=q.sqrt()
-    return (-4*mu*R*lam*_pow(rho,3)*H/w-2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2-2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sqrtq)/w),"corner_hull"
+    T1=-4*mu*R*lam*_pow(rho,3)*H/w
+    T2=-2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2
+    T3=-2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sqrtq)/w
+    G=T1+T2+T3
+    if _nonfinite(G):
+        raise ValueError(f"corner nonfinite e={e} gap={gap} mu={mu} d={d} A={A} q={q} w2={w2} H={H} rho={rho} phi={phi} Ahat={Ahat} R={R} Rg={Rg} sqrtq={sqrtq} T1={T1} T2={T2} T3={T3}")
+    return G,"corner_hull"
 def _ordinary(s,t,lam,degree):
     e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam)
     if not q.lower()>0: raise ValueError("ordinary chart requires q>0")
@@ -49,13 +57,9 @@ def _ordinary(s,t,lam,degree):
         R,_=_series(u,"Psi",degree,clamped_nonnegative=True); Psip,_=_series(u,"Psi_prime",degree,clamped_nonnegative=True); Rg=-2*gamma*Psip; chart="u_upper"
     else:
         R=gamma.acos()/u.sqrt(); Rg=(gamma*R-1)/u; chart="gamma_lower"
-    # Stable exact three-term form. On ordinary boxes q>0, so these quotients are legitimate.
     rho=s/sq; phi=d/sq; Ahat=A/sq
-    G=(-4*mu*R*lam*_pow(rho,3)*H/w
-       -2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2
-       -2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sq)/w)
-    if _nonfinite(G):
-        raise ValueError(f"ordinary nonfinite chart={chart} e={e} d={d} A={A} q={q} w2={w2} ht={ht} H={H} gamma={gamma} u={u} rho={rho} phi={phi} Ahat={Ahat} R={R} Rg={Rg}")
+    G=(-4*mu*R*lam*_pow(rho,3)*H/w-2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2-2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sq)/w)
+    if _nonfinite(G): raise ValueError(f"ordinary nonfinite chart={chart} q={q} rho={rho} phi={phi} Ahat={Ahat}")
     return G,chart
 def _split(a,b,n):
     w=(b-a)/n; return [(a+i*w,a+(i+1)*w) for i in range(n)]
@@ -69,7 +73,6 @@ def produce_record(bits=BITS,panels=S_PANELS,degree=SERIES_DEGREE):
                 left=sqrt2 if sl==SQRT2 else _point(sl); right=sqrt2 if sr==SQRT2 else _point(sr); s=_box(left,right)
                 try: val,chart=_corner(s,t,lam) if (ti==7 and si==0) else _ordinary(s,t,lam,degree)
                 except ValueError as exc: raise ValueError(f"ti={ti} li={li} si={si} t={tl}:{tr} lambda={ll}:{lr} s={sl}:{sr}; {exc}") from exc
-                if _nonfinite(val): raise ValueError(f"nonfinite kernel chart={chart} ti={ti} li={li} si={si} t={tl}:{tr} lambda={ll}:{lr} s={sl}:{sr} value={val}")
                 counts[chart]+=1; total+=val*(right-left)
             passed=bool(total.upper()<0); all_pass=all_pass and passed
             records.append({"t_box":[str(tl),str(tr)],"lambda_box":[str(ll),str(lr)],"chart_counts":counts,"total_mid":total.mid().str(50),"total_rad":total.rad().str(50),"upper_negative":passed})
