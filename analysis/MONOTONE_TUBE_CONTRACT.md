@@ -64,11 +64,79 @@ s0(t)^2 = (1-lambda^2(1-t))/(1-lambda^2).
 
 Boxes crossing this locus must use the `u` series chart rather than the scalar quotient form for `R_gamma`.
 
+## Corner-hull chart fixed before implementation
+
+The only zero of `q` in the present tube/cell geometry is the north-pole corner `(s,delta)=(0,0)`, where `delta=1-t`. The density is bounded there; the singularity is an interval-dependency artifact. On any `s`-cell / `t`-box containing that corner, direct construction of `s/sqrt(q)` or `d/sqrt(q)` is forbidden.
+
+Define formally
+
+```text
+rho  = s/sqrt(q)
+phi  = d/sqrt(q)
+Ahat = A/sqrt(q)
+```
+
+and use the exact relation
+
+```text
+rho^2 (2-s^2) + lambda^2 phi^2 = 1.
+```
+
+Hence the corner box may use the a-priori hulls
+
+```text
+0 <= rho <= 1/sqrt(2-s^2),
+-1/lambda <= phi <= 1/lambda.
+```
+
+Also use the exact identity
+
+```text
+A = s^2(2-s^2) - d(1-s^2),
+```
+
+which gives
+
+```text
+Ahat = (2-s^2) s rho - (1-s^2) phi.
+```
+
+Thus `Ahat` is formed from bounded hull quantities, not by dividing an `A` interval by a `sqrt(q)` interval containing zero.
+
+Starting from
+
+```text
+G_t = s[4 mu R gamma_t - 2 A(R_gamma gamma_t^2 + R gamma_tt)],
+N = -s^2 H,
+gamma_tt = lambda^3 s^2[3 d H-(2-s^2)q]/(w q^(5/2)),
+```
+
+the three terms become exactly
+
+```text
+T1 = -4 mu R lambda rho^3 H / w,
+
+T2 = -2 R_gamma lambda^2 H^2 Ahat rho^5 / w^2,
+
+T3 = -2 R lambda^3 Ahat rho^3
+     [3 phi H - (2-s^2) sqrt(q)] / w.
+```
+
+These are the required symbolic correspondences for the `corner_hull` chart. The corner implementation must compute neither `rho` nor `phi` as interval quotients. `sqrt(q)` itself may be used only multiplicatively in `T3`, where an upper enclosure is harmless.
+
+At the north-pole corner the angle is on the lower-gamma side (`gamma -> 0`, `alpha -> pi/2`), so `R` and `R_gamma` are evaluated with the lower gamma chart. The checker must verify that the resulting `u=1-gamma^2` enclosure is separated from zero before using the quotient formula for `R_gamma`.
+
+The corner chart is used only for boxes whose Cartesian product contains `(s,t)=(0,1)`. All other boxes use the ordinary general-t quotient formulas, with the moving `gamma=1` locus handled by the factorized upper `u` chart.
+
 ## Chart policy
 
-- Lower gamma chart may be used only on boxes where the checker proves `u=1-gamma^2` is separated from zero.
-- Any box that can meet the moving `h_t=0` locus must use the factorized `u` chart with `R=Psi(u)` and `R_gamma=-2 gamma Psi_prime(u)`.
-- The north-pole corner `(s,t)=(0,1)` is an explicit analytic/implementation obligation: no direct interval division by a `q` box containing zero is permitted. The implementation must use an algebraically regularized corner representation or a separately proved corner bound.
+The rigorous cover therefore has three chart labels:
+
+1. `gamma_lower`: ordinary general-t boxes with `u=1-gamma^2` rigorously separated from zero;
+2. `u_upper`: boxes that can meet the moving `h_t=0` locus, with `R=Psi(u)` and `R_gamma=-2 gamma Psi_prime(u)`;
+3. `corner_hull`: only the north-pole corner box(es), using the bounded `rho`, `phi`, `Ahat` representation above and lower-gamma angle functions.
+
+No direct interval division by a `q` box containing zero is permitted in any chart.
 
 ## Evidence handling
 
