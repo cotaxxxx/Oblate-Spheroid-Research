@@ -113,6 +113,42 @@ Primary evaluator:
 
 A candidate is retained only if the refined quadrature changes both gradient components by less than `1e-8` in absolute value at the candidate and the refined residual norm is below `1e-8`. These thresholds are diagnostic only.
 
+## Mandatory pre-scan axis consistency control
+
+The new meridian evaluator must be checked against the existing axial evaluator before any off-axis scan is allowed to run.
+
+At `theta=0`, `p=(0,0,lambda q)` and the chain rule gives
+
+```text
+G_q(q,0;lambda) = lambda E_z(0,lambda q;lambda).
+```
+
+With the canonical axial coordinate `t=q`, this must agree with
+
+```text
+g_axis_ob(t,lambda).
+```
+
+The implementation must compare the independently evaluated meridian-axis value with the established axial evaluator at representative points including:
+
+```text
+g_axis_ob(63/64,5/8) ~= +4.37e-4,
+g_axis_ob(31/32,5/8) ~= +1.9997e-2,
+b_ob(0.60)            ~= -4.9168e-2,
+b_ob(1)                = pi^2/32.
+```
+
+The first three are diagnostic numerical expectations; the sphere endpoint is exact. Exact decimal expectations used by the implementation must be recorded in the source rather than silently inferred from the production evaluator.
+
+Required control behavior:
+
+- report meridian-axis value, axial reference value, absolute difference, and sign for every control point;
+- use a declared tolerance appropriate to the binary64 quadrature and endpoint treatment;
+- if any control has the wrong sign, wrong normalization, or exceeds tolerance, print `AXIS_CONSISTENCY_CONTROL: FAIL` and abort before scanning the meridian;
+- only `AXIS_CONSISTENCY_CONTROL: PASS` permits the off-axis search to proceed.
+
+This control is intended to catch normalization, orientation, and algebraic mistakes before the non-binding scan.
+
 ## Search grid
 
 Coarse seed grid in (q,theta):
@@ -144,6 +180,33 @@ For each seed, refine in (q,theta) by a safeguarded two-dimensional Newton metho
 - merge candidates whose `(q,theta)` separation is < `1e-6`.
 
 No root count obtained here is binding.
+
+## Near-boundary reliability rule
+
+For `q>0.95`, the distance `D` can become small near the closest boundary point and the first-gradient density has a numerically difficult but integrable near-singular region. The baseline `160 x 256` quadrature is not trusted there.
+
+Mandatory classification:
+
+```text
+q <= 0.95 : ordinary diagnostic candidate
+q > 0.95  : NEAR_BOUNDARY_UNRELIABLE until refined validation passes
+```
+
+Every candidate with `q>0.95` must be rerun with at least
+
+```text
+N_mu=240, N_phi=512.
+```
+
+It remains `NEAR_BOUNDARY_UNRELIABLE` unless both refined gradient components satisfy the validation tolerance and the refined residual norm is below `1e-8`.
+
+If boundary-near structure remains ambiguous, perform a dedicated follow-up scan on
+
+```text
+q in [0.95,0.995]
+```
+
+with increased `N_mu` (at least 320, with `N_phi>=512`) and report it separately as a non-binding boundary-layer diagnostic. This is especially relevant for detecting an off-axis analogue of boundary entry.
 
 ## Axis and center controls
 
@@ -180,7 +243,7 @@ G_theta
 grad_norm
 quadrature_coarse_residual
 quadrature_refined_residual
-classification_hint: AXIS_CONTROL / EQUATORIAL_ORBIT / GENERIC_OFF_AXIS_ORBIT
+classification_hint: AXIS_CONTROL / EQUATORIAL_ORBIT / GENERIC_OFF_AXIS_ORBIT / NEAR_BOUNDARY_UNRELIABLE
 Jacobian eigenvalues or singular values at the candidate
 ```
 
@@ -197,6 +260,7 @@ CENTER_AXIS_HESSIAN_SIGN_HINT: POS/NEG/UNRESOLVED
 
 - `OFF_AXIS_FOUND: NO` means only "none detected by this scan"; it is not an exclusion theorem.
 - Any detected off-axis candidate must be independently rerun at higher quadrature resolution before it is used to shape the theorem statement.
+- Any `q>0.95` candidate is unreliable until it passes the dedicated refined validation above.
 - The scan must not choose `lambda_min` by convenience. It may only suggest candidate breakpoints / topology changes for later exact contracts.
 - No `CERTIFIED`, `AUDITED`, or theorem language is permitted in the diagnostic output.
 - The global theorem statement remains unfixed until this table has been reviewed.
