@@ -33,6 +33,8 @@ jobs:
         run: PYTHONPATH=. python producer/center_axis_coefficient_producer.py
       - name: Run independent center-axis checker
         run: PYTHONPATH=. python checker/center_axis_coefficient_checker.py
+      - name: Report exact center-axis enclosures
+        run: PYTHONPATH=. python analysis/center_axis_exact_enclosure_report.py
 
   gt-boundary-prototype:
     runs-on: ubuntu-latest
