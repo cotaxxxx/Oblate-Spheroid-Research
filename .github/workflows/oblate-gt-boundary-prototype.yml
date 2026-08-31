@@ -43,6 +43,8 @@ jobs:
         run: PYTHONPATH=. python analysis/census_lower_edge_width_diagnostic.py
       - name: Run lower slab and 31/32 edge gates
         run: python -m unittest tests/test_lower_slab_and_edge_31_32.py
+      - name: Reconstruct exact local-entry monotonicity margin
+        run: PYTHONPATH=. python analysis/local_entry_m_exact_diagnostic.py
       - name: Run corrected lower-edge 256-box refinement
         run: python -m unittest tests/test_census_lower_edge_refinement.py
       - name: Preserve corrected lower-edge one-box unresolved control
