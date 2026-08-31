@@ -90,6 +90,28 @@ The rigorous upper chart `s in [1,sqrt(2)]` therefore uses the existing
 remainder enclosure. The scalar branch `sin_num == 0 -> -2` is not an interval
 proof device.
 
+For the boundary `t`-derivative density, write `R = Psi(u)` on the upper chart.
+Then
+
+```text
+R_gamma = Psi_prime(u) * du/dgamma = -2*gamma*Psi_prime(u)
+```
+
+so
+
+```text
+R_gamma * gamma_t^2 = -2*gamma*Psi_prime(u)*gamma_t^2.
+```
+
+This reuses the retained certified-lineage `Psi_prime` series and its rigorous
+remainder enclosure. On the lower `gamma_lower` chart one may retain
+
+```text
+R_gamma = (gamma*R - 1)/(1 - gamma^2),
+```
+
+because that chart keeps the denominator uniformly away from zero.
+
 ## Certified-lineage record
 
 The repository was renamed from `Oblate-Spheroid-Research` to
@@ -135,6 +157,44 @@ and `Phi`/`Psi`/`Psi_prime` series plus rigorous remainder bounds. New interval
 work must therefore reuse or explicitly derive from this pinned lineage rather
 than silently reimplementing an equivalent kernel under a new provenance.
 
+## Census re-derivation and orientation
+
+The pinned pre-limit kernel and the historical census script now agree on the
+branch orientation. The historical script uses `lambda` directly as the oblate
+axis ratio; it does not replace it by `a = 1-lambda^2` or by `1/lambda`.
+
+The reproduced positive-axis roots include
+
+```text
+lambda = 0.600   t_star = 0.959901001842...
+lambda = 0.625   t_star = 0.9847113707...   [REPORTED]
+lambda = 0.640   t_star = 0.997267672733...
+lambda = 0.643   t_star = 0.999585461678...
+lambda = 0.644   no positive-axis root observed
+lambda = 0.650   no positive-axis root observed
+```
+
+The earlier working-note claims of roots near `t=0.9905` at `lambda=0.65`,
+`t=0.9865` at `lambda=0.66`, and `t=0.9377` at `lambda=0.70` are superseded and
+must not be used.
+
+The consistent orientation is therefore
+
+```text
+lambda < lambda_boundary : one observed interior positive-axis stationary root
+lambda -> lambda_boundary from below : t_star -> 1
+lambda > lambda_boundary : no observed positive-axis stationary root
+```
+
+Together with the certified `B_ob'(lambda) > 0`, the implicit-function identity
+
+```text
+dt_star/dlambda = -partial_lambda g / partial_t g
+```
+
+requires `partial_t g < 0` at the boundary passage in order to have
+`dt_star/dlambda > 0`.
+
 ## Boundary-branch identification sequence
 
 The remaining boundary-entry proof chain is fixed in the following order.
@@ -145,36 +205,54 @@ The remaining boundary-entry proof chain is fixed in the following order.
 2. **Boundary t-derivative sign.** Certify, with `t` as the axial coordinate,
 
    ```text
-   gt_boundary_ob = partial_t g_axis_ob(1,lambda) > 0
+   gt_boundary_ob = partial_t g_axis_ob(1,lambda) < 0
    ```
 
-   on the same lambda bracket `[5/8,33/50]` (or a rigorously specified
-   sub-bracket containing the certified endpoint zero). Equivalently, for
-   `tau = 1-t`, certify `partial_tau g_axis_ob < 0`.
+   on the lambda bracket `[5/8,33/50]`. Equivalently, for `tau = 1-t`, certify
+   `partial_tau g_axis_ob > 0`.
 
-   The expected sign is fixed before computation. The orientation check is:
-   the existing certificate gives `B_ob'(lambda) > 0`; for
-   `lambda > lambda_boundary`, the observed branch lies at `t_star < 1`.
-   Hence the local implicit-function relation
+   The only gating numerical claim is the rigorous interval statement
 
    ```text
-   dt_star/dlambda = -partial_lambda g / partial_t g
+   hi(partial_t g_axis_ob(1,[5/8,33/50])) < 0.
    ```
 
-   must be negative, which requires `partial_t g > 0`. The same conclusion
-   follows from `g(t_star,lambda)=0 < g(1,lambda)` for lambda just above the
-   boundary value.
+   Independent point expectations at `lambda = 5/8`, `0.65`, and `33/50` are
+   recorded only as `REPORTED_NOT_GATING` values:
+
+   ```text
+   lambda = 5/8    partial_t g(1,lambda) ~ -1.41209
+   lambda = 0.65   partial_t g(1,lambda) ~ -1.47171
+   lambda = 33/50  partial_t g(1,lambda) ~ -1.49580
+   ```
+
+   Agreement with those values is a diagnostic cross-check only. Failure to
+   obtain `hi < 0` is a gating failure regardless of pointwise agreement.
 3. **Monotone tube.** Certify a strip `t in [1-delta,1]` on which
-   `partial_t g_axis_ob > 0`. This proves at most one axial stationary root per
+   `partial_t g_axis_ob < 0`. This proves at most one axial stationary root per
    lambda inside the strip; Krawczyk is not required if the monotonicity
    enclosure closes.
-4. **Census identification.** Verify the independently observed axial census
-   root enters the certified strip at selected lambda values. Tube uniqueness
-   then identifies that census root with the local IFT branch issuing from the
-   certified boundary zero.
+4. **Census identification.** Reproduce the positive-axis census roots under a
+   fixed configuration and place selected subcritical-lambda roots inside the
+   certified monotone tube. Tube uniqueness then identifies those roots with
+   the local IFT branch terminating at the certified boundary zero.
 
 Only after all four steps are fixed may the endpoint zero be stated as the
 boundary passage of the census branch.
+
+## Symbolic-audit rule for the boundary t derivative
+
+The pre-limit second-derivative density `G_t = partial_t F_t` has received a
+chat-side symbolic derivation and term-by-term audit. The Arb implementation
+must be audited again against that analytic density before any gating run is
+accepted. In particular, the lower-chart and upper-chart formulas must be
+checked symbolically against the same `G_t`; the upper chart must use the
+`Psi_prime` identity above rather than a direct interval quotient through the
+`gamma -> 1` point.
+
+This audit is independent of the numerical sign run. A numerically negative
+result from code that has not passed the symbolic correspondence audit is not a
+certificate.
 
 ## Candidate numerical evidence — not certified
 
@@ -184,31 +262,14 @@ The following values are candidate evidence, not certified enclosures:
 lambda_entry_ob = 0.6435457703666799690435  [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
 lambda_axis_ob  = 0.40795886030094636425    [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
 b_ob_prime      = +1.10246                  [HIGH_PRECISION; centered difference h=1e-12]
+gt_boundary_ob  = -1.45623019               [HIGH_PRECISION; one-sided dps=50 diagnostic]
 b_ob(1)         = pi^2/32                   [EXACT]
 ```
 
-The previously recorded diagnostic line
-
-```text
-gt_boundary_ob = -1.45623
-```
-
-is withdrawn as a sign-convention/orientation error and must not be used as a
-reproduction target. Its magnitude is not promoted or silently re-signed. A
-new direct derivation and independently fixed expectation for the `t`
-derivative are required before interval computation. If the alternative
-coordinate `tau=1-t` is used, its derivative has the opposite sign by
-definition.
-
-These computations are candidate evidence under the two-layer certification
-rule. `lambda_axis_ob` independently agrees with an earlier floating-point
-search near `0.40796`; `lambda_entry_ob` remains a high-precision candidate
-location and must not be substituted for the certified bracket.
-
-Diagnostic census locations mentioned in working notes include approximately
-`t = 0.9905` at `lambda = 0.65`, `t = 0.9865` at `lambda = 0.66`, and
-`t = 0.9377` at `lambda = 0.70`. They remain diagnostic until reproduced under
-a fixed census configuration and then placed inside the certified monotone tube.
+The `gt_boundary_ob` value above is restored only as a high-precision diagnostic
+candidate after the census orientation was independently re-derived from the
+pinned kernel and historical raw script. It is not a certified enclosure and
+is not a gating target.
 
 Expected signs:
 
@@ -216,7 +277,7 @@ Expected signs:
 b_ob(0.60) < 0
 b_ob(0.70) > 0
 b_ob(1) = pi^2/32 > 0
-partial_t g_axis_ob(1,lambda) > 0 on the boundary bracket  [TARGET; NOT YET CERTIFIED]
+partial_t g_axis_ob(1,lambda) < 0 on [5/8,33/50]  [TARGET; NOT YET CERTIFIED]
 ```
 
 Measured diagnostic values for the first two signs were approximately
@@ -228,10 +289,11 @@ certification.
 
 - obtain the external human-audit/Judge receipt for the pinned endpoint C1
   analytic source;
-- derive the boundary `t`-derivative density and independently fix the target
-  sign `gt_boundary_ob > 0` before interval evaluation;
-- certify `gt_boundary_ob > 0` on the endpoint-zero lambda bracket;
-- certify a monotone near-boundary tube with `partial_t g_axis_ob > 0`;
+- implement the boundary `t`-derivative density on the retained two-chart Arb
+  lineage and pass an independent symbolic correspondence audit;
+- run the certified interval enclosure on `[5/8,33/50]` with the sole gating
+  condition `hi < 0`; treat point expectations as `REPORTED_NOT_GATING`;
+- certify a monotone near-boundary tube with `partial_t g_axis_ob < 0`;
 - reproduce the census roots under fixed configuration and identify them with
   the IFT branch by tube uniqueness;
 - preserve the independent PROTOTYPE audit record for `axial_endpoint_ob.py`;
