@@ -45,10 +45,10 @@ def _density(s,t,lam):
     if not q.lower()>0: raise VerificationError("q not positive")
     sq=q.sqrt(); gamma=_unit(lam*A/(w*sq)); u0=_unit(e*gap*_square(ht)/(w2*q)); glo=max(arb(0),gamma.lower()); ghi=min(arb(1),gamma.upper())
     u=_box(max(u0.lower(),arb(1)-ghi*ghi),min(u0.upper(),arb(1)-glo*glo)); gamma=_inter(gamma,_box(max(arb(0),arb(1)-u.upper()).sqrt(),max(arb(0),arb(1)-u.lower()).sqrt()))
-    rho=s/sq; Ahat=A/sq
-    def upper(): return -s*mu*_series(u,"Phi",50)+2*lam*_series(u,"Psi",50)*Ahat*_pow(rho,3)*H/w
+    rho=s/sq
+    def upper(): return -s*mu*_series(u,"Phi",50)+2*lam*_series(u,"Psi",50)*A*_pow(rho,3)*H/w
     def lower():
-        a=gamma.acos(); return -s*mu*a*a+2*lam*(a/u.sqrt())*Ahat*_pow(rho,3)*H/w
+        a=gamma.acos(); return -s*mu*a*a+2*lam*(a/u.sqrt())*A*_pow(rho,3)*H/w
     th=_point(Fraction(3,5))
     if u.upper()<=th: return upper(),"u_upper"
     if u.lower()>=th: return lower(),"gamma_lower"
@@ -60,6 +60,7 @@ def _density(s,t,lam):
 def verify(record):
     exp={"t":"63/64","lambda_domain":["5/8","33/50"],"lambda_boxes":1,"s_panels":1024,"series_degree":50,"bits":160,"u_star":"3/5","required_sign":"POS","sole_gate":"full-domain lower endpoint > 0"}
     if record.get("contract")!=exp: raise VerificationError("contract mismatch")
+    if record.get("schema")!="bg-oblate-spheroid.census-lower-edge.v2": raise VerificationError("schema mismatch")
     ctx.prec=192; n=1024; root=arb(2).sqrt(); rend=isqrt(2*n*n); vals=[Fraction(i,n) for i in range(rend+1)]+[None]
     t=_point(Fraction(63,64)); lam=_box(_point(Fraction(5,8)),_point(Fraction(33,50))); total=arb(0); counts={}
     for sl,sr in zip(vals,vals[1:]):
