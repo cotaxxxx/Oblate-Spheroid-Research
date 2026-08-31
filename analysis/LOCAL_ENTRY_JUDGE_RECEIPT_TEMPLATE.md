@@ -126,7 +126,50 @@ dt*/dlambda = - partial_lambda g_axis_ob / partial_t g_axis_ob.
 
 **Important:** the stronger sign conclusion `dt*/dlambda > 0` requires an independently audited sign input `partial_lambda g_axis_ob(t*(lambda),lambda) > 0` (or an equivalent rigorous argument). `B_ob' > 0` at the endpoint alone does not by itself establish the sign of `partial_lambda g` along the full interior root branch. Unless that additional input is pinned, the Judge receipt must state only C1 regularity and continuity of the unique branch, not global positive branch slope.
 
-From uniqueness plus the endpoint sign transition and continuity, the local axial boundary-entry parameter is identified with the endpoint zero:
+### Unconditional quantitative boundary convergence
+
+Let `m>0` be any certified uniform constant satisfying
+
+```text
+partial_t g_axis_ob(t,lambda) <= -m < 0
+on [31/32,1] x [5/8,33/50].
+```
+
+For `lambda < lambda_partial^ob`, let `t*(lambda)` be the unique interior root. Since
+
+```text
+g_axis_ob(t*(lambda),lambda)=0,
+g_axis_ob(1,lambda)=b_ob(lambda)<0,
+```
+
+the mean-value theorem gives some `xi in (t*(lambda),1)` such that
+
+```text
+b_ob(lambda)
+  = partial_t g_axis_ob(xi,lambda) * (1-t*(lambda)).
+```
+
+Therefore
+
+```text
+0 <= 1-t*(lambda) <= |b_ob(lambda)|/m.
+```
+
+Because the certified endpoint sign structure gives continuity of `b_ob` and
+
+```text
+b_ob(lambda) -> 0^- as lambda -> lambda_partial^ob from below,
+```
+
+it follows unconditionally that
+
+```text
+t*(lambda) -> 1 as lambda -> lambda_partial^ob from below.
+```
+
+This boundary convergence does not require a sign for `partial_lambda g_axis_ob` along the root branch. Only monotonicity of `t*(lambda)` in `lambda` remains conditional on such an additional sign input.
+
+From existence, uniqueness, and the quantitative boundary convergence above, the local axial boundary-entry parameter is identified with the endpoint zero:
 
 ```text
 lambda_entry,ob = lambda_partial^ob
