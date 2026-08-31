@@ -1,6 +1,6 @@
 # Center pitchfork certification contract B
 
-Status: `PROTOTYPE / SYMBOLIC_DERIVATION_PENDING / NOT_BINDING`
+Status: `AUDIT_COMPLETE / MACHINE_GATING_PASS / EXTERNAL_JUDGE_PENDING / NOT_BINDING`
 
 ## Purpose
 
@@ -10,9 +10,9 @@ This contract concerns the local center pitchfork at the certified parameter
 lambda_c^ob in (2/5,83/200)
 ```
 
-from contract A.
+from certified contract A.
 
-By z -> -z symmetry,
+By `z -> -z` symmetry,
 
 ```text
 g_axis_ob(-t,lambda) = -g_axis_ob(t,lambda),
@@ -33,16 +33,14 @@ with
 c3_ob(lambda) := (1/6) partial_t^3 g_axis_ob(0,lambda).
 ```
 
-## Fixed machine target B1
-
-Certify
+## Fixed theorem target B1
 
 ```text
 c3_ob(lambda) < 0
-for lambda in [2/5,83/200].
+for every lambda in [2/5,83/200].
 ```
 
-This is a one-parameter interval claim on the same lambda interval used to isolate `lambda_c^ob` in A.
+This is the sole machine theorem gate for B.
 
 ## Correct density order
 
@@ -54,7 +52,7 @@ G_t = partial_t F_t,
 partial_t g_axis_ob = integral_0^sqrt(2) G_t ds.
 ```
 
-Therefore the cubic coefficient is
+Therefore
 
 ```text
 c3_ob(lambda)
@@ -64,153 +62,184 @@ c3_ob(lambda)
      [partial_t^3 F_t(s,t,lambda)]_{t=0} ds.
 ```
 
-A single derivative `partial_t G_t` would correspond to `partial_t^2 g` and vanishes at `t=0` by oddness; it is not the cubic coefficient.
-
-## Useful pre-limit organization
-
-Write
+Write `C=R gamma_t`. Since `A=1-t mu`,
 
 ```text
-x = gamma,
-x1 = gamma_t,
-x2 = gamma_tt,
-x3 = gamma_ttt,
-x4 = gamma_tttt,
-R1 = R_gamma,
-R2 = R_gammagamma,
-R3 = R_gammagammagamma,
-C = R x1.
+partial_t^3 F_t
+ = s[8 mu C_tt - 2 A C_ttt],
 ```
 
-Since
+where
 
 ```text
-A = 1-t mu,
-A_t = -mu,
-A_tt = 0,
+C_tt
+ = R_gammagamma gamma_t^3
+   + 3 R_gamma gamma_t gamma_tt
+   + R gamma_ttt,
 ```
 
 and
 
 ```text
-G_t/s = 4 mu C - 2 A C_t,
-```
-
-two further t derivatives simplify to
-
-```text
-(partial_t^2 G_t)/s
- = 8 mu C_tt - 2 A C_ttt.
-```
-
-At `t=0`, `A=1`, with
-
-```text
-C_tt
- = R2 x1^3
-   + 3 R1 x1 x2
-   + R x3,
-
 C_ttt
- = R3 x1^4
-   + 6 R2 x1^2 x2
-   + 3 R1 x2^2
-   + 4 R1 x1 x3
-   + R x4.
+ = R_gammagammagamma gamma_t^4
+   + 6 R_gammagamma gamma_t^2 gamma_tt
+   + 3 R_gamma gamma_tt^2
+   + 4 R_gamma gamma_t gamma_ttt
+   + R gamma_tttt.
 ```
 
-Hence the symbolic B density target is
+At `t=0`, `A=1`, so the canonical implementation density is
 
 ```text
-6 c3_ob(lambda)
- = integral_0^sqrt(2) s [
-     8 mu (
-       R2 gamma_t^3
-       + 3 R1 gamma_t gamma_tt
-       + R gamma_ttt
-     )
-     - 2 (
-       R3 gamma_t^4
-       + 6 R2 gamma_t^2 gamma_tt
-       + 3 R1 gamma_tt^2
-       + 4 R1 gamma_t gamma_ttt
-       + R gamma_tttt
-     )
-   ]_{t=0} ds.
+D3_density
+ = (s/6)[8 mu C_tt - 2 C_ttt].
 ```
 
-Thus B requires `gamma_tttt` in addition to `gamma_ttt`, and `R_gammagammagamma`; no fourth gamma-derivative of R is needed in this organization.
+## Symbolic/raw audit
 
-The symbolic derivation must start from the pre-limit geometry, derive `gamma_ttt` and `gamma_tttt`, and only then specialize to `t=0`. No machine implementation is authorized until this density is independently audited.
-
-## Geometry / regularity inherited from A
-
-On
+Canonical note:
 
 ```text
-lambda in [2/5,83/200],
+analysis/CENTER_PITCHFORK_SYMBOLIC_NOTE.md
+commit 943aebe575785e8433e3ea39ea0c6e23e9f7f512
+blob efabc9d6c07d2176a62d1d985cba7f8ea01cc629
+status CHAT_RAW_AUDIT_PASS / SYMBOLIC_DERIVATION_AUDITED
 ```
 
-at `t=0`, retain
+The raw audit independently checked parity, the `4,6,8` derivative chain, the `1,3,1` and `1,6,3,4,1` product-rule coefficients, all four specialized gamma derivatives, both charts for `R_gammagammagamma`, the `Psi'''` tail with exact denominator `89/245`, the fixed removable loci, the exact sphere control, and gating logic.
+
+## Geometry / regularity
+
+On the B interval at `t=0`,
 
 ```text
 q = 1-mu^2 + lambda^2 mu^2 >= lambda^2 > 0,
 w^2 = mu^2 + lambda^2(1-mu^2) >= lambda^2 > 0.
 ```
 
-There is no moving corner singularity. Fixed removable `u=1-gamma^2=0` loci are handled with the same analytic continuation / series chart philosophy as A. Endpoint and center removable loci must be covered explicitly by the symbolic and machine audit.
+There is no moving corner singularity. The exact complement
+
+```text
+u = (1-mu^2) mu^2 (1-lambda^2)^2/(w^2 q)
+```
+
+has fixed removable zero loci only, handled by the audited `Psi` series chart.
+
+## Exact sphere control
+
+The unit-sphere expansion gives
+
+```text
+E_1(t) = E_1(0) + (2/3)t^2 - (2/9)t^4 + O(t^6),
+```
+
+hence
+
+```text
+g_axis_ob(t,1) = (4/3)t - (8/9)t^3 + O(t^5),
+c3_ob(1) = -8/9.
+```
+
+The machine evaluator must contain `-8/9`; this is a gating normalization/continuation control, not an assumption in the interval-sign proof.
+
+## Machine architecture and pins
+
+Producer:
+
+```text
+producer/center_pitchfork_producer.py
+blob 468ab9a3dd318998eb22b8bfbc09c3848cfb45d4
+160-bit Arb
+4096 s panels
+64 exact lambda boxes
+Psi degree 50
+u threshold 3/5
+```
+
+Checker:
+
+```text
+checker/center_pitchfork_checker.py
+blob 46d05b1aaef31a2e24beceed43d29113af351842
+192-bit Arb
+4096 s panels
+64 exact lambda boxes
+Psi degree 50
+u threshold 3/5
+```
+
+Independence declaration:
+
+```text
+CHECKER_KERNEL=TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION
+INDEPENDENCE_SCOPE=PRECISION/PARTITION/GATING
+```
+
+The A-certified source blobs are unchanged; B uses separate files.
+
+## Machine evidence
+
+Focused successful run with exact report:
+
+```text
+run 33438258204
+job center-pitchfork-evidence
+job id 99639876658
+head cbaa72fa2e55f5b5e0a698a763a680be35e1a7ae
+conclusion SUCCESS
+```
+
+Both producer and checker return
+
+```text
+C3_NEG_ALL PASS
+weakest_box [2/5,5123/12800]
+SPHERE_C3_NEG_8_9 PASS
+LOGICAL_FINAL_CLAIM PASS
+```
+
+Machine receipt:
+
+```text
+analysis/CENTER_PITCHFORK_MACHINE_RECEIPT.md
+commit 0af9d6e11117c9183951eaf60506682b1de6f608
+```
+
+Judge request:
+
+```text
+analysis/CENTER_PITCHFORK_JUDGE_REQUEST.md
+commit a30f640d7f6441ba1a424d6e6c0825d9f730dcd9
+```
 
 ## Independent expectations — REPORTED_NOT_GATING
 
-The following are expectations only and must not be used as proof gates:
-
 ```text
-c3_ob(0.4)   ~ -0.252
-c3_ob(lambda_c^ob) ~ -0.2614
-c3_ob(0.415) ~ -0.270
-c3_ob(0.5)   ~ -0.376
+c3_ob(2/5)          ~ -0.25187,
+c3_ob(lambda_c^ob)  ~ -0.26140,
+c3_ob(83/200)       ~ -0.26989,
+c3_ob(0.5)          ~ -0.376.
 ```
 
-The observed nonzero axial root at `lambda=0.5`,
+These are diagnostic/consistency values only.
 
-```text
-t* ~ 0.7803,
-```
+## Consequence after external Judge approval
 
-is qualitatively consistent with the cubic approximation
-
-```text
-t*^2 ~ H_axis_ob(lambda)/|c3_ob(lambda)|.
-```
-
-This census comparison is diagnostic only.
-
-## Direction / normal form consequence after B certification
-
-Contract A certifies
+Certified contract A gives
 
 ```text
 H_axis_ob(lambda_c^ob)=0,
 partial_lambda H_axis_ob(lambda_c^ob)>0.
 ```
 
-If B certifies
+If external Judge approves B1, then
 
 ```text
-c3_ob(lambda_c^ob)<0,
+c3_ob(lambda_c^ob)<0.
 ```
 
-then the local reduced equation
-
-```text
-0 = t [ H_axis_ob(lambda)
-        + c3_ob(lambda_c^ob) t^2
-        + higher order terms ]
-```
-
-has the supercritical orientation with respect to increasing `lambda`: for `lambda>lambda_c^ob` sufficiently close to the critical parameter there is one local nonzero pair `+/- t*(lambda)`, while for `lambda<lambda_c^ob` sufficiently close there is no local nonzero pair.
-
-The leading scaling is
+The odd real-analytic normal form therefore has supercritical orientation for increasing `lambda`: sufficiently near `lambda_c^ob`, one nonzero pair `+/-t*(lambda)` exists for `lambda>lambda_c^ob`, none exists for `lambda<lambda_c^ob`, and
 
 ```text
 t*(lambda)^2
@@ -219,43 +248,17 @@ t*(lambda)^2
     (lambda-lambda_c^ob).
 ```
 
-The local theorem must be stated on an explicit neighborhood
-
-```text
-lambda in (lambda_c^ob-epsilon, lambda_c^ob+epsilon),
-|t| < t0,
-```
-
-with exact uniqueness of the nonzero pair inside that neighborhood. The existence of such an `epsilon,t0` follows analytically from the odd real-analytic normal form once A transversality and B cubic nondegeneracy are established; any quantitative box used later by global cover C is a separate machine obligation.
-
-## Sphere control
-
-If an independent closed form for
-
-```text
-c3_ob(1)
-```
-
-is derived, it should be added as a gating containment control before B certification. Until independently derived and audited, no sphere `c3` value is assumed.
-
-## Audit sequence
-
-1. derive `gamma_ttt`, `gamma_tttt` and `partial_t^2 G_t|_{t=0}` from pre-limit formulas;
-2. independently audit `R_gammagammagamma`, all product-rule coefficients, parity, and removable limits;
-3. compare high-precision values against `REPORTED_NOT_GATING` expectations;
-4. only then implement Arb producer/checker;
-5. freeze partitions/precision before gating run;
-6. record machine receipt;
-7. external Judge review;
-8. promote B only after `JUDGE_PASS`.
+A quantitative local `(epsilon,t0)` box for global cover C is a separate obligation.
 
 ## Explicit exclusions
 
-B does not by itself certify:
+B does not certify by itself:
 
-- the entire nonzero axial branch up to boundary entry;
-- absence of additional roots outside the local center box;
+- a quantitative pitchfork neighborhood;
+- the entire nonzero axial branch;
+- absence of additional axial roots globally;
+- connection to the boundary-entry branch;
 - off-axis exclusion;
-- global stationary-point census.
+- the global stationary-point census.
 
-Those belong to C and D.
+B is internally complete through machine receipt and Judge request, but remains `NOT_BINDING` until an external `JUDGE_PASS` is recorded.
