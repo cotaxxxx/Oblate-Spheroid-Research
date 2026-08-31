@@ -62,21 +62,43 @@ The moving internal `gamma=1` locus is `h_t=0`; in delta notation its positive s
 s0(t)^2 = (1-lambda^2(1-t))/(1-lambda^2).
 ```
 
-Boxes crossing this locus must use the `u` series chart rather than the scalar quotient form for `R_gamma`.
+Boxes crossing this locus, and ordinary boxes touching `s=0` where `u=1-gamma^2` can also vanish, must use the `u` series chart rather than the scalar quotient form for `R_gamma`.
+
+## Scaled three-term representation
+
+For every point with `q>0`, define
+
+```text
+rho  = s/sqrt(q)
+phi  = d/sqrt(q)
+Ahat = A/sqrt(q).
+```
+
+Using `N=-s^2 H` and the displayed formula for `gamma_tt`, the complete derivative density is exactly
+
+```text
+T1 = -4 mu R lambda rho^3 H / w,
+
+T2 = -2 R_gamma lambda^2 H^2 Ahat rho^5 / w^2,
+
+T3 = -2 R lambda^3 Ahat rho^3
+     [3 phi H - (2-s^2) sqrt(q)] / w,
+
+G_t = T1 + T2 + T3.
+```
+
+This scaled three-term representation is the required implementation form for **all** charts. It avoids separately intervalizing `gamma_t` and `gamma_tt`, in particular the raw `q^(-5/2)` factor in `gamma_tt`.
+
+- On ordinary boxes, the checker must first prove `q>0`; then `rho`, `phi`, and `Ahat` may be formed by ordinary interval division by `sqrt(q)`.
+- On the north-pole corner box, where `q` contains zero, those quotients are forbidden and are replaced by the a-priori hulls below.
+
+This is an algebraic dependency reduction only. It does not change the fixed claim domain, parameter partition, precision, series degree, or gating predicate.
 
 ## Corner-hull chart fixed before implementation
 
 The only zero of `q` in the present tube/cell geometry is the north-pole corner `(s,delta)=(0,0)`, where `delta=1-t`. The density is bounded there; the singularity is an interval-dependency artifact. On any `s`-cell / `t`-box containing that corner, direct construction of `s/sqrt(q)` or `d/sqrt(q)` is forbidden.
 
-Define formally
-
-```text
-rho  = s/sqrt(q)
-phi  = d/sqrt(q)
-Ahat = A/sqrt(q)
-```
-
-and use the exact relation
+Use the exact relation
 
 ```text
 rho^2 (2-s^2) + lambda^2 phi^2 = 1.
@@ -101,28 +123,7 @@ which gives
 Ahat = (2-s^2) s rho - (1-s^2) phi.
 ```
 
-Thus `Ahat` is formed from bounded hull quantities, not by dividing an `A` interval by a `sqrt(q)` interval containing zero.
-
-Starting from
-
-```text
-G_t = s[4 mu R gamma_t - 2 A(R_gamma gamma_t^2 + R gamma_tt)],
-N = -s^2 H,
-gamma_tt = lambda^3 s^2[3 d H-(2-s^2)q]/(w q^(5/2)),
-```
-
-the three terms become exactly
-
-```text
-T1 = -4 mu R lambda rho^3 H / w,
-
-T2 = -2 R_gamma lambda^2 H^2 Ahat rho^5 / w^2,
-
-T3 = -2 R lambda^3 Ahat rho^3
-     [3 phi H - (2-s^2) sqrt(q)] / w.
-```
-
-These are the required symbolic correspondences for the `corner_hull` chart. The corner implementation must compute neither `rho` nor `phi` as interval quotients. `sqrt(q)` itself may be used only multiplicatively in `T3`, where an upper enclosure is harmless.
+Thus `Ahat` is formed from bounded hull quantities, not by dividing an `A` interval by a `sqrt(q)` interval containing zero. `sqrt(q)` itself may be used only multiplicatively in `T3`.
 
 ### Corner angle bounds
 
@@ -132,32 +133,34 @@ The corner does **not** have a single limiting gamma value. Since
 gamma = lambda Ahat / w,
 ```
 
-one has `gamma=1` along `s=0, delta>0`, while along `delta=0, s->0` one has `gamma->0`. Hence a corner box can span the full geometric range `0<=gamma<=1`. The corner chart must therefore not use either the lower quotient `R_gamma=(gamma R-1)/(1-gamma^2)` or the upper `Psi_prime` series as a pointwise chart across the whole corner box.
+one has `gamma=1` along `s=0, delta>0`, while along `delta=0, s->0` one has `gamma->0`. Hence a corner box can span the full geometric range `0<=gamma<=1`.
 
-Instead use the exact global analytic hulls valid for `0<=gamma<=1`:
+Use the exact global analytic hulls
 
 ```text
 1 <= R = acos(gamma)/sqrt(1-gamma^2) <= pi/2,
 -1 <= R_gamma <= -1/3.
 ```
 
-For `gamma=cos(alpha)`, `0<=alpha<=pi/2`, one has
+For `gamma=cos(alpha)`, `0<=alpha<=pi/2`,
 
 ```text
-R_gamma = (alpha cos(alpha)-sin(alpha))/sin(alpha)^3.
+R_gamma = (alpha cos(alpha)-sin(alpha))/sin(alpha)^3,
 ```
 
-Its endpoint values are `-1` at `alpha=pi/2` and `-1/3` as `alpha->0`; the function stays between these values on the interval. This tightened global hull is used only to reduce dependency width in the corner contribution. It is non-gating analytical input and does not replace the exact density identities above.
+with endpoint values `-1` at `alpha=pi/2` and `-1/3` as `alpha->0`.
 
-The corner chart is used only for boxes whose Cartesian product contains `(s,t)=(0,1)`. All other boxes use the ordinary general-t quotient formulas, with the moving `gamma=1` locus handled by the factorized upper `u` chart.
+The corner chart is used only for boxes whose Cartesian product contains `(s,t)=(0,1)`.
 
 ## Chart policy
 
-The rigorous cover therefore has three chart labels:
+The rigorous cover has three chart labels:
 
-1. `gamma_lower`: ordinary general-t boxes with `u=1-gamma^2` rigorously separated from zero;
-2. `u_upper`: boxes that can meet the moving `h_t=0` locus, with `R=Psi(u)` and `R_gamma=-2 gamma Psi_prime(u)`;
-3. `corner_hull`: only the north-pole corner box(es), using bounded `rho`, `phi`, `Ahat` together with the global angle hulls `R in [1,pi/2]`, `R_gamma in [-1,-1/3]`.
+1. `gamma_lower`: ordinary general-t boxes with `q>0` and `u=1-gamma^2` rigorously separated from zero;
+2. `u_upper`: ordinary boxes with `q>0` where `u` can touch zero, including the moving `h_t=0` locus and first `s` cells at `t<1`; use `R=Psi(u)` and `R_gamma=-2 gamma Psi_prime(u)`;
+3. `corner_hull`: only the north-pole corner box(es), using bounded `rho`, `phi`, `Ahat`, `R in [1,pi/2]`, and `R_gamma in [-1,-1/3]`.
+
+On ordinary boxes the exact identities `u=1-gamma^2` and `gamma=sqrt(1-u)` may be intersected with independently evaluated quotient enclosures to reduce interval dependency. This is a tightening operation, not a new assumption.
 
 No direct interval division by a `q` box containing zero is permitted in any chart.
 
