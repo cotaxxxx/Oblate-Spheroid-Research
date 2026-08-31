@@ -41,5 +41,7 @@ jobs:
         run: python -m unittest tests/test_gt_boundary_interval.py
       - name: Run non-gating term-by-chart width diagnostic
         run: PYTHONPATH=. python analysis/monotone_tube_width_diagnostic.py
+      - name: Run non-gating u-threshold diagnostic
+        run: PYTHONPATH=. python analysis/monotone_tube_threshold_diagnostic.py
       - name: Run fixed 64-box monotone tube producer and checker
         run: python -m unittest tests/test_monotone_tube_interval.py
