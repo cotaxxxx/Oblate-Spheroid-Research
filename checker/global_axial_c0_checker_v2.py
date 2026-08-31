@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""C0 checker wrapper: stabilize only C0b alpha^2 evaluation.
+"""C0 checker wrapper: stabilized C0b and redeclared quantitative box.
 
 CHECKER_KERNEL=TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION
 INDEPENDENCE_SCOPE=PRECISION/PARTITION/GATING
 Evidence class: PROTOTYPE / NOT_BINDING.
 """
+from fractions import Fraction
 from checker import global_axial_c0_checker as base
+
+# Fixed redeclaration for the quantitative C0 box.
+base.T_HI = Fraction(1, 2)
+base.T_EDGE = Fraction(1, 2)
 
 
 def _g_density_stable(s, t, L, stats):
