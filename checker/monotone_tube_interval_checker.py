@@ -53,7 +53,12 @@ def _ordinary(s,t,lam,degree):
     glo=max(arb(0),gamma.lower()); ghi=min(arb(1),gamma.upper())
     ulo=max(u0.lower(),arb(1)-ghi*ghi); uhi=min(u0.upper(),arb(1)-glo*glo)
     if uhi<ulo: raise VerificationError("inconsistent gamma/u enclosures")
-    u=_box(ulo,uhi); gt=-lam*e*H/(w*q32); gtt=lam2*lam*e*(3*d*H-gap*q)/(w*q52)
+    u=_box(ulo,uhi)
+    gc_lo=max(arb(0),arb(1)-u.upper()).sqrt(); gc_hi=max(arb(0),arb(1)-u.lower()).sqrt()
+    g2lo=max(gamma.lower(),gc_lo); g2hi=min(gamma.upper(),gc_hi)
+    if g2hi<g2lo: raise VerificationError("empty reciprocal gamma/u intersection")
+    gamma=_box(g2lo,g2hi)
+    gt=-lam*e*H/(w*q32); gtt=lam2*lam*e*(3*d*H-gap*q)/(w*q52)
     use_u=_contains_zero(ht) or not u.lower()>0
     if use_u:
         if not u.upper()<1: raise VerificationError("upper chart u reaches one")
