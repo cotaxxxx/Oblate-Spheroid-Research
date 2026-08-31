@@ -15,7 +15,7 @@ permissions:
 jobs:
   gt-boundary-prototype:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -39,3 +39,5 @@ jobs:
         run: python -m unittest controls/test_endpoint_algebra.py
       - name: Run boundary t-derivative producer and independent checker
         run: python -m unittest tests/test_gt_boundary_interval.py
+      - name: Run fixed 64-box monotone tube producer and checker
+        run: python -m unittest tests/test_monotone_tube_interval.py
