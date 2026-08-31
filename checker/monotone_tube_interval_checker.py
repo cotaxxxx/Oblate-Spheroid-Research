@@ -49,23 +49,23 @@ def _corner(s,t,lam):
 def _ordinary(s,t,lam,degree):
     e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam)
     if not q.lower()>0: raise VerificationError("ordinary q is not positive")
-    sq=q.sqrt(); q32=q*sq; q52=q*q32; gamma=_unit_hull(lam*A/(w*sq)); u0=_unit_hull(_clamp_nonnegative(e*gap*_square(ht)/(w2*q)))
-    glo=max(arb(0),gamma.lower()); ghi=min(arb(1),gamma.upper())
-    ulo=max(u0.lower(),arb(1)-ghi*ghi); uhi=min(u0.upper(),arb(1)-glo*glo)
+    sq=q.sqrt(); gamma=_unit_hull(lam*A/(w*sq)); u0=_unit_hull(_clamp_nonnegative(e*gap*_square(ht)/(w2*q)))
+    glo=max(arb(0),gamma.lower()); ghi=min(arb(1),gamma.upper()); ulo=max(u0.lower(),arb(1)-ghi*ghi); uhi=min(u0.upper(),arb(1)-glo*glo)
     if uhi<ulo: raise VerificationError("inconsistent gamma/u enclosures")
-    u=_box(ulo,uhi)
-    gc_lo=max(arb(0),arb(1)-u.upper()).sqrt(); gc_hi=max(arb(0),arb(1)-u.lower()).sqrt()
-    g2lo=max(gamma.lower(),gc_lo); g2hi=min(gamma.upper(),gc_hi)
+    u=_box(ulo,uhi); gc_lo=max(arb(0),arb(1)-u.upper()).sqrt(); gc_hi=max(arb(0),arb(1)-u.lower()).sqrt(); g2lo=max(gamma.lower(),gc_lo); g2hi=min(gamma.upper(),gc_hi)
     if g2hi<g2lo: raise VerificationError("empty reciprocal gamma/u intersection")
     gamma=_box(g2lo,g2hi)
-    gt=-lam*e*H/(w*q32); gtt=lam2*lam*e*(3*d*H-gap*q)/(w*q52)
     use_u=_contains_zero(ht) or not u.lower()>0
     if use_u:
         if not u.upper()<1: raise VerificationError("upper chart u reaches one")
         R=_series(u,"Psi",degree); Rg=-2*gamma*_series(u,"Psi_prime",degree); chart="u_upper"
     else:
         R=gamma.acos()/u.sqrt(); Rg=(gamma*R-1)/u; chart="gamma_lower"
-    return s*(4*mu*R*gt-2*A*(Rg*gt*gt+R*gtt)),chart
+    rho=s/sq; phi=d/sq; Ahat=A/sq; lam3=lam2*lam
+    G=(-4*mu*R*lam*_pow(rho,3)*H/w
+       -2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2
+       -2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sq)/w)
+    return G,chart
 def _split(a,b,n):
     w=(b-a)/n; return [(a+i*w,a+(i+1)*w) for i in range(n)]
 def _s_partition(n):
