@@ -31,6 +31,8 @@ jobs:
           python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
       - name: Run exact inherited endpoint controls
         run: python -m unittest controls/test_endpoint_algebra.py
+      - name: Diagnose center-axis endpoint width
+        run: PYTHONPATH=. python analysis/center_axis_endpoint_width_diagnostic.py
       - name: Run center-axis coefficient producer prototype
         run: PYTHONPATH=. python producer/center_axis_coefficient_producer.py
       - name: Run independent center-axis coefficient checker prototype
