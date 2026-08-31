@@ -13,6 +13,24 @@ permissions:
   contents: read
 
 jobs:
+  center-axis-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run center-axis producer
+        run: PYTHONPATH=. python producer/center_axis_coefficient_producer.py
+      - name: Run independent center-axis checker
+        run: PYTHONPATH=. python checker/center_axis_coefficient_checker.py
+
   gt-boundary-prototype:
     runs-on: ubuntu-latest
     timeout-minutes: 30
