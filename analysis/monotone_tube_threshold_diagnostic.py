@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """DIAGNOSTIC_ONLY threshold comparison for oblate monotone-tube charts.
 
-The fixed initial contract and producer are unchanged.  This compares
-u* in {1/4,1/2,3/5}.  Ordinary cells use:
+The fixed initial contract and producer are unchanged. This compares
+u* in {1/4,1/2,3/5}. Ordinary cells use:
   u_hi <= u*       -> u_upper
   u_lo >= u*       -> gamma_lower
   u_lo < u* < u_hi -> termwise intersection of both rigorous charts
-when both charts are valid.  T1/T2/T3 are intersected separately so no
+when both charts are valid. T1/T2/T3 are intersected separately so no
 cross-chart correlation assumption is made.
+
+For this diagnostic only, A is tightened by the exact positive-sum identity
+A = 1-t*mu = (1-t)+t*s^2 before forming gamma and A/sqrt(q). This does not
+modify the fixed initial producer or its contract.
 """
 from __future__ import annotations
 
@@ -35,6 +39,9 @@ def _intersection(x,y):
 def _angle_data(s,t,lam,degree):
     e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam)
     if not q.lower()>0: raise ValueError("ordinary diagnostic requires q>0")
+    # Exact positive-sum form; intersect with the original algebraic form.
+    Apos=(1-t)+t*e
+    A=_intersection(A,Apos)
     sq=q.sqrt(); gamma=_unit_hull(lam*A/(w*sq)); u0=_unit_hull(e*gap*_square(ht)/(w2*q))
     glo=max(arb(0),gamma.lower()); ghi=min(arb(1),gamma.upper())
     ulo=max(u0.lower(),arb(1)-ghi*ghi); uhi=min(u0.upper(),arb(1)-glo*glo)
@@ -78,12 +85,17 @@ def _ordinary_terms(s,t,lam,degree,threshold):
         return "u_upper",u_terms()
     if u.lower() >= th:
         return "gamma_lower",g_terms()
-    # crossing: intersect each full term enclosure if both charts are valid.
-    ut=u_terms()
-    if not u.lower()>0:
-        return "u_upper_cross_only",ut
-    gt=g_terms()
-    return "intersection",tuple(_intersection(a,b) for a,b in zip(ut,gt))
+    # Crossing: use both when both are valid, otherwise the one valid chart.
+    u_ok=bool(u.upper()<1)
+    g_ok=bool(u.lower()>0)
+    if u_ok and g_ok:
+        ut=u_terms(); gt=g_terms()
+        return "intersection",tuple(_intersection(a,b) for a,b in zip(ut,gt))
+    if u_ok:
+        return "u_upper_cross_only",u_terms()
+    if g_ok:
+        return "gamma_lower_cross_only",g_terms()
+    raise ValueError(f"crossing cell has neither valid chart: u={u}")
 
 
 def _corner_terms(s,t,lam):
@@ -129,7 +141,7 @@ def main():
         print("WIDEST",widest["t_box"],widest["lambda_box"],"counts",widest["counts"])
         print(" total",f(widest["total"]),"T2",f(widest["terms"][1]))
         print("MAX_T2",max_t2["t_box"],max_t2["lambda_box"],f(max_t2["terms"][1]))
-        for chart in ("gamma_lower","u_upper","intersection","u_upper_cross_only","corner_hull"):
+        for chart in ("gamma_lower","u_upper","intersection","u_upper_cross_only","gamma_lower_cross_only","corner_hull"):
             if chart in widest["by"]:
                 print(f" widest[{chart}] T2",f(widest["by"][chart][1]))
 
