@@ -1,6 +1,8 @@
 # Center pitchfork symbolic note B
 
-Status: `SYMBOLIC_DERIVATION_READY_FOR_RAW_AUDIT / NOT_BINDING`
+Status: `CHAT_RAW_AUDIT_PASS / SYMBOLIC_DERIVATION_AUDITED / NOT_BINDING`
+
+Raw audit record: the user independently checked all ten items in the checklist below and returned `CHAT_RAW_AUDIT_PASS`. The audit included parity, the 4/6/8 derivative chain, the `C_tt` and `C_ttt` combinatorial coefficients, all four `gamma` derivatives against an independent SymPy derivation, both charts for `R_gammagammagamma`, the `Psi'''` tail including the exact denominator `89/245`, all fixed removable `u=0` loci, the exact sphere control `c3_ob(1)=-8/9`, and the fact that only `upper(c3_ob)<0` on the target interval is theorem-gating.
 
 ## Scope
 
@@ -430,6 +432,8 @@ Before implementation, verify:
 8. fixed `u=0` removable loci are covered without literal singular division;
 9. sphere control `c3_ob(1)=-8/9` is independently reproduced;
 10. only the interval sign `upper(c3_ob)<0` is theorem-gating.
+
+Audit result: `CHAT_RAW_AUDIT_PASS` on all ten items.
 
 ## 11. Consequence after B certification
 
