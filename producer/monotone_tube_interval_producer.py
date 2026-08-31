@@ -47,17 +47,11 @@ def _ordinary(s,t,lam,degree):
     e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam)
     if not q.lower()>0: raise ValueError("ordinary chart requires q>0")
     sq=q.sqrt(); q32=q*sq; q52=q*q32; lam3=lam2*lam
-    gamma=_unit_hull(lam*A/(w*sq))
-    u0=_unit_hull(_clamp_nonnegative(e*gap*_square(ht)/(w2*q)))
-    # Exact consistency intersection: u=1-gamma^2. This supplies a strict
-    # upper bound in cells where the factorized quotient alone is too wide.
-    gamma_lo=max(arb(0),gamma.lower())
-    u_hi=min(u0.upper(),arb(1)-gamma_lo*gamma_lo)
-    gamma_hi=min(arb(1),gamma.upper())
-    u_lo=max(u0.lower(),arb(1)-gamma_hi*gamma_hi)
-    if u_hi<u_lo: raise ValueError("inconsistent gamma/u enclosures")
-    u=_box(u_lo,u_hi)
-    gt=-lam*e*H/(w*q32); gtt=lam3*e*(3*d*H-gap*q)/(w*q52)
+    gamma=_unit_hull(lam*A/(w*sq)); u0=_unit_hull(_clamp_nonnegative(e*gap*_square(ht)/(w2*q)))
+    glo=max(arb(0),gamma.lower()); ghi=min(arb(1),gamma.upper())
+    ulo=max(u0.lower(),arb(1)-ghi*ghi); uhi=min(u0.upper(),arb(1)-glo*glo)
+    if uhi<ulo: raise ValueError("inconsistent gamma/u enclosures")
+    u=_box(ulo,uhi); gt=-lam*e*H/(w*q32); gtt=lam3*e*(3*d*H-gap*q)/(w*q52)
     use_u=_contains_zero(ht) or not u.lower()>0
     if use_u:
         if not u.upper()<1: raise ValueError("u_upper requires u<1")
@@ -69,6 +63,8 @@ def _ordinary(s,t,lam,degree):
 
 def _split(a,b,n):
     w=(b-a)/n; return [(a+i*w,a+(i+1)*w) for i in range(n)]
+def _nonfinite(x):
+    text=str(x).lower(); return "nan" in text or "inf" in text
 
 def produce_record(bits=BITS,panels=S_PANELS,degree=SERIES_DEGREE):
     ctx.prec=bits; sends,sqrt2=_partition(panels); tboxes=_split(T_LEFT,T_RIGHT,T_SPLITS); lboxes=_split(L_LEFT,L_RIGHT,L_SPLITS)
@@ -80,6 +76,8 @@ def produce_record(bits=BITS,panels=S_PANELS,degree=SERIES_DEGREE):
             for si,(sl,sr) in enumerate(zip(sends,sends[1:])):
                 left=sqrt2 if sl==SQRT2 else _point(sl); right=sqrt2 if sr==SQRT2 else _point(sr); s=_box(left,right)
                 val,chart=_corner(s,t,lam) if (ti==7 and si==0) else _ordinary(s,t,lam,degree)
+                if _nonfinite(val):
+                    raise ValueError(f"nonfinite kernel chart={chart} ti={ti} li={li} si={si} t={tl}:{tr} lambda={ll}:{lr} s={sl}:{sr} value={val}")
                 counts[chart]+=1; total+=val*(right-left)
             passed=bool(total.upper()<0); all_pass=all_pass and passed
             records.append({"t_box":[str(tl),str(tr)],"lambda_box":[str(ll),str(lr)],"chart_counts":counts,
