@@ -1,5 +1,6 @@
 name: Center-axis coefficient prototype
 
+# PROTOTYPE / NOT_BINDING isolated machine run
 on:
   push:
     branches:
