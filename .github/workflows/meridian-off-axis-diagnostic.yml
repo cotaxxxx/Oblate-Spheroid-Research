@@ -1,9 +1,6 @@
 name: Meridian off-axis diagnostic
 
 "on":
-  push:
-    branches:
-      - implementation/gt-boundary-two-chart
   workflow_dispatch:
 
 permissions:
