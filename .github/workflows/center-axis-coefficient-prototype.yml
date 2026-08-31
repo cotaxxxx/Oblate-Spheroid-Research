@@ -2,9 +2,6 @@ name: Center-axis coefficient prototype
 
 # PROTOTYPE / NOT_BINDING isolated machine run
 "on":
-  push:
-    branches:
-      - implementation/gt-boundary-two-chart
   workflow_dispatch:
 
 permissions:
