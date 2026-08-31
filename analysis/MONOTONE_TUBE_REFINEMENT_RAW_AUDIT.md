@@ -1,8 +1,20 @@
 # Monotone tube refinement — raw audit receipt
 
-Status: `CHAT_RAW_AUDIT_PASS / EXTERNAL_JUDGE_PENDING / NOT_BINDING`
+Status: `OWNER_RAW_AUDIT_PASS / CHAT_RAW_AUDIT_PASS / EXTERNAL_JUDGE_PENDING / NOT_BINDING`
 
 This receipt audits the separately declared monotone-tube refinement. It does not promote the result to CERTIFIED and does not replace the failed initial run.
+
+## Attribution chronology
+
+The repository-side implementation actor may record only `OWNER_RAW_AUDIT_PASS` before an independent chat-side raw read has occurred. `CHAT_RAW_AUDIT_PASS` is added only after that separate read.
+
+For this receipt the chronology is:
+
+1. repository/owner-side raw correspondence review: `OWNER_RAW_AUDIT_PASS`;
+2. subsequent independent chat-side raw read of the refinement producer/checker: `CHAT_RAW_AUDIT_PASS`;
+3. external Judge remains pending.
+
+The earlier version of this receipt prematurely used the chat attribution before the chat-side raw read. That attribution-order error is corrected here; it did not affect the mathematical content or machine gating result.
 
 ## Pinned source
 
@@ -133,6 +145,7 @@ Evidence status remains:
 
 ```text
 MACHINE_GATING_PASS
+OWNER_RAW_AUDIT_PASS
 CHAT_RAW_AUDIT_PASS
 EXTERNAL_JUDGE_PENDING
 NOT_BINDING
