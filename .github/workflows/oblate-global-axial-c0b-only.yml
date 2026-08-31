@@ -1,0 +1,48 @@
+name: Oblate global axial C0b stabilized edge gate
+
+on:
+  push:
+    branches:
+      - implementation/gt-boundary-two-chart
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  c0b-edge-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-prototype.txt
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run stabilized C0b producer gate only
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          from producer import global_axial_c0_producer as b
+          from producer.global_axial_c0_producer_v2 import _g_density_stable
+          b._g_density = _g_density_stable
+          b.ctx.prec = b.BITS
+          ok, stage, worst = b._run_c0b()
+          print('C0B_ONLY_PRODUCER', 'PASS' if ok else 'UNRESOLVED', 'stage', stage, 'worst', None if worst is None else worst[1:])
+          if not ok: raise SystemExit(1)
+          PY
+      - name: Run stabilized C0b checker gate only
+        run: |
+          PYTHONPATH=. python - <<'PY'
+          from checker import global_axial_c0_checker as b
+          from checker.global_axial_c0_checker_v2 import _g_density_stable
+          b._g_density = _g_density_stable
+          b.ctx.prec = b.BITS
+          ok, stage, worst = b._gate_b()
+          print('C0B_ONLY_CHECKER', 'PASS' if ok else 'UNRESOLVED', 'stage', stage, 'worst', None if worst is None else worst[1:])
+          if not ok: raise SystemExit(1)
+          PY
