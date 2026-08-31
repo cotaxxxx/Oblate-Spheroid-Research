@@ -1,29 +1,60 @@
-# Census lower-edge machine receipt
+# Census lower-edge machine receipt — superseded v1
 
-Status: `MACHINE_GATING_PASS / NOT_AUDITED / NOT_BINDING`
+Status: `SUPERSEDED_INVALID / NOT_BINDING`
 
-Pinned claim scope:
+The earlier v1 machine PASS for
 
 ```text
 g_axis_ob(63/64, lambda) > 0
 lambda in [5/8, 33/50]
 ```
 
-Sole gate: the full-domain one-box Arb enclosure has strictly positive lower endpoint.
+is withdrawn.
 
-Pinned sources:
+## Defect
 
-- contract commit: `53e2886f89e1b8c45bd65fa1c0adabbeb6eef731`
-- producer blob: `243124b76726de8a81ab42ba5edf19c000c3a963`
-- checker blob: `0245d6c680c54e91eb6123d6fd40c9f210e60a40`
-- workflow source commit: `dbe215cfa7e4cbb549dc909382bc83a3e7019fad`
-- Actions run: #101, run id `33368313307`
-- lower-edge step: SUCCESS
-- log: `CENSUS_LOWER_EDGE producer pass: True`
-- independent checker: SUCCESS
+The v1 first-t density used
 
-The same run also reconfirmed the monotone-tube refinement step with zero unresolved boxes. The workflow's overall failure is intentionally caused by the final preserved initial-contract test, which remains 64/64 UNRESOLVED and is not part of this lower-edge gate.
+```text
+2 lambda R Ahat rho^3 H / w,
+Ahat=A/sqrt(q),
+rho=s/sqrt(q),
+```
 
-Logical consequence is conditional on separately binding prior ingredients: if `partial_t g_axis_ob<0` holds throughout `[63/64,1] x [5/8,33/50]`, then for each fixed lambda the axial function is strictly decreasing on the tube. Combining that with this lower-edge positivity and the separately certified endpoint sign structure of `b_ob(lambda)=g_axis_ob(1,lambda)` yields exactly one tube root when `b_ob(lambda)<0`, and zero tube roots when `b_ob(lambda)>0`.
+for the second term. This introduces one extra factor `q^(-1/2)`.
 
-This receipt does not certify `lambda_entry_ob`, endpoint sign structure, roots below `63/64`, a global axial census, or any off-axis exclusion.
+From
+
+```text
+F_t=s[-mu alpha^2 - 2 A R gamma_t],
+gamma_t=-lambda s^2 H/(w q^(3/2)),
+```
+
+the correct regularized first-t density is
+
+```text
+F_t = -s mu alpha^2 + 2 lambda A R rho^3 H/w,
+```
+
+with `A`, not `Ahat`.
+
+This defect was exposed by printing the full Arb margin: the invalid v1 checker enclosure was approximately
+
+```text
+[0.0414298359373783, 0.204878853734044],
+```
+
+which cannot contain the independent high-precision value near `lambda=5/8`, approximately `+4.37e-4`.
+
+## Superseded evidence
+
+The following are retained only for provenance and are **not valid evidence**:
+
+- v1 producer blob: `243124b76726de8a81ab42ba5edf19c000c3a963`
+- v1 checker blob: `0245d6c680c54e91eb6123d6fd40c9f210e60a40`
+- Actions #101 / run id `33368313307`
+- Actions #107 / run id `33369692803`
+
+The producer/checker were corrected independently and schema was advanced to `bg-oblate-spheroid.census-lower-edge.v2`.
+
+No lower-edge Judge request may cite the v1 receipt. A new machine receipt must be created only after the corrected v2 run is evaluated.
