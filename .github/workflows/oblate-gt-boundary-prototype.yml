@@ -45,7 +45,9 @@ jobs:
         run: PYTHONPATH=. python analysis/monotone_tube_threshold_diagnostic.py
       - name: Run separately declared monotone tube refinement
         run: python -m unittest tests/test_monotone_tube_refinement.py
-      - name: Run lower-edge census identification gate
+      - name: Run corrected lower-edge 256-box refinement
+        run: python -m unittest tests/test_census_lower_edge_refinement.py
+      - name: Preserve corrected lower-edge one-box unresolved control
         run: python -m unittest tests/test_census_lower_edge.py
       - name: Run fixed initial 64-box monotone tube producer and checker
         run: python -m unittest tests/test_monotone_tube_interval.py
