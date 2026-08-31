@@ -94,6 +94,43 @@ and B_ob'(lambda) > 0 on the certified endpoint domain.
 
 The Judge must identify the exact certified endpoint receipt/source used for this input. This local-entry receipt must not silently re-certify that earlier theorem.
 
+## Exact uniform monotonicity margin
+
+For reproducibility, the common uniform constant used below is reconstructed from the independent-checker enclosures for all 128 monotonicity boxes.
+
+Pinned reconstruction:
+
+- Actions run #159: `33378234711`
+- diagnostic source commit: `98d86a791ac87923cf2885946636a096c1aefddd`
+- diagnostic file: `analysis/local_entry_m_exact_diagnostic.py`
+- upper-tube source/checker lineage remains exactly the Claim 1 pinned lineage above
+- lower-slab source/checker lineage remains exactly the Claim 2 pinned lineage above
+
+Exact Arb outputs from the 192-bit checker reconstructions:
+
+```text
+UPPER_TUBE_MAX_UPPER_EXACT
+= [-0.7755791957951341498417420970471836083489971351918145235481603005887826197275581782527571201381525660 +/- 2.49e-101]
+
+LOWER_SLAB_MAX_UPPER_EXACT
+= [-1.130849882824852566033705417862666317825771736718947033449853015929681729147339580327276464425734005 +/- 3.11e-100]
+
+GLOBAL_MAX_UPPER_EXACT
+= [-0.7755791957951341498417420970471836083489971351918145235481603005887826197275581782527571201381525660 +/- 2.49e-101]
+
+M_EXACT
+= [0.7755791957951341498417420970471836083489971351918145235481603005887826197275581782527571201381525660 +/- 2.49e-101]
+```
+
+Thus the uniform inequality used in the logical consequence is
+
+```text
+partial_t g_axis_ob(t,lambda) <= -M_EXACT < 0
+on [31/32,1] x [5/8,33/50].
+```
+
+The upper tube is the limiting side for this global margin.
+
 ## Logical consequence — only after PASS of Claims 1–3 and analytic pins
 
 Because Claims 1 and 2 overlap at `t=63/64`, their union gives
@@ -128,13 +165,6 @@ dt*/dlambda = - partial_lambda g_axis_ob / partial_t g_axis_ob.
 
 ### Unconditional quantitative boundary convergence
 
-Let `m>0` be any certified uniform constant satisfying
-
-```text
-partial_t g_axis_ob(t,lambda) <= -m < 0
-on [31/32,1] x [5/8,33/50].
-```
-
 For `lambda < lambda_partial^ob`, let `t*(lambda)` be the unique interior root. Since
 
 ```text
@@ -149,10 +179,10 @@ b_ob(lambda)
   = partial_t g_axis_ob(xi,lambda) * (1-t*(lambda)).
 ```
 
-Therefore
+Using the pinned `M_EXACT` above,
 
 ```text
-0 <= 1-t*(lambda) <= |b_ob(lambda)|/m.
+0 <= 1-t*(lambda) <= |b_ob(lambda)|/M_EXACT.
 ```
 
 Because the certified endpoint sign structure gives continuity of `b_ob` and
