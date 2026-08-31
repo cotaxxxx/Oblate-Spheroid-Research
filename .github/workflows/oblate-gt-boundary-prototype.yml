@@ -1,0 +1,35 @@
+name: Oblate boundary t-derivative prototype
+
+on:
+  push:
+    branches:
+      - implementation/gt-boundary-two-chart
+  pull_request:
+    branches:
+      - receipt-binding-e5ab171
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gt-boundary-prototype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install
+          --require-hashes
+          --only-binary=:all:
+          --requirement requirements-interval.txt
+      - name: Run exact inherited endpoint controls
+        run: python -m unittest controls/test_endpoint_algebra.py
+      - name: Run boundary t-derivative producer and independent checker
+        run: python -m unittest tests/test_gt_boundary_interval.py
