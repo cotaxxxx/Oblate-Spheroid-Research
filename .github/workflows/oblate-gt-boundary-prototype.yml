@@ -31,6 +31,10 @@ jobs:
           python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
       - name: Run exact inherited endpoint controls
         run: python -m unittest controls/test_endpoint_algebra.py
+      - name: Run center-axis coefficient producer prototype
+        run: PYTHONPATH=. python producer/center_axis_coefficient_producer.py
+      - name: Run independent center-axis coefficient checker prototype
+        run: PYTHONPATH=. python checker/center_axis_coefficient_checker.py
       - name: Run boundary t-derivative producer and independent checker
         run: python -m unittest tests/test_gt_boundary_interval.py
       - name: Run non-gating term-by-chart width diagnostic
