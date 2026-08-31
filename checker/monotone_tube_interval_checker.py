@@ -24,6 +24,8 @@ def _pow(x,n):
 def _contains_zero(x): return x.lower()<=0<=x.upper()
 def _zero_to_upper(x):
     hi=max(arb(0),x.upper()); return arb(hi/2,hi/2)
+def _sqrt_hull_nonnegative(x):
+    hi=max(arb(0),x.upper()).sqrt(); return _box(arb(0),hi)
 def _series(u,name,degree):
     if not u.upper()<1: raise VerificationError(f"{name} requires u<1")
     p=arb(0)
@@ -43,8 +45,9 @@ def _quantities(s,t,lam):
     H=(1-e)*gap+lam2*(2*e-2*delta-e*e+delta*e)
     return e,gap,mu,d,lam2,A,q,w2,w,ht,H
 def _corner(s,t,lam):
-    e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam); rho=_box(arb(0),1/gap.lower().sqrt()); phi=arb(0,(1/lam).upper())
-    Ahat=gap*s*rho-mu*phi; R=_box(arb(1),arb.pi()/2); Rg=_box(-arb(1),-arb(1)/3); lam3=lam2*lam; sqrtq=q.sqrt()
+    e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam)
+    rho=_box(arb(0),1/gap.lower().sqrt()); inv=(1/lam).upper(); phi=_box(-inv,inv)
+    Ahat=gap*s*rho-mu*phi; R=_box(arb(1),arb.pi()/2); Rg=_box(-arb(1),-arb(1)/3); lam3=lam2*lam; sqrtq=_sqrt_hull_nonnegative(q)
     return (-4*mu*R*lam*_pow(rho,3)*H/w-2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2-2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sqrtq)/w),"corner_hull"
 def _ordinary(s,t,lam,degree):
     e,gap,mu,d,lam2,A,q,w2,w,ht,H=_quantities(s,t,lam)
@@ -62,9 +65,7 @@ def _ordinary(s,t,lam,degree):
     else:
         R=gamma.acos()/u.sqrt(); Rg=(gamma*R-1)/u; chart="gamma_lower"
     rho=s/sq; phi=d/sq; Ahat=A/sq; lam3=lam2*lam
-    G=(-4*mu*R*lam*_pow(rho,3)*H/w
-       -2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2
-       -2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sq)/w)
+    G=(-4*mu*R*lam*_pow(rho,3)*H/w-2*Rg*lam2*H*H*Ahat*_pow(rho,5)/w2-2*R*lam3*Ahat*_pow(rho,3)*(3*phi*H-gap*sq)/w)
     return G,chart
 def _split(a,b,n):
     w=(b-a)/n; return [(a+i*w,a+(i+1)*w) for i in range(n)]
