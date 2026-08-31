@@ -142,16 +142,32 @@ The remaining boundary-entry proof chain is fixed in the following order.
 1. **Endpoint C1 lemma audit.** Audit the pinned analytic source and attach an
    external judge receipt. This discharges the equality between the one-sided
    limit of `g_axis_ob(t,lambda)` and the direct endpoint integral.
-2. **Boundary t-derivative sign.** Certify
-   `gt_boundary_ob = partial_t g_axis_ob(1,lambda) < 0` on the same lambda
-   bracket `[5/8,33/50]` (or a rigorously specified sub-bracket containing the
-   certified endpoint zero). Together with the already certified
-   `b_ob_prime > 0`, this gives the IFT transversality and the sign of
-   `dt_star/dlambda = -partial_lambda F_ob / partial_t F_ob`.
+2. **Boundary t-derivative sign.** Certify, with `t` as the axial coordinate,
+
+   ```text
+   gt_boundary_ob = partial_t g_axis_ob(1,lambda) > 0
+   ```
+
+   on the same lambda bracket `[5/8,33/50]` (or a rigorously specified
+   sub-bracket containing the certified endpoint zero). Equivalently, for
+   `tau = 1-t`, certify `partial_tau g_axis_ob < 0`.
+
+   The expected sign is fixed before computation. The orientation check is:
+   the existing certificate gives `B_ob'(lambda) > 0`; for
+   `lambda > lambda_boundary`, the observed branch lies at `t_star < 1`.
+   Hence the local implicit-function relation
+
+   ```text
+   dt_star/dlambda = -partial_lambda g / partial_t g
+   ```
+
+   must be negative, which requires `partial_t g > 0`. The same conclusion
+   follows from `g(t_star,lambda)=0 < g(1,lambda)` for lambda just above the
+   boundary value.
 3. **Monotone tube.** Certify a strip `t in [1-delta,1]` on which
-   `partial_t g_axis_ob` has fixed nonzero sign. This proves at most one axial
-   stationary root per lambda inside the strip; Krawczyk is not required if
-   the monotonicity enclosure closes.
+   `partial_t g_axis_ob > 0`. This proves at most one axial stationary root per
+   lambda inside the strip; Krawczyk is not required if the monotonicity
+   enclosure closes.
 4. **Census identification.** Verify the independently observed axial census
    root enters the certified strip at selected lambda values. Tube uniqueness
    then identifies that census root with the local IFT branch issuing from the
@@ -168,10 +184,21 @@ The following values are candidate evidence, not certified enclosures:
 lambda_entry_ob = 0.6435457703666799690435  [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
 lambda_axis_ob  = 0.40795886030094636425    [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
 b_ob_prime      = +1.10246                  [HIGH_PRECISION; centered difference h=1e-12]
-gt_boundary_ob  = -1.45623                  [HIGH_PRECISION; one-sided Richardson difference]
-entry_slope_ob  = 0.757064                  [HIGH_PRECISION; ratio b_ob_prime/(-gt_boundary_ob)]
 b_ob(1)         = pi^2/32                   [EXACT]
 ```
+
+The previously recorded diagnostic line
+
+```text
+gt_boundary_ob = -1.45623
+```
+
+is withdrawn as a sign-convention/orientation error and must not be used as a
+reproduction target. Its magnitude is not promoted or silently re-signed. A
+new direct derivation and independently fixed expectation for the `t`
+derivative are required before interval computation. If the alternative
+coordinate `tau=1-t` is used, its derivative has the opposite sign by
+definition.
 
 These computations are candidate evidence under the two-layer certification
 rule. `lambda_axis_ob` independently agrees with an earlier floating-point
@@ -189,6 +216,7 @@ Expected signs:
 b_ob(0.60) < 0
 b_ob(0.70) > 0
 b_ob(1) = pi^2/32 > 0
+partial_t g_axis_ob(1,lambda) > 0 on the boundary bracket  [TARGET; NOT YET CERTIFIED]
 ```
 
 Measured diagnostic values for the first two signs were approximately
@@ -200,8 +228,10 @@ certification.
 
 - obtain the external human-audit/Judge receipt for the pinned endpoint C1
   analytic source;
-- derive and certify `gt_boundary_ob < 0` on the endpoint-zero lambda bracket;
-- certify a monotone near-boundary tube in `(t,lambda)`;
+- derive the boundary `t`-derivative density and independently fix the target
+  sign `gt_boundary_ob > 0` before interval evaluation;
+- certify `gt_boundary_ob > 0` on the endpoint-zero lambda bracket;
+- certify a monotone near-boundary tube with `partial_t g_axis_ob > 0`;
 - reproduce the census roots under fixed configuration and identify them with
   the IFT branch by tube uniqueness;
 - preserve the independent PROTOTYPE audit record for `axial_endpoint_ob.py`;
