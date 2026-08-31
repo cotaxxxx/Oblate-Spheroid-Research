@@ -1,6 +1,3 @@
-import json
-from pathlib import Path
-import tempfile
 import unittest
 
 from producer.gt_boundary_interval_producer import produce_record
@@ -13,6 +10,8 @@ class GTBoundaryIntervalTest(unittest.TestCase):
         self.assertEqual(record["expectations"]["status"], "REPORTED_NOT_GATING")
         self.assertEqual(record["contract"]["required_sign"], "NEG")
         checked = verify(record)
+        print("REPORTED checker enclosure:", checked)
+        print("GATING criterion: upper endpoint < 0")
         self.assertLess(checked.upper(), 0)
 
 
