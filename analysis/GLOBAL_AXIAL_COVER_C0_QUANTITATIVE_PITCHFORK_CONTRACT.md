@@ -1,12 +1,12 @@
 # Global axial cover C0 — quantitative center pitchfork box
 
-Status: `PROTOTYPE / SYMBOLIC_READY / MACHINE_PENDING / NOT_BINDING`
+Status: `CHAT_RAW_AUDIT_PASS / IMPLEMENTED_PROTOTYPE / MACHINE_PENDING / NOT_BINDING`
 
 ## Purpose
 
-This is the first obligation in global axial cover C. It converts the qualitative odd-analytic pitchfork near the certified center parameter into an explicit box that can be joined to the later sign-definite cover / branch tube.
+This is the first obligation in global axial cover C. It converts the qualitative odd-analytic center pitchfork into an explicit certified candidate box that can later be joined to the middle axial branch tube / sign-definite cover.
 
-Dependencies:
+Dependencies are the already closed center contracts:
 
 ```text
 A: H_axis_ob(lambda)=partial_t g_axis_ob(0,lambda)
@@ -17,59 +17,42 @@ B: c3_ob(lambda)=(1/6)partial_t^3 g_axis_ob(0,lambda)<0
    on [2/5,83/200].
 ```
 
-C0 does not alter either A or B.
+C0 does not alter A or B.
 
-## Candidate explicit box
+## Fixed redeclaration
 
-Use
+The C0 candidate box is now fixed as
 
 ```text
-t in [0,5/16],
+t in [0,1/2],
 lambda in [2/5,83/200],
-tau=t^2 in [0,25/256].
+tau=t^2 in [0,1/4],
+T_EDGE = 1/2.
 ```
 
-The endpoint `5/16` is provisional until machine gating closes. It is chosen with ample diagnostic margin above the largest local root in the A bracket.
+The previous `t<=5/16`, `tau<=25/256`, `T_EDGE=5/16` attempt is superseded for evidence purposes. In particular, run `33446730602` is retained only as a `HISTORICAL_UNRESOLVED_CONTROL`; it is not admissible as C0 evidence.
 
 ## Reduced even function
 
-Because `g_axis_ob(t,lambda)` is odd in `t`, define the analytic even quotient
+Because `g_axis_ob(t,lambda)` is odd in `t`, define
 
 ```text
 Phi(tau,lambda) := g_axis_ob(t,lambda)/t,
 tau=t^2,
-```
-
-with analytic continuation
-
-```text
 Phi(0,lambda)=H_axis_ob(lambda).
 ```
 
-For stable evaluation at `tau=0`, do not divide by `t`. Use
-
-```text
-Phi(tau,lambda)
- = integral_0^1 partial_t g_axis_ob(u t,lambda) du.
-```
-
-Differentiating in `tau` gives the nonsingular identities
-
-```text
-partial_tau Phi(tau,lambda)
- = (1/2) integral_0^1 integral_0^1
-     u^2 partial_t^3 g_axis_ob(v u t,lambda) dv du
-```
-
-and equivalently
+The nonsingular identity
 
 ```text
 partial_tau Phi(tau,lambda)
  = (1/4) integral_0^1
-     (1-x^2) partial_t^3 g_axis_ob(x t,lambda) dx.
+     (1-x^2) partial_t^3 g_axis_ob(x t,lambda) dx
 ```
 
-At `t=0`, this gives exactly
+is exact. Therefore strict negativity of `partial_t^3 g_axis_ob` on the full C0 box implies strict decrease of `Phi` in `tau`.
+
+At `t=0`,
 
 ```text
 partial_tau Phi(0,lambda)
@@ -77,39 +60,43 @@ partial_tau Phi(0,lambda)
  = c3_ob(lambda).
 ```
 
-## Simplified machine strategy
+## Machine gates
 
-A separate proof of `partial_lambda Phi>0` is not required for the C0 existence/uniqueness theorem.
-
-A already gives the sign of
-
-```text
-Phi(0,lambda)=H_axis_ob(lambda)
-```
-
-on either side of `lambda_c^ob`. Therefore it is enough to certify the stronger two-dimensional claim
+The machine obligations are exactly:
 
 ```text
 C0a: partial_t^3 g_axis_ob(t,lambda) < 0
-     on [0,5/16] x [2/5,83/200],
-```
+     on [0,1/2] x [2/5,83/200].
 
-which implies
-
-```text
-partial_tau Phi(tau,lambda) < 0
-```
-
-on the full C0 box by the positive-weight integral identity, together with
-
-```text
-C0b: Phi(25/256,lambda) < 0
+C0b: Phi(1/4,lambda)
+     = g_axis_ob(1/2,lambda)/(1/2) < 0
      for every lambda in [2/5,83/200].
 ```
 
-For C0b, since `t=5/16` is bounded away from zero, either direct `g/t` evaluation or the integral representation of `Phi` is acceptable. The implementation should prefer whichever gives the narrower Arb enclosure.
+The predeclared first-passing stage schedules remain unchanged:
 
-## General-t geometry
+```text
+C0a:
+A0  t_boxes=8   lambda_boxes=8   s_panels=512
+A1  t_boxes=16  lambda_boxes=16  s_panels=1024
+A2  t_boxes=32  lambda_boxes=32  s_panels=2048
+
+C0b:
+B0  lambda_boxes=16  s_panels=512
+B1  lambda_boxes=32  s_panels=1024
+B2  lambda_boxes=64  s_panels=2048
+```
+
+The first stage with `unresolved=0` is authoritative; later stages are not consulted. No undeclared refinement is permitted.
+
+Producer precision remains 160 bits; checker precision remains 192 bits; `Psi` degree 50 and `USTAR=3/5` remain unchanged. The checker remains
+
+```text
+CHECKER_KERNEL=TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION
+INDEPENDENCE_SCOPE=PRECISION/PARTITION/GATING
+```
+
+## General-t geometry and stable chart policy
 
 Use
 
@@ -123,29 +110,43 @@ w^2 = mu^2 + lambda^2 e,
 gamma = lambda A/(w sqrt(q)).
 ```
 
-On the candidate box, `t<=5/16<1`, so the north-corner singularity `s=0,t=1` is absent and `q>0` uniformly.
-
-The exact stable complement is
+The exact complement identity is
 
 ```text
 u = 1-gamma^2
   = e [mu(1-lambda^2)+lambda^2 t]^2/(w^2 q) >= 0.
 ```
 
-Unlike B at `t=0`, the interior removable `u=0` locus moves with `(t,lambda)`. This is harmless only if the implementation uses the analytic `Psi(u)` chart whenever the interval may meet `u=0`; literal division by `u`, `u^2`, or `u^3` is forbidden there.
+Because the removable `u=0` locus moves with `(t,lambda)`, chart handling is fixed:
 
-## General-t gamma derivative recurrence
+```text
+intersect u only with exact 0<=u<=1;
+if upper(u)<=3/5: use the Psi series chart;
+elif lower(u)>0: use the direct chart;
+else: UNRESOLVED.
+```
 
-Keep the pre-limit derivatives factorized. Define
+Literal division by `u`, `u^2`, or `u^3` across an interval meeting zero is forbidden.
+
+For C0b, use the stable exact identity
+
+```text
+alpha^2 = u R^2,
+R = asin(sqrt(u))/sqrt(u),
+```
+
+through the same two-chart continuation.
+
+## General-t derivative recurrence
+
+Define
 
 ```text
 L2 = lambda^2,
 N  = -mu q - A L2 d,
 N1 = -L2 e,
-
 M  = N1 q - 3 N L2 d,
 M1 = lambda^4 e d - 3 L2 N,
-
 P  = M1 q - 5 M L2 d,
 M2 = 4 lambda^4 e,
 P1 = M2 q - 3 L2 d M1 - 5 L2 M.
@@ -154,31 +155,13 @@ P1 = M2 q - 3 L2 d M1 - 5 L2 M.
 Then exactly
 
 ```text
-gamma_t
- = lambda N/(w q^(3/2)),
-
-gamma_tt
- = lambda M/(w q^(5/2)),
-
-gamma_ttt
- = lambda P/(w q^(7/2)),
-
-gamma_tttt
- = lambda (P1 q - 7 P L2 d)/(w q^(9/2)).
+gamma_t    = lambda N/(w q^(3/2)),
+gamma_tt   = lambda M/(w q^(5/2)),
+gamma_ttt  = lambda P/(w q^(7/2)),
+gamma_tttt = lambda(P1 q - 7 P L2 d)/(w q^(9/2)).
 ```
 
-These identities reduce at `t=0` to the four formulas already audited in B.
-
-## General-t third derivative density
-
-Retain the B organization
-
-```text
-R = acos(gamma)/sqrt(1-gamma^2),
-C = R gamma_t.
-```
-
-With
+With `C=R gamma_t`,
 
 ```text
 C_tt
@@ -191,92 +174,69 @@ C_ttt
    + 6 R_gammagamma gamma_t^2 gamma_tt
    + 3 R_gamma gamma_tt^2
    + 4 R_gamma gamma_t gamma_ttt
-   + R gamma_tttt,
+   + R gamma_tttt.
 ```
 
-we have for all pre-limit `t`
+Hence the canonical C0a density is
 
 ```text
-partial_t^3 F_t
- = s [8 mu C_tt - 2 A C_ttt].
+partial_t^3 F_t = s [8 mu C_tt - 2 A C_ttt],
 ```
 
-Hence
+and
 
 ```text
 partial_t^3 g_axis_ob(t,lambda)
- = integral_0^sqrt(2)
-     s [8 mu C_tt - 2 A C_ttt] ds.
+ = integral_0^sqrt(2) partial_t^3 F_t ds.
 ```
-
-This is the canonical C0a machine density.
-
-Use the same `R_gamma`, `R_gammagamma`, `R_gammagammagamma` two-chart formulas and `Psi'''` tail already audited in B.
 
 ## Logical consequence of C0a + C0b + A
 
-If C0a and C0b are certified, then for each fixed lambda in `[2/5,83/200]`, `Phi(tau,lambda)` is strictly decreasing in `tau` on `[0,25/256]`.
-
-Therefore:
+If C0a and C0b pass, then `Phi(tau,lambda)` is strictly decreasing in `tau` on `[0,1/4]`. Using the certified sign structure of `H_axis_ob=Phi(0,lambda)` from A:
 
 ```text
 lambda < lambda_c^ob:
-  Phi(0,lambda)<0, hence no nonzero axial root in 0<t<=5/16.
+  no nonzero axial root in 0<t<=1/2.
 
 lambda = lambda_c^ob:
-  Phi(0,lambda)=0 and Phi(tau,lambda)<0 for every tau>0,
-  hence only the center root occurs in the box.
+  t=0 is the only axial root in the C0 box.
 
 lambda > lambda_c^ob:
-  Phi(0,lambda)>0 while Phi(25/256,lambda)<0,
-  hence exactly one tau*(lambda) in (0,25/256),
-  equivalently exactly one positive root t*(lambda) in (0,5/16),
+  exactly one positive root t*(lambda) with 0<t*(lambda)<1/2,
   together with its symmetric negative partner.
 ```
 
-This is the quantitative C0 pitchfork box needed by global cover C.
+The observed branch value near `lambda=83/200` is approximately `t*~0.25`, safely inside the redeclared box; this is diagnostic only.
 
-## REPORTED_NOT_GATING diagnostics
+## REPORTED_NOT_GATING expectations
 
-High-precision direct evaluation before machine implementation gives approximately
-
-```text
-partial_lambda Phi > 2.35  on sampled points of the candidate box,
-partial_tau Phi   < -0.25 on sampled points,
-
-Phi(t=5/16, lambda=2/5)   ~ -0.04444,
-Phi(t=5/16, lambda_c)     ~ -0.02564,
-Phi(t=5/16, lambda=83/200)~ -0.008864.
-```
-
-Also sampled `partial_t^3 g_axis_ob` remains negative with values roughly from `-1.51` to `-1.70` across the candidate box. These are expectations only and are not gates.
-
-## Machine architecture proposal
-
-Start with:
+Before the rerun, direct high-precision diagnostics suggest approximately
 
 ```text
-producer bits: 160
-checker bits: 192
-lambda boxes: 64
-t boxes: 64
-s panels: 4096
-Psi degree: 50
-u threshold: 3/5
-checker kernel: TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION
-independence scope: PRECISION/PARTITION/GATING
+Phi(1/4, 2/5)      ~ -0.13,
+Phi(1/4, 83/200)   ~ -0.0507,
 ```
 
-If direct 64x64 boxes are too wide, refine `t` first; do not silently change the declared partition after a gating run.
+and `partial_t^3 g_axis_ob` is expected to retain a margin of roughly `-1.5` or better over the enlarged `t` interval. These are expectations only and are not gates.
+
+## Historical unresolved control
+
+```text
+run 33446730602
+old box: t<=5/16, tau<=25/256, T_EDGE=5/16
+classification: HISTORICAL_UNRESOLVED_CONTROL / NOT_EVIDENCE
+```
+
+Its C0b failure is retained as a control showing that the old edge did not have enough enclosure margin. It must not be cited in a positive C0 machine receipt.
 
 ## Explicit exclusions
 
 C0 does not certify:
 
 - any axial statement for lambda outside `[2/5,83/200]`;
-- continuation of the nonzero branch beyond `t=5/16`;
-- connection to the certified boundary band `[31/32,1]`;
-- absence of additional roots in the middle axial region;
+- continuation of the nonzero branch beyond `t=1/2`;
+- connection from `t=1/2` to the certified boundary band `[31/32,1]`;
+- absence of additional roots in that middle region;
 - any off-axis stationary-orbit statement.
 
-Those remain later obligations in C and D.
+After C0 closes, the next axial obligation is C1: cover the middle region between `t=1/2` and `[31/32,1]` for the relevant lambda range by a branch tube plus sign-definite boxes.
