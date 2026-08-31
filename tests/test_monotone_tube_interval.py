@@ -7,6 +7,10 @@ from checker.monotone_tube_interval_checker import verify
 class MonotoneTubeIntervalTest(unittest.TestCase):
     def test_full_fixed_tube_negative(self):
         record = produce_record()
+        unresolved = [r for r in record["parameter_boxes"] if not r["upper_negative"]]
+        print("MONOTONE_TUBE unresolved producer boxes:", len(unresolved))
+        for r in unresolved:
+            print("UNRESOLVED", r)
         self.assertTrue(record["gating_pass"])
         checked = verify(record)
         self.assertEqual(len(checked), 64)
