@@ -44,34 +44,104 @@ for lambda in [2/5,83/200].
 
 This is a one-parameter interval claim on the same lambda interval used to isolate `lambda_c^ob` in A.
 
-## Density target
+## Correct density order
 
-Let `G_t` denote the already established second-t density satisfying
+The canonical notation is
 
 ```text
-partial_t g_axis_ob(t,lambda)
- = integral_0^sqrt(2) G_t(s,t,lambda) ds.
+g_axis_ob(t,lambda) = integral_0^sqrt(2) F_t(s,t,lambda) ds,
+G_t = partial_t F_t,
+partial_t g_axis_ob = integral_0^sqrt(2) G_t ds.
 ```
 
-Then
+Therefore the cubic coefficient is
 
 ```text
 c3_ob(lambda)
  = (1/6) integral_0^sqrt(2)
-     [partial_t G_t(s,t,lambda)]_{t=0} ds.
+     [partial_t^2 G_t(s,t,lambda)]_{t=0} ds
+ = (1/6) integral_0^sqrt(2)
+     [partial_t^3 F_t(s,t,lambda)]_{t=0} ds.
 ```
 
-The symbolic derivation must start from the pre-limit formulas and differentiate before setting `t=0`. The new terms include at least
+A single derivative `partial_t G_t` would correspond to `partial_t^2 g` and vanishes at `t=0` by oddness; it is not the cubic coefficient.
+
+## Useful pre-limit organization
+
+Write
 
 ```text
-gamma_ttt,
-R_gammagamma,
-R_gammagammagamma,
+x = gamma,
+x1 = gamma_t,
+x2 = gamma_tt,
+x3 = gamma_ttt,
+x4 = gamma_tttt,
+R1 = R_gamma,
+R2 = R_gammagamma,
+R3 = R_gammagammagamma,
+C = R x1.
 ```
 
-and the full product-rule assembly for `partial_t G_t`.
+Since
 
-No machine implementation is authorized until the symbolic density has been independently audited.
+```text
+A = 1-t mu,
+A_t = -mu,
+A_tt = 0,
+```
+
+and
+
+```text
+G_t/s = 4 mu C - 2 A C_t,
+```
+
+two further t derivatives simplify to
+
+```text
+(partial_t^2 G_t)/s
+ = 8 mu C_tt - 2 A C_ttt.
+```
+
+At `t=0`, `A=1`, with
+
+```text
+C_tt
+ = R2 x1^3
+   + 3 R1 x1 x2
+   + R x3,
+
+C_ttt
+ = R3 x1^4
+   + 6 R2 x1^2 x2
+   + 3 R1 x2^2
+   + 4 R1 x1 x3
+   + R x4.
+```
+
+Hence the symbolic B density target is
+
+```text
+6 c3_ob(lambda)
+ = integral_0^sqrt(2) s [
+     8 mu (
+       R2 gamma_t^3
+       + 3 R1 gamma_t gamma_tt
+       + R gamma_ttt
+     )
+     - 2 (
+       R3 gamma_t^4
+       + 6 R2 gamma_t^2 gamma_tt
+       + 3 R1 gamma_tt^2
+       + 4 R1 gamma_t gamma_ttt
+       + R gamma_tttt
+     )
+   ]_{t=0} ds.
+```
+
+Thus B requires `gamma_tttt` in addition to `gamma_ttt`, and `R_gammagammagamma`; no fourth gamma-derivative of R is needed in this organization.
+
+The symbolic derivation must start from the pre-limit geometry, derive `gamma_ttt` and `gamma_tttt`, and only then specialize to `t=0`. No machine implementation is authorized until this density is independently audited.
 
 ## Geometry / regularity inherited from A
 
@@ -170,8 +240,8 @@ is derived, it should be added as a gating containment control before B certific
 
 ## Audit sequence
 
-1. derive `partial_t G_t|_{t=0}` from pre-limit formulas;
-2. independently audit `gamma_ttt`, `R_gammagammagamma`, all product-rule coefficients, parity, and removable limits;
+1. derive `gamma_ttt`, `gamma_tttt` and `partial_t^2 G_t|_{t=0}` from pre-limit formulas;
+2. independently audit `R_gammagammagamma`, all product-rule coefficients, parity, and removable limits;
 3. compare high-precision values against `REPORTED_NOT_GATING` expectations;
 4. only then implement Arb producer/checker;
 5. freeze partitions/precision before gating run;
