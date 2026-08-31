@@ -37,9 +37,30 @@ b_ob(lambda) = g_axis_ob(1,lambda)
 
 The substitution `mu = 1 - s^2` regularizes the transformed endpoint
 density and supports a one-sided `C^1` extension to `t = 1`. The prototype
-formula has now received an independent implementation-level audit, but the
-analytic interchange/regularity lemma remains a separate manuscript
-obligation.
+formula has received an independent implementation-level audit, while the
+analytic interchange/regularity statement is pinned separately for human audit.
+
+## Endpoint C1 analytic source
+
+The retained analytic branch
+
+```text
+analytic-endpoint-limit-78c178f
+```
+
+contains `analysis/endpoint_kernel_lemma.md`, blob SHA
+
+```text
+aa6a1a1710d1a4af560e5ddf0c504870f50c535c
+```
+
+which gives the pre-limit factorization, a `t`- and `lambda`-independent
+integrable majorant near `s=0`, compact domination on `[1,sqrt(2)]`, dominated
+convergence to the endpoint density, the exact endpoint reduction, and the
+two-chart analyticity needed for differentiation under the lambda integral.
+This source is not yet promoted by the present branch; its human audit receipt
+is `analysis/ENDPOINT_C1_AUDIT_RECEIPT.md` and remains `PENDING` until an
+external judge record is attached.
 
 ## Endpoint evaluator prototype
 
@@ -114,6 +135,31 @@ and `Phi`/`Psi`/`Psi_prime` series plus rigorous remainder bounds. New interval
 work must therefore reuse or explicitly derive from this pinned lineage rather
 than silently reimplementing an equivalent kernel under a new provenance.
 
+## Boundary-branch identification sequence
+
+The remaining boundary-entry proof chain is fixed in the following order.
+
+1. **Endpoint C1 lemma audit.** Audit the pinned analytic source and attach an
+   external judge receipt. This discharges the equality between the one-sided
+   limit of `g_axis_ob(t,lambda)` and the direct endpoint integral.
+2. **Boundary t-derivative sign.** Certify
+   `gt_boundary_ob = partial_t g_axis_ob(1,lambda) < 0` on the same lambda
+   bracket `[5/8,33/50]` (or a rigorously specified sub-bracket containing the
+   certified endpoint zero). Together with the already certified
+   `b_ob_prime > 0`, this gives the IFT transversality and the sign of
+   `dt_star/dlambda = -partial_lambda F_ob / partial_t F_ob`.
+3. **Monotone tube.** Certify a strip `t in [1-delta,1]` on which
+   `partial_t g_axis_ob` has fixed nonzero sign. This proves at most one axial
+   stationary root per lambda inside the strip; Krawczyk is not required if
+   the monotonicity enclosure closes.
+4. **Census identification.** Verify the independently observed axial census
+   root enters the certified strip at selected lambda values. Tube uniqueness
+   then identifies that census root with the local IFT branch issuing from the
+   certified boundary zero.
+
+Only after all four steps are fixed may the endpoint zero be stated as the
+boundary passage of the census branch.
+
 ## Candidate numerical evidence — not certified
 
 The following values are candidate evidence, not certified enclosures:
@@ -132,6 +178,11 @@ rule. `lambda_axis_ob` independently agrees with an earlier floating-point
 search near `0.40796`; `lambda_entry_ob` remains a high-precision candidate
 location and must not be substituted for the certified bracket.
 
+Diagnostic census locations mentioned in working notes include approximately
+`t = 0.9905` at `lambda = 0.65`, `t = 0.9865` at `lambda = 0.66`, and
+`t = 0.9377` at `lambda = 0.70`. They remain diagnostic until reproduced under
+a fixed census configuration and then placed inside the certified monotone tube.
+
 Expected signs:
 
 ```text
@@ -147,14 +198,15 @@ certification.
 
 ## Open obligations
 
+- obtain the external human-audit/Judge receipt for the pinned endpoint C1
+  analytic source;
+- derive and certify `gt_boundary_ob < 0` on the endpoint-zero lambda bracket;
+- certify a monotone near-boundary tube in `(t,lambda)`;
+- reproduce the census roots under fixed configuration and identify them with
+  the IFT branch by tube uniqueness;
 - preserve the independent PROTOTYPE audit record for `axial_endpoint_ob.py`;
 - reconnect any future production work explicitly to the pinned certified
   lineage rather than duplicating the two-chart Arb kernel without provenance;
-- discharge the endpoint analytic and one-sided-limit interchange lemma;
-- establish the census-branch identification needed to interpret the certified
-  endpoint zero as the boundary passage of the stationary branch;
-- certify `gt_boundary_ob < 0` at the boundary-entry zero and the associated
-  entry slope under the same fixed proof chain;
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
 - exclude interior folds and additional meridian stationary points;
 - keep the `lambda -> 0` uniform tail outside the present finite-window claim.
