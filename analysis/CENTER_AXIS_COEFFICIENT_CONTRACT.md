@@ -1,6 +1,6 @@
 # Center-axis coefficient certification contract
 
-Status: `PROTOTYPE / NOT_AUDITED / NOT_BINDING`
+Status: `AUDIT_COMPLETE / MACHINE_GATING_PASS / EXTERNAL_JUDGE_PENDING / NOT_BINDING`
 
 ## Target
 
@@ -84,7 +84,7 @@ Together these imply exactly one zero `lambda_c^ob in (2/5,83/200)`.
 
 ## Stable proof decomposition after width diagnostic
 
-The final claims A1--A3 are unchanged. A direct two-parameter sign cover for A1/A2 was found to be unnecessarily weak near `lambda=2/5` and `83/200`; even point-lambda 1024-panel enclosures for H were wider than the true endpoint margins. Therefore the machine proof may establish the stronger monotonicity lemma
+The final claims A1--A3 are unchanged. A direct two-parameter sign cover for A1/A2 was found to be unnecessarily weak near `lambda=2/5` and `83/200`; even point-lambda 1024-panel enclosures for H were wider than the true endpoint margins. Therefore the machine proof establishes the stronger monotonicity lemma
 
 ```text
 A0: partial_lambda H_axis_ob(lambda) > 0 on [1/4,1],
@@ -99,14 +99,19 @@ H_axis_ob(83/200) > 0.
 
 Then A1 and A2 follow immediately from A0, and A3 is a restriction of A0. This is a proof decomposition only; it does not change the theorem claim, parameter domain, or zero enclosure target.
 
-The non-gating 1024-panel width diagnostic gave
+The machine receipt is pinned at
 
 ```text
-H_axis_ob(2/5):     [+/- 0.0438]
-H_axis_ob(83/200):  [+/- 0.0415]
+analysis/CENTER_AXIS_COEFFICIENT_MACHINE_RECEIPT.md
+commit d2321a12033b5ad3ad14e2282603aefcb2ebfdaa
 ```
 
-so the point-sign gates must use a finer s partition fixed before their gating run.
+and the Judge request at
+
+```text
+analysis/CENTER_AXIS_COEFFICIENT_JUDGE_REQUEST.md
+commit 06eae461deed6a343774d3f67c83f7921bc79bba
+```
 
 ## Lambda derivative density
 
@@ -170,16 +175,18 @@ The corrected symbolic audit is recorded separately and has user audit status `P
 
 ## Machine architecture
 
-Producer/checker separation is mandatory. Current prototype declaration:
+Producer/checker separation is mandatory. Final A implementation declaration:
 
 ```text
 arithmetic: Arb
 producer bits: 160
 checker bits: 192
-regular derivative s panels: 1024 initially
-point-sign s panels: to be frozen after width diagnostic
+regular derivative s panels: 1024
+point-sign s panels: 4096
 Psi series degree: 50
 u-series threshold: 3/5
+checker kernel: TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION
+independence scope: PRECISION/PARTITION/GATING
 ```
 
 At `u<=3/5`, evaluate
@@ -191,6 +198,8 @@ R_gammagamma = 4 gamma^2 Psi''(u) - 2 Psi'(u)
 ```
 
 using positive-coefficient series with a rigorous tail. For larger u use the factorized positive complement and direct regular formulas.
+
+The user completed a raw content audit of producer/checker algebra, tail bounds, removable continuation, lambda derivatives, sphere controls, and gating logic with result `PASS`.
 
 ## Independent expectations — REPORTED_NOT_GATING
 
@@ -205,19 +214,21 @@ partial_lambda H_axis_ob(0.5) ~ 2.6172
 lambda_c^ob ~ 0.4079588603...
 ```
 
-Exact sphere controls, independent of production evaluation:
+Exact sphere controls, independent of production evaluation and machine-gated by containment:
 
 ```text
 H_axis_ob(1) = 4/3,
 partial_lambda H_axis_ob(1) = 8/5.
 ```
 
-## Logical consequence after certification
+## Current logical consequence
 
-If the fixed final claims and audit chain are certified, there exists exactly one
+The audited machine chain establishes, pending external Judge approval, exactly one
 
 ```text
 lambda_c^ob in (2/5,83/200)
 ```
 
-such that H is negative below it and positive above it throughout `[1/4,1]`. This establishes only the change of the axial center eigenvalue; the pitchfork normal-form coefficient is a separate contract.
+such that H is negative below it and positive above it throughout `[1/4,1]`.
+
+A is internally closed at `AUDIT_COMPLETE / MACHINE_GATING_PASS`; only external Judge approval remains before any `CERTIFIED` promotion. The pitchfork normal-form coefficient is a separate contract B.
