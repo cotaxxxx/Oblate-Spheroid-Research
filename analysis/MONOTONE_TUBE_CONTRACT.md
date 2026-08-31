@@ -124,7 +124,24 @@ T3 = -2 R lambda^3 Ahat rho^3
 
 These are the required symbolic correspondences for the `corner_hull` chart. The corner implementation must compute neither `rho` nor `phi` as interval quotients. `sqrt(q)` itself may be used only multiplicatively in `T3`, where an upper enclosure is harmless.
 
-At the north-pole corner the angle is on the lower-gamma side (`gamma -> 0`, `alpha -> pi/2`), so `R` and `R_gamma` are evaluated with the lower gamma chart. The checker must verify that the resulting `u=1-gamma^2` enclosure is separated from zero before using the quotient formula for `R_gamma`.
+### Corner angle bounds
+
+The corner does **not** have a single limiting gamma value. Since
+
+```text
+gamma = lambda Ahat / w,
+```
+
+one has `gamma=1` along `s=0, delta>0`, while along `delta=0, s->0` one has `gamma->0`. Hence a corner box can span the full geometric range `0<=gamma<=1`. The corner chart must therefore not use either the lower quotient `R_gamma=(gamma R-1)/(1-gamma^2)` or the upper `Psi_prime` series as a pointwise chart across the whole corner box.
+
+Instead use the exact global analytic hulls valid for `0<=gamma<=1`:
+
+```text
+1 <= R = acos(gamma)/sqrt(1-gamma^2) <= pi/2,
+-1 <= R_gamma <= 0.
+```
+
+For the second bound, write `gamma=cos(alpha)`, `0<=alpha<=pi/2`. Then `gamma R = alpha cot(alpha) <= 1`, so `R_gamma<=0`; and `R>=gamma` gives `gamma R >= gamma^2`, hence `R_gamma>=-1`. These global bounds remove both endpoint quotient problems and are intentionally coarse; the corner cell contribution is controlled by its small `s` width and the bounded `rho`, `phi`, `Ahat` factors.
 
 The corner chart is used only for boxes whose Cartesian product contains `(s,t)=(0,1)`. All other boxes use the ordinary general-t quotient formulas, with the moving `gamma=1` locus handled by the factorized upper `u` chart.
 
@@ -134,7 +151,7 @@ The rigorous cover therefore has three chart labels:
 
 1. `gamma_lower`: ordinary general-t boxes with `u=1-gamma^2` rigorously separated from zero;
 2. `u_upper`: boxes that can meet the moving `h_t=0` locus, with `R=Psi(u)` and `R_gamma=-2 gamma Psi_prime(u)`;
-3. `corner_hull`: only the north-pole corner box(es), using the bounded `rho`, `phi`, `Ahat` representation above and lower-gamma angle functions.
+3. `corner_hull`: only the north-pole corner box(es), using bounded `rho`, `phi`, `Ahat` together with the global angle hulls `R in [1,pi/2]`, `R_gamma in [-1,0]`.
 
 No direct interval division by a `q` box containing zero is permitted in any chart.
 
