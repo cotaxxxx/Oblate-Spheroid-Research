@@ -1,7 +1,7 @@
 name: Center-axis coefficient prototype
 
 # PROTOTYPE / NOT_BINDING isolated machine run
-on:
+"on":
   push:
     branches:
       - implementation/gt-boundary-two-chart
