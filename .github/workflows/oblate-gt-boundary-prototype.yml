@@ -56,6 +56,8 @@ jobs:
         run: PYTHONPATH=. python producer/center_pitchfork_producer.py
       - name: Run center pitchfork checker
         run: PYTHONPATH=. python checker/center_pitchfork_checker.py
+      - name: Report exact center pitchfork enclosures
+        run: PYTHONPATH=. python analysis/center_pitchfork_exact_enclosure_report.py
 
   gt-boundary-prototype:
     runs-on: ubuntu-latest
