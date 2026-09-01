@@ -42,6 +42,7 @@ def run_v2():
     """
     base.ctx.prec = base.BITS
     print("GLOBAL_AXIAL_C0_PRODUCER_V2 — PROTOTYPE / NOT_BINDING")
+    print("C0A_FOUR_GROUP_IMPLEMENTATION_STAGE PENDING_WRITE")
     print("BITS", base.BITS, "DEG", base.DEG, "USTAR", "3/5")
     print("T_HI", base.T_HI, "T_EDGE", base.T_EDGE)
     print("C0A_STAGES", base.C0A_STAGES)
