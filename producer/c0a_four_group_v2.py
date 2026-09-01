@@ -35,6 +35,40 @@ def _record(stats, chart, groups):
             rec[chart][i] = r
 
 
+def _report_first_k3_inf(stats, chart, s, t, lam, u, q, w2, Rggg, K3, group3):
+    """Report one provenance record per stage for an infinite K3-group radius."""
+    if chart != "series" or stats.get("k3_inf_reported"):
+        return
+    if "inf" not in str(group3.rad()).lower():
+        return
+    U = u.upper()
+    den0 = 1 - U
+    den1 = 1 - U * 52 / 51
+    den2 = 1 - U * 52 / 50
+    den3 = 1 - U * 52 / 49
+    q2 = q * q
+    q4 = q2 * q2
+    q6 = q4 * q2
+    w4 = w2 * w2
+    print(
+        "C0A_K3_INF_DIAGNOSTIC",
+        "s", s,
+        "t", t,
+        "lambda", lam,
+        "u", u,
+        "U", U,
+        "tail_denoms", (den0, den1, den2, den3),
+        "q", q,
+        "q6", q6,
+        "w2", w2,
+        "w4", w4,
+        "Rggg", Rggg,
+        "K3", K3,
+        "RgggK3", group3,
+    )
+    stats["k3_inf_reported"] = True
+
+
 def density(s, t, lam, stats):
     mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q = _geometry(s, t, lam)
     chart = "series" if u.upper() <= base.USTAR else "direct"
@@ -63,5 +97,6 @@ def density(s, t, lam, stats):
     K3 = -2 * A * l4 * N4 / (w4 * q6)
 
     groups = (R*K0, Rg*K1, Rgg*K2, Rggg*K3)
+    _report_first_k3_inf(stats, chart, s, t, lam, u, q, w2, Rggg, K3, groups[3])
     _record(stats, chart, groups)
     return s * (groups[0] + groups[1] + groups[2] + groups[3])
