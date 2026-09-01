@@ -15,6 +15,12 @@ base.T_HI = Fraction(1, 2)
 base.T_EDGE = Fraction(1, 2)
 
 
+def _box_candidate(left, right):
+    midpoint = (left + right) / 2
+    radius = (right - left) / 2
+    return midpoint + base.arb(0, 1) * radius
+
+
 def _g_density_stable(s, t, lam, stats):
     mu, A, gamma, u, gt, _, _, _ = base._geometry(s, t, lam)
     R, _, _, _ = base._R_bundle(u, gamma, stats)
@@ -49,6 +55,14 @@ def run_v2():
     print(
         "BOX_TEST_T",
         base._box(base._point(Fraction(7, 16)), base._point(Fraction(1, 2))),
+    )
+    print(
+        "BOX_CANDIDATE_01",
+        _box_candidate(base._point(Fraction(0)), base._point(Fraction(1))),
+    )
+    print(
+        "BOX_CANDIDATE_T",
+        _box_candidate(base._point(Fraction(7, 16)), base._point(Fraction(1, 2))),
     )
     print("CTX_PREC", base.ctx.prec)
     aok, astage, _ = base._run_c0a()
