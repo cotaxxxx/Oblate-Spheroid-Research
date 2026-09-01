@@ -1,0 +1,37 @@
+name: C0a term-by-chart diagnostic launcher
+
+"on":
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SOURCE_SHA: 5716bccfe66ac92ef73b84100ba1c3f37a406964
+
+jobs:
+  c0a-term-chart-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact V2 source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+      - name: Record checked-out source SHA
+        run: |
+          echo "DECLARED_SOURCE_SHA=${SOURCE_SHA}"
+          echo "CHECKED_OUT_SHA=$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "${SOURCE_SHA}"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned prototype dependency
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-prototype.txt
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run report-only C0a term-by-chart diagnostic
+        run: PYTHONPATH=. python analysis/c0a_worst_box_term_chart_diagnostic.py
