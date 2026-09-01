@@ -21,6 +21,21 @@ def _box_candidate(left, right):
     return midpoint + base.arb(0, 1) * radius
 
 
+def _probe_hull(label, left, right):
+    print(label, "ARB_API", [n for n in dir(base.arb) if "union" in n.lower() or "hull" in n.lower() or "error" in n.lower()])
+    print(label, "HAS_CLASS_UNION", hasattr(base.arb, "union"), "HAS_LEFT_UNION", hasattr(left, "union"))
+    if hasattr(base.arb, "union"):
+        try:
+            print(label, "CLASS_UNION", base.arb.union(left, right))
+        except Exception as exc:
+            print(label, "CLASS_UNION_ERROR", type(exc).__name__, str(exc))
+    if hasattr(left, "union"):
+        try:
+            print(label, "INSTANCE_UNION", left.union(right))
+        except Exception as exc:
+            print(label, "INSTANCE_UNION_ERROR", type(exc).__name__, str(exc))
+
+
 def _g_density_stable(s, t, lam, stats):
     mu, A, gamma, u, gt, _, _, _ = base._geometry(s, t, lam)
     R, _, _, _ = base._R_bundle(u, gamma, stats)
@@ -42,28 +57,22 @@ def run_v2():
     print("C0A_STAGES", base.C0A_STAGES)
     print("C0B_STAGES", base.C0B_STAGES)
     print("PREDECLARED_MAX_S_PANEL_EVALS", base.MAX_S_PANEL_EVALS)
+    p0 = base._point(Fraction(0))
+    p1 = base._point(Fraction(1))
+    p716 = base._point(Fraction(7, 16))
+    p12 = base._point(Fraction(1, 2))
     print(
         "PT_TEST",
         base._point(Fraction(2, 5)),
-        base._point(Fraction(1, 2)),
+        p12,
         base._point(Fraction(1, 512)),
     )
-    print(
-        "BOX_TEST_01",
-        base._box(base._point(Fraction(0)), base._point(Fraction(1))),
-    )
-    print(
-        "BOX_TEST_T",
-        base._box(base._point(Fraction(7, 16)), base._point(Fraction(1, 2))),
-    )
-    print(
-        "BOX_CANDIDATE_01",
-        _box_candidate(base._point(Fraction(0)), base._point(Fraction(1))),
-    )
-    print(
-        "BOX_CANDIDATE_T",
-        _box_candidate(base._point(Fraction(7, 16)), base._point(Fraction(1, 2))),
-    )
+    print("BOX_TEST_01", base._box(p0, p1))
+    print("BOX_TEST_T", base._box(p716, p12))
+    print("BOX_CANDIDATE_01", _box_candidate(p0, p1))
+    print("BOX_CANDIDATE_T", _box_candidate(p716, p12))
+    _probe_hull("HULL_TEST_01", p0, p1)
+    _probe_hull("HULL_TEST_T", p716, p12)
     print("CTX_PREC", base.ctx.prec)
     aok, astage, _ = base._run_c0a()
     bok, bstage, _ = base._run_c0b()
