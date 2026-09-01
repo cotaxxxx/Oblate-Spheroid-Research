@@ -28,6 +28,8 @@ jobs:
       - name: Install hash-pinned Arb binary wheel
         run: >-
           python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run C0a exact four-group raw audit
+        run: PYTHONPATH=. python analysis/c0a_four_group_raw_audit.py
       - name: Run C0 V2 producer
         run: PYTHONPATH=. python producer/global_axial_c0_producer_v2.py
       - name: Run C0 V2 checker
