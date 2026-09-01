@@ -2,14 +2,26 @@
 from checker import global_axial_c0_checker as base
 
 
+def _known_nonnegative(x):
+    """Intersect an Arb enclosure with the mathematically known half-line x>=0."""
+    lower = max(base.arb(0), x.lower())
+    upper = x.upper()
+    if upper < lower:
+        raise ValueError("empty exact nonnegative intersection")
+    return base._box(lower, upper)
+
+
 def _primitives(s, t, L):
-    mu = 1 - s * s
-    eps = 1 - mu * mu
-    L2 = L * L
+    # Independent transcription of the factorized nonnegative q geometry.
+    s_sq = _known_nonnegative(s * s)
+    mu = 1 - s_sq
+    eps = _known_nonnegative(s_sq * (2 - s_sq))
+    L2 = _known_nonnegative(L * L)
     L4 = L2 * L2
     delta = t - mu
+    delta_sq = _known_nonnegative(delta * delta)
     A = 1 - t * mu
-    q = eps + L2 * delta * delta
+    q = eps + L2 * delta_sq
     W2 = mu * mu + L2 * eps
     W = W2.sqrt()
     rootq = q.sqrt()
