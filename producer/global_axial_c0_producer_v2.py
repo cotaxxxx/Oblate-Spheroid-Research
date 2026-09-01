@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
-"""C0 producer wrapper: stabilized C0b and redeclared quantitative box.
+"""C0 V2 producer: four-group C0a and stabilized C0b.
 
-The raw-audited C0 kernel in global_axial_c0_producer.py is left unchanged.
-This wrapper makes only the declared C0 box/edge change
-
-    t in [0, 1/2],  tau=t^2 in [0, 1/4],  T_EDGE=1/2,
-
-while preserving the predeclared A0--A2 and B0--B2 stage schedules.
-For C0b it also keeps the exact stable identity
-
-    alpha^2 = u * R^2,
-
-where R = asin(sqrt(u))/sqrt(u) is evaluated by the audited two-chart
-continuation.
+The legacy base kernel remains unchanged as the raw-audit reference.  V2 uses
+the separately implemented common-denominator four-group C0a evaluator while
+keeping the declared box t in [0,1/2], tau<=1/4 and T_EDGE=1/2.
 
 Evidence class: PROTOTYPE / NOT_BINDING.
 """
 from fractions import Fraction
 from producer import global_axial_c0_producer as base
+from producer import c0a_four_group_v2 as grouped
 
-# Fixed redeclaration for the quantitative C0 box.
 base.T_HI = Fraction(1, 2)
 base.T_EDGE = Fraction(1, 2)
 
@@ -31,18 +22,15 @@ def _g_density_stable(s, t, lam, stats):
     return s * (-mu * alpha2 - 2 * A * R * gt)
 
 
+base._g3_density = grouped.density
 base._g_density = _g_density_stable
 
 
 def run_v2():
-    """Run unchanged audited gates under the V2 redeclaration.
-
-    The wrapper mirrors base.run() only so the machine-facing claim string
-    reflects T_EDGE=1/2. Numerical kernels and gate routines remain in base.
-    """
     base.ctx.prec = base.BITS
     print("GLOBAL_AXIAL_C0_PRODUCER_V2 — PROTOTYPE / NOT_BINDING")
-    print("C0A_FOUR_GROUP_IMPLEMENTATION_STAGE PENDING_WRITE")
+    print("C0A_KERNEL FOUR_GROUP_COMMON_DENOMINATOR / RAW_AUDITED")
+    print("C0A_WIDTH_DIAGNOSTIC four_group_width_max = K0..K3 density radii by chart")
     print("BITS", base.BITS, "DEG", base.DEG, "USTAR", "3/5")
     print("T_HI", base.T_HI, "T_EDGE", base.T_EDGE)
     print("C0A_STAGES", base.C0A_STAGES)
@@ -54,10 +42,8 @@ def run_v2():
     print(
         "LOGICAL_FINAL_C0",
         "PASS" if ok else "UNRESOLVED",
-        "C0a_stage",
-        astage,
-        "C0b_stage",
-        bstage,
+        "C0a_stage", astage,
+        "C0b_stage", bstage,
         "claim: g_ttt<0 on box and Phi(t=1/2)<0 on lambda interval",
     )
     if not ok:
