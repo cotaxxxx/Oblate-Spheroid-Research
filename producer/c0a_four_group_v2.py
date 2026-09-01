@@ -11,9 +11,47 @@ def _nonnegative(x):
     return base._box(lo, hi)
 
 
+def _positive_q_powers(q):
+    """Monotone endpoint enclosures for q^4,q^5,q^6,q^(9/2),q^(11/2)."""
+    qlo = q.lower()
+    qhi = q.upper()
+    if qlo <= 0:
+        raise ValueError("C0a positive-q power construction requires q.lower() > 0")
+
+    qlo2 = qlo * qlo
+    qlo4 = qlo2 * qlo2
+    qlo5 = qlo4 * qlo
+    qlo6 = qlo5 * qlo
+    qhilo2 = qhi * qhi
+    qhilo4 = qhilo2 * qhilo2
+    qhilo5 = qhilo4 * qhi
+    qhilo6 = qhilo5 * qhi
+
+    qlo_sqrt = qlo.sqrt()
+    qhi_sqrt = qhi.sqrt()
+    return (
+        base._box(qlo4, qhilo4),
+        base._box(qlo5, qhilo5),
+        base._box(qlo6, qhilo6),
+        base._box(qlo4 * qlo_sqrt, qhilo4 * qhi_sqrt),
+        base._box(qlo5 * qlo_sqrt, qhilo5 * qhi_sqrt),
+    )
+
+
+def _even_fourth_power(x):
+    """Endpoint enclosure of x^4 using the known nonnegativity of an even power."""
+    lo = x.lower()
+    hi = x.upper()
+    mag = max(abs(lo), abs(hi))
+    mag2 = mag * mag
+    mag4 = mag2 * mag2
+    return base._box(base.arb(0), mag4)
+
+
 def _geometry(s, t, lam):
     # Preserve exact nonnegative structure near s=0.  In particular, avoid
     # e = 1-mu^2, whose interval subtraction loses the cancellation mu~1.
+    s = _nonnegative(s)
     s2 = _nonnegative(s * s)
     mu = 1 - s2
     e = _nonnegative(s2 * (2 - s2))
@@ -28,14 +66,14 @@ def _geometry(s, t, lam):
     sq = q.sqrt()
     gamma = lam * A / (w * sq)
     h = mu * (1 - l2) + l2 * t
-    u = base._unit_nonnegative(e * h * h / (w2 * q))
+    u = _nonnegative(base._unit_nonnegative(e * h * h / (w2 * q)))
     N = -mu * q - A * l2 * d
     M = (-l2 * e) * q - 3 * N * l2 * d
     M1 = l4 * e * d - 3 * l2 * N
     P = M1 * q - 5 * M * l2 * d
     P1 = (4 * l4 * e) * q - 3 * l2 * d * M1 - 5 * l2 * M
     Q = P1 * q - 7 * P * l2 * d
-    return mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q
+    return s, mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q
 
 
 def _record(stats, chart, groups):
@@ -89,30 +127,29 @@ def _report_first_k3_inf(
 
 
 def density(s, t, lam, stats):
-    mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q = _geometry(s, t, lam)
+    s, mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q = _geometry(s, t, lam)
     chart = "series" if u.upper() <= base.USTAR else "direct"
     R, Rg, Rgg, Rggg = base._R_bundle(u, gamma, stats)
 
-    # Deliberately use products, not interval powers. q^(9/2)=q4*sqrt(q).
-    q2 = q * q
-    q4 = q2 * q2
-    q5 = q4 * q
-    q6 = q5 * q
+    # q is strictly positive on C0a.  Construct its powers from endpoint
+    # monotonicity instead of repeated ball multiplication, which can make the
+    # relative radius exceed 100% on coarse boxes.
+    q4, q5, q6, q9h, q11h = _positive_q_powers(q)
     l3 = l2 * lam
     l4 = l2 * l2
     w3 = w2 * w
     w4 = w2 * w2
-    N2 = N * N
+    N2 = _nonnegative(N * N)
     N3 = N2 * N
-    N4 = N2 * N2
+    N4 = _even_fourth_power(N)
 
     # Build each cancelling numerator before its single common-denominator division.
     num0 = 8 * mu * P * q - 2 * A * Q
     num1 = 24 * mu * N * M * q - 6 * A * M * M - 8 * A * N * P
     num2 = 8 * mu * N3 * q - 12 * A * N2 * M
-    K0 = lam * num0 / (w * q4 * sq)
+    K0 = lam * num0 / (w * q9h)
     K1 = l2 * num1 / (w2 * q5)
-    K2 = l3 * num2 / (w3 * q5 * sq)
+    K2 = l3 * num2 / (w3 * q11h)
     k3_num = -2 * A * l4 * N4
     k3_den = w4 * q6
     K3 = k3_num / k3_den
