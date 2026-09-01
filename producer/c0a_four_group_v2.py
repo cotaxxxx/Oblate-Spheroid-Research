@@ -52,9 +52,9 @@ def _geometry(s, t, lam):
     # Preserve exact nonnegative structure near s=0.  In particular, avoid
     # e = 1-mu^2, whose interval subtraction loses the cancellation mu~1.
     s = _nonnegative(s)
-    s2 = _nonnegative(s * s)
-    mu = 1 - s2
-    e = _nonnegative(s2 * (2 - s2))
+    x = _nonnegative(s * s)
+    mu = 1 - x
+    e = _nonnegative(x * (2 - x))
     l2 = _nonnegative(lam * lam)
     l4 = l2 * l2
     A = 1 - t * mu
@@ -73,7 +73,31 @@ def _geometry(s, t, lam):
     P = M1 * q - 5 * M * l2 * d
     P1 = (4 * l4 * e) * q - 3 * l2 * d * M1 - 5 * l2 * M
     Q = P1 * q - 7 * P * l2 * d
-    return s, mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q
+    return s, x, mu, e, A, d, d2, gamma, u, l2, q, sq, w, w2, N, M, P, Q
+
+
+def _factorized_k0(x, mu, e, A, d2, t, lam, l2, w, q9h):
+    """Exact factorization 8*mu*P*q-2*A*Q = 6*l2*e*G, with G Horner-evaluated."""
+    # W = -t^2(x-1)^2 + t(8x^3-24x^2+14x+2)
+    #     + 3x^4-12x^3+20x^2-16x-1.
+    xm1 = x - 1
+    wx0 = (((3 * x - 12) * x + 20) * x - 16) * x - 1
+    wx1 = ((8 * x - 24) * x + 14) * x + 2
+    Wpoly = wx0 + t * wx1 - (t * t) * _nonnegative(xm1 * xm1)
+
+    # S = 9*t*(x-1) + 8*x^2 - 16*x + 9.
+    S = (8 * x - 16) * x + 9 + 9 * t * xm1
+
+    d4 = _nonnegative(d2 * d2)
+    e2 = _nonnegative(e * e)
+    mu2 = _nonnegative(mu * mu)
+    c3 = -8 * e * d4
+    c2 = -4 * d2 * Wpoly
+    c1 = -3 * e * A * S
+    c0 = 4 * e2 * mu2
+    G = ((c3 * l2 + c2) * l2 + c1) * l2 + c0
+    l3 = l2 * lam
+    return 6 * l3 * e * G / (w * q9h)
 
 
 def _record(stats, chart, groups):
@@ -127,7 +151,7 @@ def _report_first_k3_inf(
 
 
 def density(s, t, lam, stats):
-    s, mu, A, gamma, u, l2, q, sq, w, w2, N, M, P, Q = _geometry(s, t, lam)
+    s, x, mu, e, A, d, d2, gamma, u, l2, q, sq, w, w2, N, M, P, Q = _geometry(s, t, lam)
     chart = "series" if u.upper() <= base.USTAR else "direct"
     R, Rg, Rgg, Rggg = base._R_bundle(u, gamma, stats)
 
@@ -143,11 +167,11 @@ def density(s, t, lam, stats):
     N3 = N2 * N
     N4 = _even_fourth_power(N)
 
-    # Build each cancelling numerator before its single common-denominator division.
-    num0 = 8 * mu * P * q - 2 * A * Q
+    # K0 uses the exact polynomial factorization; K1/K2 retain the audited
+    # recursive numerators until their own factorizations are separately checked.
     num1 = 24 * mu * N * M * q - 6 * A * M * M - 8 * A * N * P
     num2 = 8 * mu * N3 * q - 12 * A * N2 * M
-    K0 = lam * num0 / (w * q9h)
+    K0 = _factorized_k0(x, mu, e, A, d2, t, lam, l2, w, q9h)
     K1 = l2 * num1 / (w2 * q5)
     K2 = l3 * num2 / (w3 * q11h)
     k3_num = -2 * A * l4 * N4
