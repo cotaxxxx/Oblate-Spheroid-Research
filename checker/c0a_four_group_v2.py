@@ -11,8 +11,43 @@ def _known_nonnegative(x):
     return base._box(lower, upper)
 
 
+def _positive_q_powers(q):
+    """Independent monotone endpoint construction for positive q powers."""
+    lower = q.lower()
+    upper = q.upper()
+    if lower <= 0:
+        raise ValueError("C0a checker requires q.lower() > 0 for positive powers")
+
+    lower2 = lower * lower
+    lower4 = lower2 * lower2
+    lower5 = lower4 * lower
+    lower6 = lower5 * lower
+    upper2 = upper * upper
+    upper4 = upper2 * upper2
+    upper5 = upper4 * upper
+    upper6 = upper5 * upper
+    return (
+        base._box(lower4, upper4),
+        base._box(lower5, upper5),
+        base._box(lower6, upper6),
+        base._box(lower4 * lower.sqrt(), upper4 * upper.sqrt()),
+        base._box(lower5 * lower.sqrt(), upper5 * upper.sqrt()),
+    )
+
+
+def _fourth_even_enclosure(x):
+    """Independent endpoint enclosure for the mathematically nonnegative x^4."""
+    lower = x.lower()
+    upper = x.upper()
+    bound = max(abs(lower), abs(upper))
+    bound2 = bound * bound
+    bound4 = bound2 * bound2
+    return base._box(base.arb(0), bound4)
+
+
 def _primitives(s, t, L):
     # Independent transcription of the factorized nonnegative q geometry.
+    s = _known_nonnegative(s)
     s_sq = _known_nonnegative(s * s)
     mu = 1 - s_sq
     eps = _known_nonnegative(s_sq * (2 - s_sq))
@@ -27,7 +62,7 @@ def _primitives(s, t, L):
     rootq = q.sqrt()
     gam = L * A / (W * rootq)
     h = mu * (1 - L2) + L2 * t
-    u = base._unit_nonnegative(eps * h * h / (W2 * q))
+    u = _known_nonnegative(base._unit_nonnegative(eps * h * h / (W2 * q)))
 
     n = -mu * q - A * L2 * delta
     m = (-L2 * eps) * q - 3 * n * L2 * delta
@@ -35,7 +70,7 @@ def _primitives(s, t, L):
     p = m_first * q - 5 * m * L2 * delta
     p_first = (4 * L4 * eps) * q - 3 * L2 * delta * m_first - 5 * L2 * m
     big_q = p_first * q - 7 * p * L2 * delta
-    return mu, A, gam, u, L2, q, rootq, W, W2, n, m, p, big_q
+    return s, mu, A, gam, u, L2, q, rootq, W, W2, n, m, p, big_q
 
 
 def _note_width(stats, chart, values):
@@ -48,29 +83,27 @@ def _note_width(stats, chart, values):
 
 
 def density(s, t, L, stats):
-    mu, A, gam, u, L2, q, rootq, W, W2, n, m, p, big_q = _primitives(s, t, L)
+    s, mu, A, gam, u, L2, q, rootq, W, W2, n, m, p, big_q = _primitives(s, t, L)
     chart = "series" if u.upper() <= base.USTAR else "direct"
     r0, r1, r2, r3 = base._R(u, gam, stats)
 
-    # Independent transcription of q products and the four common denominators.
-    qq = q * q
-    q4 = qq * qq
-    q5 = q4 * q
-    q6 = q5 * q
+    # q is positive on C0a; use endpoint monotonicity rather than repeated
+    # ball multiplication for all denominator powers.
+    q4, q5, q6, q9h, q11h = _positive_q_powers(q)
     L3 = L2 * L
     L4 = L2 * L2
     W3 = W2 * W
     W4 = W2 * W2
-    n2 = n * n
+    n2 = _known_nonnegative(n * n)
     n3 = n2 * n
-    n4 = n2 * n2
+    n4 = _fourth_even_enclosure(n)
 
     a0 = 8 * mu * p * q - 2 * A * big_q
     a1 = 24 * mu * n * m * q - 6 * A * m * m - 8 * A * n * p
     a2 = 8 * mu * n3 * q - 12 * A * n2 * m
-    k0 = L * a0 / (W * q4 * rootq)
+    k0 = L * a0 / (W * q9h)
     k1 = L2 * a1 / (W2 * q5)
-    k2 = L3 * a2 / (W3 * q5 * rootq)
+    k2 = L3 * a2 / (W3 * q11h)
     k3 = -2 * A * L4 * n4 / (W4 * q6)
 
     pieces = (r0*k0, r1*k1, r2*k2, r3*k3)
