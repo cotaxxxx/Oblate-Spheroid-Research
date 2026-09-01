@@ -36,6 +36,21 @@ def run_v2():
     print("C0A_STAGES", base.C0A_STAGES)
     print("C0B_STAGES", base.C0B_STAGES)
     print("PREDECLARED_MAX_S_PANEL_EVALS", base.MAX_S_PANEL_EVALS)
+    print(
+        "PT_TEST",
+        base._point(Fraction(2, 5)),
+        base._point(Fraction(1, 2)),
+        base._point(Fraction(1, 512)),
+    )
+    print(
+        "BOX_TEST_01",
+        base._box(base._point(Fraction(0)), base._point(Fraction(1))),
+    )
+    print(
+        "BOX_TEST_T",
+        base._box(base._point(Fraction(7, 16)), base._point(Fraction(1, 2))),
+    )
+    print("CTX_PREC", base.ctx.prec)
     aok, astage, _ = base._run_c0a()
     bok, bstage, _ = base._run_c0b()
     ok = aok and bok
