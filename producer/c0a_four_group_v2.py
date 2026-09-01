@@ -2,15 +2,27 @@
 from producer import global_axial_c0_producer as base
 
 
+def _nonnegative(x):
+    """Intersect an Arb enclosure with the mathematically known half-line x>=0."""
+    lo = max(base.arb(0), x.lower())
+    hi = x.upper()
+    if hi < lo:
+        raise ValueError("empty exact nonnegative intersection")
+    return base._box(lo, hi)
+
+
 def _geometry(s, t, lam):
-    s2 = s * s
+    # Preserve exact nonnegative structure near s=0.  In particular, avoid
+    # e = 1-mu^2, whose interval subtraction loses the cancellation mu~1.
+    s2 = _nonnegative(s * s)
     mu = 1 - s2
-    e = 1 - mu * mu
-    l2 = lam * lam
+    e = _nonnegative(s2 * (2 - s2))
+    l2 = _nonnegative(lam * lam)
     l4 = l2 * l2
     A = 1 - t * mu
     d = t - mu
-    q = e + l2 * d * d
+    d2 = _nonnegative(d * d)
+    q = e + l2 * d2
     w2 = mu * mu + l2 * e
     w = w2.sqrt()
     sq = q.sqrt()
