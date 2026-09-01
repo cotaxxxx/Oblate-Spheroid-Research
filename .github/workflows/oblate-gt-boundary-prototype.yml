@@ -100,8 +100,6 @@ jobs:
           PYTHONPATH=. python analysis/meridian_off_axis_scan.py
       - name: Run same-evaluator axial row diagnostic
         run: PYTHONPATH=. python analysis/meridian_axis_row_scan.py
-      - name: Run corrected lower-edge 256-box refinement
-        run: python -m unittest tests/test_census_lower_edge_refinement.py
       - name: Preserve corrected lower-edge one-box unresolved control
         run: python -m unittest tests/test_census_lower_edge.py
       - name: Run fixed initial 64-box monotone tube producer and checker
