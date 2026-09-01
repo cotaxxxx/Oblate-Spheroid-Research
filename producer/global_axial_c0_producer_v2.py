@@ -33,5 +33,35 @@ def _g_density_stable(s, t, lam, stats):
 
 base._g_density = _g_density_stable
 
+
+def run_v2():
+    """Run unchanged audited gates under the V2 redeclaration.
+
+    The wrapper mirrors base.run() only so the machine-facing claim string
+    reflects T_EDGE=1/2. Numerical kernels and gate routines remain in base.
+    """
+    base.ctx.prec = base.BITS
+    print("GLOBAL_AXIAL_C0_PRODUCER_V2 — PROTOTYPE / NOT_BINDING")
+    print("BITS", base.BITS, "DEG", base.DEG, "USTAR", "3/5")
+    print("T_HI", base.T_HI, "T_EDGE", base.T_EDGE)
+    print("C0A_STAGES", base.C0A_STAGES)
+    print("C0B_STAGES", base.C0B_STAGES)
+    print("PREDECLARED_MAX_S_PANEL_EVALS", base.MAX_S_PANEL_EVALS)
+    aok, astage, _ = base._run_c0a()
+    bok, bstage, _ = base._run_c0b()
+    ok = aok and bok
+    print(
+        "LOGICAL_FINAL_C0",
+        "PASS" if ok else "UNRESOLVED",
+        "C0a_stage",
+        astage,
+        "C0b_stage",
+        bstage,
+        "claim: g_ttt<0 on box and Phi(t=1/2)<0 on lambda interval",
+    )
+    if not ok:
+        raise SystemExit("UNRESOLVED")
+
+
 if __name__ == "__main__":
-    base.run()
+    run_v2()
