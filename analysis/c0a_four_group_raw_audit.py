@@ -6,6 +6,32 @@ RAW_AUDIT_TRANSCRIPTION_CHECK / REPORT_ONLY / NOT_GATING / NOT_BINDING.
 This is not a formal symbolic proof.  It is a deterministic exact-Fraction
 check designed to catch transcription/sign/power mistakes before any Arb
 producer/checker implementation is changed.
+
+K0 factorized numerator note (x=s^2, v=lambda^2):
+
+    8*mu*P*q - 2*A*Q = 6*v*e*G,
+
+where
+
+    mu = 1-x,
+    e  = x*(2-x),
+    d  = t+x-1,
+    A  = 1-t*mu,
+
+and
+
+    G = -8*v^3*e*d^4
+        -4*v^2*d^2*W
+        -3*v*e*A*S
+        +4*e^2*mu^2,
+
+    W = -t^2*(x-1)^2 + 8*t*x^3 - 24*t*x^2 + 14*t*x + 2*t
+        + 3*x^4 - 12*x^3 + 20*x^2 - 16*x - 1,
+
+    S = 9*(t*x-t) + 8*x^2 - 16*x + 9.
+
+Important transcription point: 4*x^2*(x-2)^2*(x-1)^2 = 4*e^2*mu^2,
+not e^2*mu^2.  The exact-Fraction audit below checks this coefficient.
 """
 from fractions import Fraction as F
 
@@ -59,6 +85,51 @@ def direct_K(mu, A, gt, gtt, gttt, gtttt):
     )
 
 
+def k0_recurrence_numerator(x, t, v):
+    mu = 1 - x
+    e = x * (2 - x)
+    A = 1 - t * mu
+    d = t - mu
+    q = e + v * d**2
+    N = -mu * q - A * v * d
+    M = (-v * e) * q - 3 * N * v * d
+    M1 = v**2 * e * d - 3 * v * N
+    P = M1 * q - 5 * M * v * d
+    P1 = (4 * v**2 * e) * q - 3 * v * d * M1 - 5 * v * M
+    Q = P1 * q - 7 * P * v * d
+    return 8 * mu * P * q - 2 * A * Q
+
+
+def k0_factorized_numerator(x, t, v):
+    mu = 1 - x
+    e = x * (2 - x)
+    d = t + x - 1
+    A = 1 - t * mu
+
+    # Independent literal transcription of W and S.
+    W = (
+        -t**2 * (x - 1)**2
+        + 8 * t * x**3
+        - 24 * t * x**2
+        + 14 * t * x
+        + 2 * t
+        + 3 * x**4
+        - 12 * x**3
+        + 20 * x**2
+        - 16 * x
+        - 1
+    )
+    S = 9 * (t * x - t) + 8 * x**2 - 16 * x + 9
+
+    # Horner in v, preserving the factored nonnegative pieces for the Arb port.
+    c3 = -8 * e * d**4
+    c2 = -4 * d**2 * W
+    c1 = -3 * e * A * S
+    c0 = 4 * e**2 * mu**2
+    G = ((c3 * v + c2) * v + c1) * v + c0
+    return 6 * v * e * G
+
+
 def sqrt_fraction(x):
     import math
 
@@ -95,6 +166,16 @@ def deterministic_cases():
             idx += 1
 
 
+def deterministic_geometry_cases():
+    xs = [F(1, 64), F(1, 8), F(3, 8), F(7, 16)]
+    ts = [F(1, 16), F(1, 4), F(7, 16), F(1, 2)]
+    vs = [F(4, 25), F(81, 400), F(1, 4), F(9, 25)]
+    for x in xs:
+        for t in ts:
+            for v in vs:
+                yield x, t, v
+
+
 def main():
     print("C0A FOUR-GROUP RAW AUDIT — EXACT FRACTION / REPORT_ONLY / NOT_GATING")
     count = 0
@@ -114,9 +195,22 @@ def main():
 
         count += 1
 
+    geometry_count = 0
+    for x, t, v in deterministic_geometry_cases():
+        recurrence = k0_recurrence_numerator(x, t, v)
+        factorized = k0_factorized_numerator(x, t, v)
+        if recurrence != factorized:
+            raise SystemExit(
+                "FAIL K0 factorized numerator at geometry case "
+                f"{geometry_count}: x={x} t={t} v={v} diff={recurrence-factorized}"
+            )
+        geometry_count += 1
+
     print("PASS exact_fraction_cases", count)
     print("PASS eight_term_equals_four_group")
     print("PASS K0_K1_K2_K3_common_denominators")
+    print("PASS K0_factorized_numerator_exact_fraction_cases", geometry_count)
+    print("PASS K0_factorized_constant_coefficient 4*e^2*mu^2")
     print("STATUS TRANSCRIPTION_AUDIT_PASS / NOT_FORMAL_SYMBOLIC_PROOF / NOT_BINDING")
 
 
