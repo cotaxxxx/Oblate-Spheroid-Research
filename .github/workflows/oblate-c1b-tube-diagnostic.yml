@@ -1,0 +1,32 @@
+name: Oblate C1b tube-width diagnostic
+
+"on":
+  push:
+    branches:
+      - implementation/gt-boundary-two-chart
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  c1b-tube-width-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Record checked-out head
+        run: git rev-parse HEAD
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned prototype dependency
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-prototype.txt
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run C1b tube-width diagnostic only
+        run: PYTHONPATH=. python analysis/c1b_tube_width_diagnostic.py
