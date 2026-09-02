@@ -1,6 +1,6 @@
 # Global axial C1a crossing lambda derivative — symbolic audit target
 
-Status: `AWAITING_USER_SYMBOLIC_AUDIT / NOT_IMPLEMENTED / NOT_BINDING`
+Status: `USER_SYMBOLIC_AUDIT_PASS / NOT_IMPLEMENTED / NOT_BINDING`
 
 This note is the pre-implementation human-audit target for the C1a gate
 
@@ -10,7 +10,7 @@ F_x(lambda) := Phi(1/4,lambda) = 2 g_axis_ob(1/2,lambda),
 lambda in [83/200,9/20].
 ```
 
-No machine implementation of this new lambda-derivative density is to be used as C1 evidence before this symbolic target is independently checked.
+The new lambda-derivative assembly below has now received an independent user symbolic/numerical audit.  This document remains an algebra audit only; no machine enclosure is promoted by this note.
 
 ## 1. Start from the already used first-t density
 
@@ -43,7 +43,7 @@ N = -mu q - A lambda^2 d,
 gamma_t = lambda N/(w q^(3/2)).
 ```
 
-For C1a.2, `t=1/2` is fixed throughout.  Thus `mu,e,A,d` are independent of lambda.
+For C1a.2, `t=1/2` is fixed throughout. Thus `mu,e,A,d` are independent of lambda.
 
 ## 2. Basic lambda derivatives at fixed t
 
@@ -62,8 +62,6 @@ gamma_lambda
            - lambda d^2/q ].
 ```
 
-This is the general-fixed-t analogue of the `t=0` formula already audited for Claim A.
-
 ## 3. Lambda derivative of gamma_t
 
 Write
@@ -79,7 +77,7 @@ Since
 N = -mu q - A lambda^2 d,
 ```
 
-and `mu,A,d` are lambda-independent at fixed t,
+we have
 
 ```text
 N_lambda
@@ -103,7 +101,7 @@ Hence
  = L_lambda N + L N_lambda.
 ```
 
-No `gamma_tt` or `(gamma_tt)_lambda` term enters C1a.2; those belonged to the center-axis second-density derivative used in Claim A.
+No `gamma_tt` or `(gamma_tt)_lambda` term enters C1a.2.
 
 ## 4. R and alpha-square derivatives
 
@@ -121,14 +119,14 @@ Then
 R_lambda = R_gamma gamma_lambda.
 ```
 
-For the first term of `F_t`, differentiate `alpha^2 = acos(gamma)^2` directly:
+Also
 
 ```text
 partial_lambda(alpha^2)
  = -2 R gamma_lambda.
 ```
 
-The removable `u=0` loci must be handled by the same analytic continuation / positive-series chart already used by the C0/A kernels; literal division by zero is forbidden.
+The removable `u=0` loci must use the same analytic continuation / positive-series chart as the C0/A kernels; literal division by zero is forbidden.
 
 ## 5. Final lambda derivative of the first-t density
 
@@ -138,7 +136,7 @@ Starting from
 F_t = s [ -mu alpha^2 - 2 A R gamma_t ],
 ```
 
-with `mu_lambda=A_lambda=0` at fixed `t`, the product rule gives
+the product rule gives
 
 ```text
 partial_lambda F_t
@@ -151,41 +149,18 @@ partial_lambda F_t
      ].
 ```
 
-Equivalently, using `R_lambda=R_gamma gamma_lambda`,
-
-```text
-partial_lambda F_t
- = s [
-       2 mu R gamma_lambda
-       - 2 A (R_lambda gamma_t + R (gamma_t)_lambda)
-     ].
-```
-
 Therefore at `t=1/2`,
-
-```text
-partial_lambda g(1/2,lambda)
- = integral_0^sqrt(2) partial_lambda F_t(s,1/2,lambda) ds,
-```
-
-and because
-
-```text
-F_x(lambda) = 2 g(1/2,lambda),
-```
-
-we have
 
 ```text
 partial_lambda F_x(lambda)
  = 2 integral_0^sqrt(2) partial_lambda F_t(s,1/2,lambda) ds.
 ```
 
-The outer factor `2` is part of the C1a crossing quantity and must not be omitted in the producer/checker reporting.
+The outer factor `2` is part of the C1a crossing quantity.
 
 ## 6. Relation to the already audited A derivative
 
-Reusable audited components from the center-axis lambda-derivative work are only the analytic architecture and common identities:
+Reusable audited components from the center-axis lambda-derivative work are only
 
 ```text
 q_lambda,
@@ -195,52 +170,48 @@ R_lambda = R_gamma gamma_lambda,
 series/direct removable-locus handling.
 ```
 
-C1a.2 is NOT the A density `partial_lambda G_t|_{t=0}`.  In particular C1a.2 does not reuse the A final product-rule assembly and does not require `R_gammagamma`, `gamma_tt`, or `(gamma_tt)_lambda`.
-
-The new algebra requiring independent audit here is specifically:
-
-```text
-N_lambda = -2 lambda (mu d^2 + A d),
-L_lambda = L[1/lambda - lambda e/w^2 - 3 lambda d^2/q],
-(gamma_t)_lambda = L_lambda N + L N_lambda,
-partial_lambda(alpha^2) = -2 R gamma_lambda,
-partial_lambda F_t
- = s[2 mu R gamma_lambda
-     -2A(R_gamma gamma_lambda gamma_t + R(gamma_t)_lambda)].
-```
+C1a.2 is not the A density `partial_lambda G_t|_{t=0}` and does not reuse its final product-rule assembly.
 
 ## 7. Reported numerical expectations — NOT GATING
 
-The following are independent point-evaluation expectations supplied before implementation.  They are controls only and cannot certify C1a:
+Corrected independent controls:
 
 ```text
-partial_lambda g(1/2,lambda) ~ +0.52
-through lambda in [83/200,9/20], approximately,
+F_x(83/200) ~ -0.0507,
+F_x(9/20)   ~ +0.0276,
 
-partial_lambda F_x(lambda) ~ +1.0,
+partial_lambda F_x(83/200) ~ 2.2042426481,
+partial_lambda F_x(9/20)   ~ 2.2642011538,
 
-F_x(83/200) ~ -0.0089,
-F_x(9/20)   ~ +0.0276.
+partial_lambda g(1/2,lambda) ~ 1.10 to 1.13
+through lambda in [83/200,9/20].
 ```
 
-The eventual Arb producer should report these endpoint quantities and derivative margins, but containment of these decimal expectations is not itself a gate.
+The earlier `F_x(83/200) ~ -0.0089` control was from the superseded `t=5/16` edge and was not a `t=1/2` value.  The earlier derivative expectations `partial_lambda g ~ 0.52` and `partial_lambda F_x ~ 1.0` inherited the same stale-edge mixup.  None of these reported decimals is gating.
 
-## 8. Required independent audit before implementation
+## 8. Independent audit result
 
-Please check independently:
+`USER_SYMBOLIC_AUDIT_PASS`.
+
+The independent implementation checked:
 
 ```text
-1. gamma_lambda logarithmic derivative;
-2. N_lambda at fixed t;
-3. L_lambda q-power coefficient 3;
-4. (gamma_t)_lambda product rule;
-5. partial_lambda(alpha^2) sign and factor 2;
-6. final partial_lambda F_t assembly;
-7. outer factor 2 from F_x=2g(1/2,lambda).
+1. gamma_lambda logarithmic derivative — PASS;
+2. N_lambda = -2 lambda(mu d^2 + A d) — PASS;
+3. L_lambda q-power coefficient -3 — PASS;
+4. (gamma_t)_lambda = L_lambda N + L N_lambda — PASS;
+5. partial_lambda(alpha^2) = -2 R gamma_lambda — PASS;
+6. final partial_lambda F_t product rule — PASS;
+7. outer factor 2 from F_x=2g(1/2,lambda) — PASS.
 ```
 
-Only after this note receives an explicit independent symbolic pass should the new C1a derivative density be implemented in producer/checker code.
+Independent formula evaluation and finite differences agreed to 12 digits.  Reported derivative values were
+
+```text
+partial_lambda F_x(83/200) = 2.2042426481...
+partial_lambda F_x(9/20)   = 2.2642011538...
+```
 
 ## 9. Evidence boundary
 
-This document is a symbolic audit target only.  It contains no machine certification, does not establish `partial_lambda F_x>0`, does not certify `lambda_x`, and does not alter any closed A/B/C0 result.
+This document records a successful independent symbolic/numerical audit of the algebra only. It does not establish `partial_lambda F_x>0` by interval arithmetic, does not certify `lambda_x`, and does not alter any closed A/B/C0 result.
