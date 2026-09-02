@@ -46,9 +46,11 @@ def _gate():
         stats = _stats()
         unresolved = 0
         stage_worst = None
+        stage_actual = 0
         for tl, tr in _split(T_LO, T_HI, nt):
             for ll, lr in _split(L_LO, L_HI, nl):
                 actual += panels
+                stage_actual += panels
                 try:
                     value = _integrate(tl, tr, ll, lr, panels, stats)
                     good = value.upper() < 0
@@ -57,12 +59,25 @@ def _gate():
                     good = False
                 if not good:
                     unresolved += 1
-                if value is not None and (stage_worst is None or value.upper() > stage_worst[0]):
-                    stage_worst = (value.upper(), tl, tr, ll, lr, value)
+                if value is not None:
+                    upper = value.upper()
+                    if stage_worst is None or upper > stage_worst[0]:
+                        stage_worst = (upper, tl, tr, ll, lr, value.mid(), value.rad())
         worst = stage_worst
         print("C1C_G3_STAGE", label, "t_boxes", nt, "lambda_boxes", nl,
-              "s_panels", panels, "unresolved", unresolved, "chart_stats", stats,
-              "worst", None if worst is None else worst[1:])
+              "s_panels", panels, "unresolved", unresolved,
+              "panel_evaluations", stage_actual)
+        print("C1C_G3_CHART_STATS", label, stats,
+              "AGREEMENT_EXCLUDES", "four_group_width_max")
+        if worst is None:
+            print("C1C_G3_WORST_BOX", label, "NONE")
+            print("C1C_G3_WORST_UPPER", label, "NONE")
+        else:
+            upper, tl, tr, ll, lr, mid, rad = worst
+            print("C1C_G3_WORST_BOX", label,
+                  "t_lo", tl, "t_hi", tr, "lambda_lo", ll, "lambda_hi", lr,
+                  "mid", mid, "rad", rad, "upper", upper)
+            print("C1C_G3_WORST_UPPER", label, upper)
         if actual > C1C_PANEL_CEILING:
             raise SystemExit("C1C_PANEL_CEILING_EXCEEDED")
         if unresolved == 0:

@@ -52,20 +52,55 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          def field(path, prefix):
-              rows = [x for x in Path(path).read_text().splitlines() if x.startswith(prefix)]
-              if len(rows) != 1:
-                  raise SystemExit(f"{path}: expected one {prefix!r}, got {len(rows)}")
-              return rows[0].split()
+          def rows(path, prefix):
+              return [x.split() for x in Path(path).read_text().splitlines()
+                      if x.startswith(prefix)]
 
-          p_stage = field("c1c-producer.log", "C1C_G3_FIRST_PASS")
-          c_stage = field("c1c-checker.log", "C1C_G3_FIRST_PASS")
-          p_final = field("c1c-producer.log", "LOGICAL_FINAL_C1C_MACHINE")
-          c_final = field("c1c-checker.log", "LOGICAL_FINAL_C1C_MACHINE")
+          def one(path, prefix):
+              found = rows(path, prefix)
+              if len(found) != 1:
+                  raise SystemExit(f"{path}: expected one {prefix!r}, got {len(found)}")
+              return found[0]
+
+          pp, cp = "c1c-producer.log", "c1c-checker.log"
+          p_stages = rows(pp, "C1C_G3_STAGE")
+          c_stages = rows(cp, "C1C_G3_STAGE")
+          if p_stages != c_stages:
+              raise SystemExit(f"stage unresolved/panel mismatch: {p_stages} != {c_stages}")
+
+          p_boxes = rows(pp, "C1C_G3_WORST_BOX")
+          c_boxes = rows(cp, "C1C_G3_WORST_BOX")
+          def box_key(row):
+              if row[2] == "NONE":
+                  return tuple(row[:3])
+              return tuple(row[:10])
+          if [box_key(x) for x in p_boxes] != [box_key(x) for x in c_boxes]:
+              raise SystemExit(f"worst-box mismatch: {p_boxes} != {c_boxes}")
+
+          p_upper = {x[1]: x[2] for x in rows(pp, "C1C_G3_WORST_UPPER")}
+          c_upper = {x[1]: x[2] for x in rows(cp, "C1C_G3_WORST_UPPER")}
+          if p_upper.keys() != c_upper.keys():
+              raise SystemExit(f"worst-upper stage mismatch: {p_upper} != {c_upper}")
+          unresolved = {x[1]: int(x[x.index("unresolved") + 1]) for x in p_stages}
+          for label in p_upper:
+              pu, cu = float(p_upper[label]), float(c_upper[label])
+              if (unresolved[label] == 0) != (pu < 0 and cu < 0):
+                  raise SystemExit(
+                      f"{label}: sign/unresolved inconsistency: "
+                      f"unresolved={unresolved[label]} producer_upper={pu} checker_upper={cu}"
+                  )
+
+          p_stage = one(pp, "C1C_G3_FIRST_PASS")
+          c_stage = one(cp, "C1C_G3_FIRST_PASS")
+          p_final = one(pp, "LOGICAL_FINAL_C1C_MACHINE")
+          c_final = one(cp, "LOGICAL_FINAL_C1C_MACHINE")
           if p_stage[1:] != c_stage[1:]:
               raise SystemExit(f"first-stage mismatch: {p_stage} != {c_stage}")
           if p_final[1] != "PASS" or c_final[1] != "PASS":
               raise SystemExit(f"machine gate unresolved: {p_final} / {c_final}")
+          print("C1C_AGREEMENT_FIELDS unresolved,worst_box,panel_evaluations")
+          print("C1C_WORST_UPPER_POLICY sign_checked_not_value_equal")
+          print("C1C_FOUR_GROUP_WIDTH_MAX AGREEMENT_EXCLUDED mag_t_derived")
           print("C1C_PRODUCER_CHECKER_AGREEMENT PASS", "first_stage", p_stage[1])
           print("C1C_ASSEMBLY_STATUS PENDING_C1B_ANCHOR_AND_EXACT_COVER")
           PY
