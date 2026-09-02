@@ -492,6 +492,21 @@ def run_full(kernel, lineage, run_dir):
         "attempted": state["attempted"],
         "next_slab": None if not state["queue"] else slab_payload(state["queue"][0]),
     })
+    def append_segment_end(reason, cumulative_work, attempted, **extra):
+        post_identity = environment_snapshot(pins[lineage])
+        verify_identity(post_identity, pins[lineage])
+        payload = {
+            "segment_index": segment_index,
+            "utc": utc_now(),
+            "reason": reason,
+            "cumulative_work": cumulative_work,
+            "attempted": attempted,
+            "post_pin_check": "PASS",
+            "post_identity": post_identity,
+        }
+        payload.update(extra)
+        ledger.append("segment_end", payload)
+
     signal.signal(signal.SIGTERM, request_stop)
     signal.signal(signal.SIGINT, request_stop)
     kernel.ctx.prec = kernel.BITS
@@ -505,14 +520,10 @@ def run_full(kernel, lineage, run_dir):
     accepted_count = len(state["accepted"])
     while queue:
         if _stop_requested:
-            ledger.append("segment_end", {
-                "segment_index": segment_index,
-                "utc": utc_now(),
-                "reason": "requested_stop",
-                "cumulative_work": global_work,
-                "attempted": attempted,
-                "next_slab": slab_payload(queue[0]),
-            })
+            append_segment_end(
+                "requested_stop", global_work, attempted,
+                next_slab=slab_payload(queue[0]),
+            )
             return
         if attempted >= kernel.MAX_ATTEMPTED:
             raise SystemExit("MAX_ATTEMPTED_SLABS_EXCEEDED")
@@ -564,14 +575,10 @@ def run_full(kernel, lineage, run_dir):
             left, right = slab.children()
             queue = [left, right] + queue
         else:
-            ledger.append("segment_end", {
-                "segment_index": segment_index,
-                "utc": utc_now(),
-                "reason": "failure",
-                "cumulative_work": global_work,
-                "attempted": attempted,
-                "next_slab": slab_payload(slab),
-            })
+            append_segment_end(
+                "failure", global_work, attempted,
+                next_slab=slab_payload(slab),
+            )
             raise SystemExit(f"C1B_UNRESOLVED {slab}")
     slabs = [r["payload"] for r in ledger.records if r["record_type"] == "slab_record"
              and r["payload"]["decision"] == "ACCEPT"]
@@ -582,16 +589,14 @@ def run_full(kernel, lineage, run_dir):
         union_ok = union_ok and all(
             a["lambda_hi"] == b["lambda_lo"] for a, b in zip(slabs, slabs[1:])
         )
-    ledger.append("segment_end", {
-        "segment_index": segment_index,
-        "utc": utc_now(),
-        "reason": "completed" if union_ok else "failure",
-        "cumulative_work": global_work,
-        "attempted": attempted,
-        "accepted": accepted_count,
-        "exact_union": union_ok,
-        "final_record_hash_before_end": ledger.last_hash,
-    })
+    append_segment_end(
+        "completed" if union_ok else "failure",
+        global_work,
+        attempted,
+        accepted=accepted_count,
+        exact_union=union_ok,
+        final_record_hash_before_end=ledger.last_hash,
+    )
     print("C1B_RESUMABLE_FINAL", "PASS" if union_ok else "UNRESOLVED",
           "accepted", accepted_count, "attempted", attempted,
           "work", global_work, "ledger_hash", ledger.last_hash)
