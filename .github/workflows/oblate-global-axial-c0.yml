@@ -34,3 +34,5 @@ jobs:
         run: PYTHONPATH=. python producer/global_axial_c0_producer_v2.py
       - name: Run C0 V2 checker
         run: PYTHONPATH=. python checker/global_axial_c0_checker_v2.py
+      - name: Run non-binding C1b tube-width diagnostic
+        run: PYTHONPATH=. python analysis/c1b_tube_width_diagnostic.py
