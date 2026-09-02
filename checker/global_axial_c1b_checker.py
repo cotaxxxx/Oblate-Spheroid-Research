@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Full-source C1b producer. No machine PASS is claimed by this source commit.
+"""Full-source 192-bit C1b checker.
 
+CHECKER_KERNEL=TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION
+INDEPENDENCE_SCOPE=PRECISION/PARTITION/GATING
 Status: IMPLEMENTED_PROTOTYPE / MACHINE_NOT_RUN / NOT_BINDING.
-The binding policy is fixed by the C1 parent contract plus the three C1b
-pre-run amendments already committed on this branch.
 """
 from __future__ import annotations
 import argparse
@@ -14,12 +14,12 @@ from pathlib import Path
 
 from flint import arb, ctx
 
-from producer import global_axial_c0_producer as base
-from producer.global_axial_c0_producer_v2 import _g_density_stable
-from producer.monotone_tube_refinement_producer import _ordinary as _gt_ordinary
-from producer.monotone_tube_refinement_producer import _corner as _gt_corner
+from checker import global_axial_c0_checker as base
+from checker import c0a_four_group_v2 as grouped
+from checker.monotone_tube_refinement_checker import _ordinary_refinement as _gt_ordinary
+from checker.monotone_tube_interval_checker import _corner as _gt_corner
 
-BITS, DEG = 160, 50
+BITS, DEG = 192, 50
 USTAR = Fraction(3, 5)
 L_LO, L_HI = Fraction(9, 20), Fraction(5, 8)
 DLAM, N_COARSE = Fraction(1, 800), 140
@@ -73,11 +73,20 @@ def coarse_ledger():
 def interval(a, b):
     return base._box(base._point(a), base._point(b))
 
+def _stats():
+    return {"series": 0, "direct": 0, "series_hits_moving_u0": 0, "chart_unresolved": 0}
+
+def _g_density_stable(s, t, L, stats):
+    s, x, mu, eps, A, delta, delta_sq, gam, u, L2, q, rootq, W, W2, n, m, p, big_q = grouped._primitives(s, t, L)
+    R, _, _, _ = base._R(u, gam, stats)
+    gt = L * n / (W * q * rootq)
+    alpha2 = u * R * R
+    return s * (-mu * alpha2 - 2 * A * R * gt)
+
 def g_box(tl, tr, ll, lr, panels):
     grid, root = base._partition(panels)
     t, lam = interval(tl, tr), interval(ll, lr)
-    stats = {"series": 0, "direct": 0, "series_hits_moving_u0": 0, "chart_unresolved": 0}
-    z = arb(0)
+    stats, z = _stats(), arb(0)
     for a, b in zip(grid, grid[1:]):
         aa = root if a == base.SQRT2 else base._point(a)
         bb = root if b == base.SQRT2 else base._point(b)
@@ -93,7 +102,8 @@ def gt_box(tl, tr, ll, lr, panels):
         bb = root if b == base.SQRT2 else base._point(b)
         s = base._box(aa, bb)
         if tr == T_HI and si == 0:
-            chart, terms = _gt_corner(s, t, lam)
+            val, chart = _gt_corner(s, t, lam)
+            terms = (val,)
         else:
             chart, terms = _gt_ordinary(s, t, lam)
         charts[chart] += 1
@@ -338,7 +348,9 @@ def attempt(slab, previous_root):
 
 def preflight():
     slabs, ok = coarse_ledger()
-    print("GLOBAL_AXIAL_C1B_PRODUCER — IMPLEMENTED_PROTOTYPE / MACHINE_NOT_RUN / NOT_BINDING")
+    print("GLOBAL_AXIAL_C1B_CHECKER — IMPLEMENTED_PROTOTYPE / MACHINE_NOT_RUN / NOT_BINDING")
+    print("CHECKER_KERNEL TRANSCRIBED_COPY_NOT_INDEPENDENT_DERIVATION")
+    print("INDEPENDENCE_SCOPE PRECISION/PARTITION/GATING")
     print("BITS", BITS, "DEG", DEG, "USTAR", USTAR)
     print("LAMBDA_DOMAIN", L_LO, L_HI, "direction increasing")
     print("COARSE_LEDGER", "PASS" if ok else "FAIL", "count", len(slabs),
@@ -346,7 +358,7 @@ def preflight():
     print("PREDICTOR_ORDER continuation -> bracket_scan -> relocated")
     print("PREDICTOR_ACCEPT", PRED_ACCEPT, "ROOT_TARGET", ROOT_TARGET)
     print("CLAMP_RULE", "max(1/2,tc-w0)", "min(1,tc+w0)", "w0", W0)
-    print("CORNER_RULE", "tr==1 and first s-panel => corner_hull")
+    print("CORNER_RULE", "tr==1 and first s-panel => checker corner_hull")
     print("T_STAGES", T_STAGES, "ROOT", (ROOT_STEPS,ROOT_LBOXES,ROOT_PANELS))
     print("E_POLICY", E0_TBOXES, E0_LBOXES, E_STAGES, "cap", E_BOX_CAP)
     print("CAPS", "coarse", N_COARSE, "accepted", MAX_ACCEPTED, "attempted", MAX_ATTEMPTED,
@@ -401,25 +413,13 @@ def full():
     print("LOGICAL_FINAL_C1B", "PASS" if ok else "UNRESOLVED")
     if not ok: raise SystemExit("UNRESOLVED")
 
-def smoke(index, tc):
-    ctx.prec = BITS; base.ctx.prec = BITS
-    slabs, ok = coarse_ledger()
-    if not ok or not (0 <= index < len(slabs)): raise SystemExit("BAD_LEDGER_OR_INDEX")
-    print("C1B_SMOKE — NOT_FULL_EVIDENCE", slabs[index], tc)
-    tube_first_pass(slabs[index], tc)
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ledger-only", action="store_true")
-    ap.add_argument("--smoke-slab", type=int)
-    ap.add_argument("--tc", type=str)
     args = ap.parse_args()
     ctx.prec = BITS; base.ctx.prec = BITS
     if args.ledger_only:
         preflight(); return
-    if args.smoke_slab is not None:
-        if args.tc is None: raise SystemExit("--tc exact rational required")
-        smoke(args.smoke_slab, Fraction(args.tc)); return
     full()
 
 if __name__ == "__main__":
