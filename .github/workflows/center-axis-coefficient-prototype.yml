@@ -17,7 +17,8 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install Arb dependency
-        run: python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
       - name: Run producer
         run: PYTHONPATH=. python producer/center_axis_coefficient_producer.py
       - name: Run independent checker
