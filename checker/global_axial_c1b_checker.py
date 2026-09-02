@@ -7,6 +7,7 @@ Status: IMPLEMENTED_PROTOTYPE / MACHINE_NOT_RUN / NOT_BINDING.
 """
 from __future__ import annotations
 import argparse
+import hashlib
 from collections import defaultdict
 from dataclasses import dataclass
 from fractions import Fraction
@@ -39,6 +40,7 @@ BOB_RECEIPT = Path("analysis/GLOBAL_AXIAL_C1B_BOB_MACHINE_RECEIPT.md")
 BOB_EVIDENCE_HEAD = "25efb59b851eb9d7a3d5ce30309eb8903d976930"
 BOB_CONTRACT_BLOB = "215193e2fc2a1abcf2aee2527c4c2e6f3176ea6c"
 BOB_AMENDMENT_BLOB = "8e04e2efaf816bab9d9d1f3fd0a9d753538b31ad"
+BOB_RECEIPT_BLOB = "0f19e3877b9675506ac8f35a5702147a84723c43"
 
 @dataclass(frozen=True)
 class Slab:
@@ -111,14 +113,18 @@ def gt_box(tl, tr, ll, lr, panels):
     return z, dict(charts), panels
 
 def bob_preflight():
-    text = BOB_RECEIPT.read_text()
+    data = BOB_RECEIPT.read_bytes()
+    text = data.decode()
+    header = f"blob {len(data)}\0".encode()
+    blob = hashlib.sha1(header + data).hexdigest()
     required = (
         "MACHINE_PASS / C1B_SUBGATE_ONLY / FULL_C1B_NOT_YET_CLOSED",
         BOB_EVIDENCE_HEAD, BOB_CONTRACT_BLOB, BOB_AMENDMENT_BLOB,
         "B_ob(lambda) < 0 for every lambda in [9/20,5/8]",
     )
-    ok = all(x in text for x in required)
+    ok = all(x in text for x in required) and blob == BOB_RECEIPT_BLOB
     print("C1B_BOB_PIN_CHECK", "PASS" if ok else "FAIL",
+          "receipt_blob", blob, "expected_receipt_blob", BOB_RECEIPT_BLOB,
           "evidence_head", BOB_EVIDENCE_HEAD,
           "contract_blob", BOB_CONTRACT_BLOB, "amendment_blob", BOB_AMENDMENT_BLOB)
     if not ok:
@@ -373,6 +379,7 @@ def full():
     queue, _ = coarse_ledger()
     accepted, attempts, previous_root = [], 0, None
     totals = defaultdict(int)
+    accepted_work = 0
     while queue:
         if attempts >= MAX_ATTEMPTED: raise SystemExit("MAX_ATTEMPTED_SLABS_EXCEEDED")
         slab = queue.pop(0); attempts += 1
@@ -386,7 +393,9 @@ def full():
             raise SystemExit("PER_ATTEMPT_WORK_CEILING_EXCEEDED")
         if ok:
             accepted.append(rec); previous_root = root
+            accepted_work += attempt_work
             if len(accepted) > MAX_ACCEPTED: raise SystemExit("MAX_ACCEPTED_SLABS_EXCEEDED")
+            if accepted_work > ACCEPTED_WORK_CEILING: raise SystemExit("ACCEPTED_WORK_CEILING_EXCEEDED")
         else:
             if slab.depth >= MAX_DEPTH: raise SystemExit(f"C1B_UNRESOLVED_DEPTH3 {slab}")
             left, right = slab.children()
@@ -406,10 +415,11 @@ def full():
           "exact_adjacency", union_ok)
     print("C1B_RIGHT_CLAMP_SUMMARY", "lambda_B", lambda_b, "count", right_clamped,
           "corner_hull_total", corners)
-    print("C1B_WORK_LEDGER", dict(totals), "actual_total", actual,
+    print("C1B_WORK_LEDGER", dict(totals), "accepted_work", accepted_work,
+          "accepted_ceiling", ACCEPTED_WORK_CEILING, "actual_total", actual,
           "global_ceiling", GLOBAL_ATTEMPT_WORK_CEILING)
     ok = union_ok and attempts <= MAX_ATTEMPTED and len(accepted) <= MAX_ACCEPTED \
-         and actual <= GLOBAL_ATTEMPT_WORK_CEILING
+         and accepted_work <= ACCEPTED_WORK_CEILING and actual <= GLOBAL_ATTEMPT_WORK_CEILING
     print("LOGICAL_FINAL_C1B", "PASS" if ok else "UNRESOLVED")
     if not ok: raise SystemExit("UNRESOLVED")
 
