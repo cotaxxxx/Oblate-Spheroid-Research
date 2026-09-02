@@ -44,6 +44,22 @@ git diff e66dab917d9dba0b06298ba480d197cb6bc6e944..fbffaccc6dfcfd1b7b9be5b362d8c
  1 file changed, 19 insertions(+), 4 deletions(-)
 ```
 
+Checker receipt-layer stat:
+
+```text
+git diff 5b4c8c1068f7452e8f25f0b8ebcc13d0bb54ae3b..3ecbda1b3e9acd8134fdd94505721b1780e14edc --stat
+ checker/global_axial_c1c_checker.py | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
+```
+
+Workflow receipt/agreement stat:
+
+```text
+git diff e9c3bfb7a88ba94323bc934e6168875c878b3d3d..b9de12fae75ce0268fc1b4d87257a057896e752c --stat
+ .github/workflows/oblate-global-axial-c1c.yml | 69 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 60 insertions(+), 9 deletions(-)
+```
+
 Those 23 changed lines only retain `arb.upper()`, `mid()`, and `rad()` for output, count per-stage panel evaluations, and split stage/chart/worst receipt records. Density, chart selection, recurrence, series, tail, partitions, strict-sign predicate, stages, precision, and ceiling are unchanged. The checker has the same receipt-layer change in its separate lineage.
 
 ```text
