@@ -1,6 +1,6 @@
 # C1c pre-run amendment — lower-half post-crossing exclusion
 
-Status: `PREDECLARED_AMENDMENT / MACHINE_NOT_RUN / NOT_BINDING`
+Status: `PREDECLARED_AMENDMENT / MACHINE_GATING_PASS / ASSEMBLY_PENDING_C1B / NOT_BINDING`
 
 This amendment is made before the first C1c gating run. It adds the missing lower-half obligation to the global C1 assembly without changing any C0, C1a, C1b, boundary-band, tube, predictor, clamp, corner-hull, exterior, precision, or budget rule.
 
@@ -100,3 +100,28 @@ The later assembly receipt must additionally pin the C1b receipt, its exact lamb
 ## 6. Abort rule
 
 Any unresolved A2 box, ceiling excess, source/dependency pin mismatch, producer/checker disagreement, missing C1b exact cover, or missing positive `t=1/2` anchor leaves the corresponding machine or assembly claim `UNRESOLVED / NOT_BINDING`.
+
+## 7. Pinned machine-gating result
+
+```text
+run id = 33652374082
+run number = 3
+run URL = https://github.com/cotaxxxx/bg-oblate-spheroid/actions/runs/33652374082
+run HEAD = 3dec57ae76aa6d1e3254592f03eda7fef2eb736c
+run status = success
+run started = 2026-09-02T16:02:04Z
+run updated = 2026-09-02T16:28:31Z
+```
+
+Run-time blob pins:
+
+```text
+amendment = f7568ac381884e35386de221277776765baf5c57
+producer = fbffaccc6dfcfd1b7b9be5b362d8cb80d867aa62
+checker = 3ecbda1b3e9acd8134fdd94505721b1780e14edc
+workflow = b9de12fae75ce0268fc1b4d87257a057896e752c
+requirements-prototype = e01c11e4c67774875b280ccc7603ffb29aa427f4
+requirements-interval = 399cb56905e5cf6e71a2d59771fee1ea7c2834e0
+```
+
+The machine gate passed at A2 in both lineages. The global assembly remains pending until the pinned C1b receipt supplies the exact `[9/20,5/8]` lambda union and the positive `g(1/2,lambda)` anchor on every accepted slab.
