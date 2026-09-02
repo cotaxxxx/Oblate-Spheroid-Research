@@ -4,6 +4,8 @@ Status: `PREDECLARED_CONTRACT / MACHINE_NOT_RUN / NOT_BINDING`
 
 This file fixes the C1 machine policy before any C1 gating run is used as evidence.
 
+Pre-run amendment: the C1a crossing lambda-derivative density must pass an independent symbolic audit before implementation, and C1b may be executed on a pinned external workstation under the acceptance rules in Section 7.1.  No stage, sign, refinement, width, or budget rule is changed by this amendment.
+
 ## 1. Scope
 
 C1 is the axial middle-cover bridge immediately to the right of the closed C0 box.  Its fixed parameter interval is
@@ -112,7 +114,24 @@ F_x(9/20) > 0,
 partial_lambda F_x(lambda) > 0 on [83/200,9/20].
 ```
 
-The `partial_lambda F_x` certification must use the same analytic-derivative architecture as the certified center-axis `partial_lambda H_axis_ob` calculation: Arb, the same stable `R/R_gamma/R_gammagamma` charts, and a separately transcribed checker.  A finite-difference derivative is diagnostic only and cannot gate C1a.
+The `partial_lambda F_x` certification is a new first-density lambda derivative at fixed `t=1/2`; it is not the center-axis second-density derivative used for Claim A.  Before producer/checker implementation, the algebra in
+
+```text
+analysis/GLOBAL_AXIAL_C1A_CROSSING_LAMBDA_DERIVATIVE_SYMBOLIC_AUDIT.md
+```
+
+must receive an explicit independent symbolic pass.  Until then C1a.2 remains `NOT_IMPLEMENTED / NOT_BINDING`.
+
+After that audit, implementation must use Arb, the same stable `R/R_gamma` series/direct architecture used by the certified A/C0 kernels, and a separately transcribed checker.  A finite-difference derivative is diagnostic only and cannot gate C1a.
+
+Reported independent controls, explicitly non-gating:
+
+```text
+F_x(83/200) ~ -0.0089,
+F_x(9/20)   ~ +0.0276,
+partial_lambda g(1/2,lambda) ~ +0.52,
+partial_lambda F_x(lambda)   ~ +1.0.
+```
 
 Predeclared derivative stages:
 
@@ -342,7 +361,7 @@ Therefore the absolute C1b machine-work ceiling, including failed refined attemp
 128 * 23,560,192 = 3,015,704,576 panel evaluations.
 ```
 
-This is a safety ceiling, not a target workload.
+This is a safety ceiling, not a target workload.  Because this ceiling is not assumed to fit inside hosted Actions wall-time, C1b is permitted to run on an external workstation under Section 7.1 without changing any mathematical gate or budget.
 
 ## 7. Arithmetic / checker architecture
 
@@ -358,6 +377,33 @@ arithmetic          = Arb
 
 The checker must reproduce exact coverage, first-pass stage choice, strict signs, candidate acceptance, and resource counts with an independently transcribed kernel where one already exists.  As in A/C0, a transcribed checker is not to be described as an independent mathematical derivation.
 
+### 7.1 External-workstation execution acceptance
+
+C1b may be run outside GitHub Actions, including on the designated external high-performance workstation, provided the run starts from a fully pinned repository state and emits a receipt sufficient to reproduce the environment.
+
+Mandatory pre-run acceptance conditions:
+
+```text
+1. exact git HEAD is recorded before execution;
+2. git status --short is empty before execution;
+3. branch/ref name is recorded;
+4. contract blob and contract commit are recorded;
+5. producer/checker blobs are recorded;
+6. requirements-prototype.txt and requirements-interval.txt blobs are recorded;
+7. installed Python version is recorded;
+8. installed mpmath and python-flint versions are recorded;
+9. package hashes / the same hash-pinned requirement files are used;
+10. producer/checker precision, DEG, USTAR, all stage declarations, w0, slab caps, and work ceilings are echoed before numerical work;
+11. host CPU/OS metadata and start/end timestamps are recorded;
+12. no source file, requirement file, contract, or executable parameter is modified during the accepted run.
+```
+
+The authoritative source identity is the recorded Git commit plus blob pins, not the machine name.  A local run from a dirty tree, an unrecorded HEAD, an unpinned dependency environment, or altered stage/budget parameters is `NOT_EVIDENCE` even if all numerical signs appear to pass.
+
+For a long C1b execution, periodic checkpoint files are permitted only as resumability artifacts.  Acceptance after resume requires the checkpoint to pin the same HEAD, contract blob, producer/checker blobs, dependency pins, precision, stage declarations, exact slab ledger, accumulated resource ledger, and next unresolved slab.  A resume that changes any gating parameter is a new run and requires a pre-run contract amendment.
+
+Hosted Actions may still be used for C1a and for focused C1b smoke/diagnostic runs.  Such focused runs do not replace the full external C1b evidence unless they themselves satisfy the complete declared cover and receipt requirements.
+
 ## 8. Mandatory machine receipt fields
 
 A C1 machine receipt must pin at least:
@@ -365,9 +411,10 @@ A C1 machine receipt must pin at least:
 ```text
 contract blob and commit
 producer/checker blobs
-workflow blob
+workflow blob, or external-run launcher/script blob when Actions is not used
 requirements blobs and package hashes
-run id / job id / checked-out head
+run id / job id when Actions is used; external run label / host metadata otherwise
+checked-out head and clean-tree precondition
 precision and all stage declarations
 C1a first-pass stages and unresolved counts
 C1a worst boxes and sign margins
@@ -382,6 +429,7 @@ left-wall worst g lower bound
 right-wall worst g upper bound
 exterior box counts / unresolved counts / worst margins
 actual panel-evaluation totals
+checkpoint/resume lineage if any
 checker agreement and stated independence scope
 ```
 
@@ -390,6 +438,7 @@ checker agreement and stated independence scope
 The run is `UNRESOLVED / NOT_BINDING` if any of the following occurs:
 
 ```text
+C1a symbolic lambda-derivative audit has not passed before implementation/evidence use;
 C1a A2 unresolved;
 C1a D2 unresolved;
 endpoint signs do not bracket a crossing;
@@ -403,7 +452,9 @@ any exterior box remains unresolved after E2;
 exact slab union/coverage check fails;
 accepted slab count exceeds 64;
 attempted slab count exceeds 128;
-any declared work ceiling is exceeded.
+any declared work ceiling is exceeded;
+external execution begins from a dirty tree or unrecorded HEAD;
+external dependency/source/stage pins do not match the declared run identity.
 ```
 
 A failed condition may not be converted to PASS by an unannounced partition, width, precision, formula, or budget change.
