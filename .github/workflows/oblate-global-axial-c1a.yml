@@ -16,8 +16,11 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
-      - name: Record checked-out head
-        run: git rev-parse HEAD
+      - name: Record checked-out head and amendment pin
+        run: |
+          git rev-parse HEAD
+          git hash-object analysis/GLOBAL_AXIAL_C1A_PRE_RUN_AMENDMENT.md
+          cat analysis/GLOBAL_AXIAL_C1A_PRE_RUN_AMENDMENT.md
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
