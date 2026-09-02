@@ -109,47 +109,6 @@ def _record(stats, chart, groups):
             rec[chart][i] = r
 
 
-def _bounds(x):
-    return (x.lower(), x.upper())
-
-
-def _report_first_k3_inf(
-    stats, chart, s, t, lam, u, q, q6, w2, w4, N, N4,
-    k3_num, k3_den, Rggg, K3, group3,
-):
-    """Report one provenance record per stage for an infinite K3-group radius."""
-    if chart != "series" or stats.get("k3_inf_reported"):
-        return
-    if "inf" not in str(group3.rad()).lower():
-        return
-    U = u.upper()
-    den0 = 1 - U
-    den1 = 1 - U * 52 / 51
-    den2 = 1 - U * 52 / 50
-    den3 = 1 - U * 52 / 49
-    print(
-        "C0A_K3_INF_DIAGNOSTIC",
-        "s_bounds", _bounds(s),
-        "t_bounds", _bounds(t),
-        "lambda_bounds", _bounds(lam),
-        "u_bounds", _bounds(u),
-        "U", U,
-        "tail_denoms", (den0, den1, den2, den3),
-        "q_bounds", _bounds(q),
-        "q6_bounds", _bounds(q6),
-        "N_bounds", _bounds(N),
-        "N4_bounds", _bounds(N4),
-        "w2_bounds", _bounds(w2),
-        "w4_bounds", _bounds(w4),
-        "num_bounds", _bounds(k3_num),
-        "den_bounds", _bounds(k3_den),
-        "Rggg_bounds", _bounds(Rggg),
-        "K3_bounds", _bounds(K3),
-        "RgggK3_bounds", _bounds(group3),
-    )
-    stats["k3_inf_reported"] = True
-
-
 def density(s, t, lam, stats):
     s, x, mu, e, A, d, d2, gamma, u, l2, q, sq, w, w2, N, M, P, Q = _geometry(s, t, lam)
     chart = "series" if u.upper() <= base.USTAR else "direct"
@@ -174,14 +133,8 @@ def density(s, t, lam, stats):
     K0 = _factorized_k0(x, mu, e, A, d2, t, lam, l2, w, q9h)
     K1 = l2 * num1 / (w2 * q5)
     K2 = l3 * num2 / (w3 * q11h)
-    k3_num = -2 * A * l4 * N4
-    k3_den = w4 * q6
-    K3 = k3_num / k3_den
+    K3 = (-2 * A * l4 * N4) / (w4 * q6)
 
     groups = (R*K0, Rg*K1, Rgg*K2, Rggg*K3)
-    _report_first_k3_inf(
-        stats, chart, s, t, lam, u, q, q6, w2, w4, N, N4,
-        k3_num, k3_den, Rggg, K3, groups[3],
-    )
     _record(stats, chart, groups)
     return s * (groups[0] + groups[1] + groups[2] + groups[3])
