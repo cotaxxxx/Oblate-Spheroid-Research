@@ -59,10 +59,11 @@ Every JSON object must be serialized for hashing with:
 
 ```text
 UTF-8
-sorted keys
+json.dumps(..., sort_keys=True, separators=(",",":"), ensure_ascii=True)
 no insignificant whitespace
-ensure_ascii=false
-exact rationals encoded as canonical "numerator/denominator" strings
+exact rationals encoded as canonical "p/q" strings, including denominator 1
+Arb values encoded as {"mid":"...","rad":"...","upper":"..."} with decimal strings
+JSON float values forbidden in every record
 ```
 
 Each record contains:
@@ -187,7 +188,9 @@ For a graceful requested stop, the driver appends exact completed-stage work and
 
 For an ungraceful interruption, the exact partial-stage work may be unknowable. On resume, every unmatched `attempt_begin` is therefore charged conservatively at the full declared per-attempt gating ceiling plus the full predictor-scan ceiling before that slab is restarted. This charge is appended as an `interrupted_attempt_charge` record. It counts toward global attempted work but does not advance the slab ledger.
 
-No interruption may reduce cumulative work or reset an attempted-slab count. Ceiling checks include all prior segments, completed attempts, graceful partial work, conservative interruption charges, and the current segment.
+Every appended `attempt_begin`, including one interrupted before a terminal `slab_record`, consumes one unit of `MAX_ATTEMPTED_SLABS=2100`. Restarting the discarded slab consumes another attempt unit. Repeated interruption of the same exact slab therefore consumes the attempted-slab cap and eventually forces `UNRESOLVED`; it may not be collapsed into one logical attempt.
+
+No interruption may reduce cumulative work or reset an attempted-slab count. Ceiling checks include all prior segments, all `attempt_begin` records, completed attempts, graceful partial work, conservative interruption charges, and the current segment.
 
 ## 4. Producer/checker concurrency
 
