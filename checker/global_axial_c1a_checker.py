@@ -138,18 +138,18 @@ def _crossing():
         return False, None
 
     lo, hi = L_LO, L_HI
+    vlo, vhi = left, right
     for k in range(1, BISECTION_STEPS + 1):
         mid = (lo + hi) / 2
         v, _ = _fx_point(mid)
         if v.upper() < 0:
-            lo = mid; sign = "NEG"
+            lo, vlo = mid, v; sign = "NEG"
         elif v.lower() > 0:
-            hi = mid; sign = "POS"
+            hi, vhi = mid, v; sign = "POS"
         else:
             print("C1A_BISECTION", k, "UNRESOLVED", "mid", mid, "enclosure", v)
             return False, None
         print("C1A_BISECTION", k, sign, "mid", mid, "enclosure", v)
-    vlo, _ = _fx_point(lo); vhi, _ = _fx_point(hi)
     ok = vlo.upper() < 0 and vhi.lower() > 0
     print("C1A_LAMBDA_X_BRACKET", "PASS" if ok else "UNRESOLVED", "lo", lo, "hi", hi,
           "F_lo", vlo, "F_hi", vhi, "width", hi - lo)
