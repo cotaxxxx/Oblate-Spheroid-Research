@@ -77,17 +77,33 @@ jobs:
           if [box_key(x) for x in p_boxes] != [box_key(x) for x in c_boxes]:
               raise SystemExit(f"worst-box mismatch: {p_boxes} != {c_boxes}")
 
-          p_upper = {x[1]: x[2] for x in rows(pp, "C1C_G3_WORST_UPPER")}
-          c_upper = {x[1]: x[2] for x in rows(cp, "C1C_G3_WORST_UPPER")}
+          p_upper = {x[1]: " ".join(x[2:]) for x in rows(pp, "C1C_G3_WORST_UPPER")}
+          c_upper = {x[1]: " ".join(x[2:]) for x in rows(cp, "C1C_G3_WORST_UPPER")}
           if p_upper.keys() != c_upper.keys():
               raise SystemExit(f"worst-upper stage mismatch: {p_upper} != {c_upper}")
+
+          def point_interval_sign(text):
+              # python-flint renders arb.upper() as a certified point interval:
+              # negative "[-... +/- ...]", positive "[... +/- ...]",
+              # zero-containing "[+/- ...]".
+              text = text.strip()
+              if text.startswith("[-"):
+                  return -1
+              if text.startswith("[+/-"):
+                  return 0
+              if text.startswith("["):
+                  return 1
+              raise SystemExit(f"unrecognized arb.upper() rendering: {text!r}")
+
           unresolved = {x[1]: int(x[x.index("unresolved") + 1]) for x in p_stages}
           for label in p_upper:
-              pu, cu = float(p_upper[label]), float(c_upper[label])
-              if (unresolved[label] == 0) != (pu < 0 and cu < 0):
+              psign = point_interval_sign(p_upper[label])
+              csign = point_interval_sign(c_upper[label])
+              if (unresolved[label] == 0) != (psign < 0 and csign < 0):
                   raise SystemExit(
                       f"{label}: sign/unresolved inconsistency: "
-                      f"unresolved={unresolved[label]} producer_upper={pu} checker_upper={cu}"
+                      f"unresolved={unresolved[label]} "
+                      f"producer_upper={p_upper[label]} checker_upper={c_upper[label]}"
                   )
 
           p_stage = one(pp, "C1C_G3_FIRST_PASS")
