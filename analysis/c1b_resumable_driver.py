@@ -21,6 +21,17 @@ from pathlib import Path
 PINS_PATH = Path("analysis/GLOBAL_AXIAL_C1B_RESUMABLE_PINS.json")
 CHAIN_VERSION = "C1B_JSONL_CHAIN_V1"
 ZERO_HASH = "0" * 64
+PINNED_ENVIRONMENT_FIELDS = (
+    "python_executable",
+    "python_version",
+    "pip_version",
+    "pip_freeze_all",
+    "packages",
+    "platform",
+    "uname",
+    "lscpu_head",
+    "os_release",
+)
 
 
 def utc_now():
@@ -146,6 +157,9 @@ def environment_snapshot(pin_spec):
         for path in sorted(wheel_dir.iterdir()):
             if path.is_file():
                 wheels[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    os_release_path = Path("/etc/os-release")
+    os_release = os_release_path.read_text(encoding="utf-8").splitlines() \
+        if os_release_path.is_file() else []
     return {
         "head": run_text(["git", "rev-parse", "HEAD"]),
         "ref": run_text(["git", "rev-parse", "--abbrev-ref", "HEAD"]),
@@ -160,6 +174,7 @@ def environment_snapshot(pin_spec):
         "platform": platform.platform(),
         "uname": platform.uname()._asdict(),
         "lscpu_head": lscpu,
+        "os_release": os_release,
         "wheel_sha256": wheels,
     }
 
@@ -168,12 +183,27 @@ def verify_identity(identity, pin_spec):
     failures = []
     if identity["head"] != pin_spec["head"]:
         failures.append("HEAD")
+    if identity["ref"] != pin_spec["ref"]:
+        failures.append("REF")
     if identity["clean_status"] != "":
         failures.append("DIRTY_TREE")
     if identity["blobs"] != pin_spec["expected_blobs"]:
         failures.append("BLOBS")
     if identity["wheel_sha256"] != pin_spec["wheel_sha256"]:
         failures.append("WHEELS")
+    expected_environment = pin_spec.get("expected_environment")
+    if not isinstance(expected_environment, dict):
+        failures.append("EXPECTED_ENVIRONMENT_MISSING")
+    else:
+        missing = [key for key in PINNED_ENVIRONMENT_FIELDS
+                   if key not in expected_environment]
+        extra = sorted(set(expected_environment) - set(PINNED_ENVIRONMENT_FIELDS))
+        if missing or extra:
+            failures.append("EXPECTED_ENVIRONMENT_SCHEMA")
+        else:
+            for key in PINNED_ENVIRONMENT_FIELDS:
+                if identity.get(key) != expected_environment[key]:
+                    failures.append("ENV_" + key.upper())
     if failures:
         raise SystemExit("PIN_IDENTITY_FAIL " + ",".join(failures))
 

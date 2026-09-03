@@ -8,7 +8,7 @@ import io
 import re
 import signal
 import sys
-from decimal import Decimal, ROUND_CEILING, localcontext
+from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR, localcontext
 from fractions import Fraction
 from pathlib import Path
 
@@ -16,11 +16,20 @@ from analysis import c1b_resumable_driver as persistence
 
 _stop_requested = False
 
-def decimal_add_up(a, b):
+def decimal_directed(a, b, rounding):
     with localcontext() as dc:
         dc.prec = max(120, len(a) + len(b) + 20)
-        dc.rounding = ROUND_CEILING
+        dc.rounding = rounding
         return str(Decimal(a) + Decimal(b))
+
+
+def arb_parts(mid, rad):
+    return {
+        "mid": mid,
+        "rad": rad,
+        "lower": decimal_directed(mid, "-" + rad, ROUND_FLOOR),
+        "upper": decimal_directed(mid, rad, ROUND_CEILING),
+    }
 
 
 _ARB_RE = re.compile(r"^\[?\s*([^\s\]]+)\s*\+/-\s*([^\s\]]+)\s*\]?$")
@@ -34,13 +43,13 @@ def arb_decimal_record(text):
     if s.startswith("[+/-"):
         rad = s[len("[+/-"):].strip().rstrip("]").strip()
         mid = "0"
-        return {"mid": mid, "rad": rad, "upper": decimal_add_up(mid, rad)}
+        return arb_parts(mid, rad)
     m = _ARB_RE.match(s)
     if m:
         mid, rad = m.group(1), m.group(2)
-        return {"mid": mid, "rad": rad, "upper": decimal_add_up(mid, rad)}
+        return arb_parts(mid, rad)
     # Exact decimal Arb rendering.
-    return {"mid": s, "rad": "0", "upper": s}
+    return {"mid": s, "rad": "0", "lower": s, "upper": s}
 
 
 
@@ -121,6 +130,15 @@ def serialize_root(root):
     if root is None:
         return None
     return [persistence.rational_text(root[0]), persistence.rational_text(root[1])]
+
+
+def slab_payload(slab):
+    return {
+        "coarse_index": int(slab.coarse),
+        "refinement_depth": int(slab.depth),
+        "lambda_lo": persistence.rational_text(slab.ll),
+        "lambda_hi": persistence.rational_text(slab.lr),
+    }
 
 
 def serialize_record(rec, tc, mode, work, reason, trace):
@@ -210,7 +228,7 @@ def estimates(kernel):
 
 def header_payload(kernel, lineage, pins, identity):
     return {
-        "chain_version": CHAIN_VERSION,
+        "chain_version": persistence.CHAIN_VERSION,
         "lineage": lineage,
         "created_utc": persistence.utc_now(),
         "identity": identity,
@@ -245,6 +263,16 @@ def request_stop(signum, frame):
     _stop_requested = True
 
 
+def verify_resume_header(stored, current):
+    """Compare every immutable header field; only creation UTC may differ."""
+    stored_static = dict(stored)
+    current_static = dict(current)
+    stored_static.pop("created_utc", None)
+    current_static.pop("created_utc", None)
+    if stored_static != current_static:
+        raise SystemExit("RESUME_HEADER_CONTRACT_MISMATCH")
+
+
 def run_full(kernel, lineage, run_dir):
     pins = persistence.load_pins()
     if pins is None:
@@ -259,8 +287,10 @@ def run_full(kernel, lineage, run_dir):
         header = ledger.records[0]
         if header["record_type"] != "header":
             raise SystemExit("LEDGER_HEADER_MISSING")
-        if header["payload"]["identity"] != identity:
-            raise SystemExit("RESUME_HEADER_IDENTITY_MISMATCH")
+        verify_resume_header(
+            header["payload"],
+            header_payload(kernel, lineage, pins[lineage], identity),
+        )
     state = replay(kernel, ledger.records)
     full_charge = kernel.ATTEMPT_WORK_CEILING + 513 * 2 * kernel.PRED_SCAN_PANELS
     for seq in state["unmatched"]:
