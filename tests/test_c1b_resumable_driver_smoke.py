@@ -84,12 +84,13 @@ class StubKernel:
 
 
 def identity():
+    blobs = {path: "b" * 40 for path in persistence.REQUIRED_C1B_BLOB_PATHS}
     return {
         "head": "a" * 40,
         "ref": "smoke",
         "clean_status": "",
-        "blobs": {"stub": "b" * 40},
-        "expected_blobs": {"stub": "b" * 40},
+        "blobs": blobs,
+        "expected_blobs": blobs,
         "python_executable": "/usr/bin/python3",
         "python_version": "3.smoke",
         "pip_version": "smoke",
@@ -105,9 +106,8 @@ def identity():
 
 def pins(snapshot):
     return {
-        "head": snapshot["head"],
         "ref": snapshot["ref"],
-        "blob_paths": ["stub"],
+        "blob_paths": list(persistence.REQUIRED_C1B_BLOB_PATHS),
         "expected_blobs": snapshot["blobs"],
         "wheel_dir": "unused",
         "wheel_sha256": snapshot["wheel_sha256"],
@@ -178,6 +178,9 @@ class C1BResumableSmoke(unittest.TestCase):
             self.assertEqual(final["attempted"], 2)
 
     def test_identity_and_header_mismatches_refuse_resume(self):
+        changed_head = copy.deepcopy(self.snapshot)
+        changed_head["head"] = "d" * 40
+        persistence.verify_identity(changed_head, self.manifest["producer"])
         bad = copy.deepcopy(self.snapshot)
         bad["python_version"] = "changed"
         with self.assertRaisesRegex(SystemExit, "ENV_PYTHON_VERSION"):

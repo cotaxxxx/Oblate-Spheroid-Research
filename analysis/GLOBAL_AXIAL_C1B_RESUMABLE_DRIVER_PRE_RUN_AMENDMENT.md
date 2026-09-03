@@ -115,6 +115,25 @@ canonical-JSON and hash-chain version
 
 The header is immutable for the lifetime of the ledger.
 
+The pin manifest must not contain an expected `head` field. A manifest commit
+cannot truthfully pin its own commit hash. Exact HEAD continuity is instead
+recorded by `identity.head` in the immutable ledger header and enforced on
+every resume by equality of all immutable header fields. The manifest still
+pins the branch `ref`, clean tree, wheels, environment, and source blobs.
+
+The source-blob set is exactly the following seven paths; the manifest itself
+must not appear in `expected_blobs`:
+
+```text
+analysis/c1b_resumable_driver.py
+producer/global_axial_c1b_gating.py
+checker/global_axial_c1b_gating.py
+producer/global_axial_c1b_kernel.py
+checker/global_axial_c1b_kernel.py
+producer/global_axial_c1b_producer.py
+checker/global_axial_c1b_checker.py
+```
+
 ### 2.3 Segment records
 
 Every process start appends `segment_begin`; every graceful process end appends `segment_end`. Their payloads record:
@@ -176,6 +195,11 @@ At startup, if a ledger exists, the driver must:
 
 A successful comparison is appended in the new `segment_begin`. One failed comparison is permanently `NOT_EVIDENCE`; deleting or replacing the failed ledger to obtain a pass is forbidden.
 
+A ledger containing a terminal `slab_record` with `decision = ABORT` is not
+resumable. That run is failed and remains `NOT_EVIDENCE`; any later attempt
+must use a new, previously nonexistent `RUN_DIR`. An ABORT ledger may not be
+deleted, truncated, copied, or relabelled as a resumable ledger.
+
 Completed slabs are never recomputed. An attempt having `attempt_begin` but no terminal `slab_record` is interrupted and is discarded in full. No interval, stage, box queue, partial sum, predictor scan, or root-localization state from that attempt may be reused. The exact slab is restarted from its beginning.
 
 The slab order is fixed in increasing lambda order, including deterministic left-child-before-right-child refinement. The continuation `previous_root` is read only from the last accepted terminal `slab_record`; it is not recomputed on resume.
@@ -228,6 +252,14 @@ producer/checker post-completion comparison
 
 If any resume comparison fails, either hash chain fails, an existing ledger is rewritten, an interrupted slab is partially reused, or a shared runtime state is detected, the affected lineage and combined receipt are `NOT_EVIDENCE`.
 
+The receipt must state that the producer and checker gating modules are
+byte-identical transcription copies. Their runtime independence consists of
+separate processes, directories, ledgers, and writable state; their substantive
+numerical independence resides in the separately audited 160-bit producer and
+192-bit checker kernel modules. Parsed trace fields are receipt diagnostics
+only. The gating decision is the kernel's returned `ok` value and must not be
+recomputed, strengthened, weakened, or overridden from parsed trace text.
+
 ## 6. Preflight estimates and calibration
 
 Before a full run, the driver must print and append to the header:
@@ -252,6 +284,13 @@ predictor scan work = separately accumulated
 Before the C1b evidence run, execute the pinned C1c machine calculation on the external host as `DIAGNOSTIC / NOT_C1B_EVIDENCE` to measure panel-evaluation throughput. Record its HEAD, blobs, exact evaluation count, UTC duration, CPU/toolchain, and derived evaluations per second. The calibration may estimate time only; it may not change any C1b stage, gate, budget, or acceptance rule.
 
 If the resulting selected execution plan is expected to exceed the available uninterrupted operating window, the resumable driver must be used. An estimate may not be converted into evidence.
+
+Before the external host's environment is written into the pin manifest, run
+`lscpu | head -20` twice in the intended execution environment and compare the
+two byte streams. They must match. If a volatile line (for example, a scaling
+frequency) is present, the exact exclusion rule and retained-line ordering must
+be declared in a committed amendment before the manifest is created; it may not
+be chosen after observing a resume mismatch.
 
 ## 7. Audit and pin order
 

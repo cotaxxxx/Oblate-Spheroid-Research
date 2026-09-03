@@ -21,6 +21,15 @@ from pathlib import Path
 PINS_PATH = Path("analysis/GLOBAL_AXIAL_C1B_RESUMABLE_PINS.json")
 CHAIN_VERSION = "C1B_JSONL_CHAIN_V1"
 ZERO_HASH = "0" * 64
+REQUIRED_C1B_BLOB_PATHS = (
+    "analysis/c1b_resumable_driver.py",
+    "producer/global_axial_c1b_gating.py",
+    "checker/global_axial_c1b_gating.py",
+    "producer/global_axial_c1b_kernel.py",
+    "checker/global_axial_c1b_kernel.py",
+    "producer/global_axial_c1b_producer.py",
+    "checker/global_axial_c1b_checker.py",
+)
 PINNED_ENVIRONMENT_FIELDS = (
     "python_executable",
     "python_version",
@@ -181,13 +190,18 @@ def environment_snapshot(pin_spec):
 
 def verify_identity(identity, pin_spec):
     failures = []
-    if identity["head"] != pin_spec["head"]:
-        failures.append("HEAD")
+    if "head" in pin_spec:
+        failures.append("SELF_REFERENTIAL_HEAD_PIN")
     if identity["ref"] != pin_spec["ref"]:
         failures.append("REF")
     if identity["clean_status"] != "":
         failures.append("DIRTY_TREE")
-    if identity["blobs"] != pin_spec["expected_blobs"]:
+    required_blob_paths = set(REQUIRED_C1B_BLOB_PATHS)
+    if set(pin_spec.get("blob_paths", ())) != required_blob_paths:
+        failures.append("BLOB_PATH_SCHEMA")
+    if set(pin_spec.get("expected_blobs", {})) != required_blob_paths:
+        failures.append("EXPECTED_BLOB_SCHEMA")
+    if identity["blobs"] != pin_spec.get("expected_blobs"):
         failures.append("BLOBS")
     if identity["wheel_sha256"] != pin_spec["wheel_sha256"]:
         failures.append("WHEELS")
