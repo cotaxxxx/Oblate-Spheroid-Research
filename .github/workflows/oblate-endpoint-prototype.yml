@@ -1,0 +1,63 @@
+name: Oblate endpoint prototype checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - implementation/endpoint-regular-axis-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prototype-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned prototype dependency
+        run: >-
+          python -m pip install
+          --require-hashes
+          --only-binary=:all:
+          --requirement requirements-prototype.txt
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install
+          --require-hashes
+          --only-binary=:all:
+          --requirement requirements-interval.txt
+      - name: Lint endpoint interval claim contract
+        run: python -m unittest tests/test_endpoint_contract.py
+      - name: Run exact endpoint algebra controls
+        run: python -m unittest controls/test_endpoint_algebra.py
+      - name: Run exact lambda-derivative algebra controls
+        run: python -m unittest controls/test_endpoint_lambda_derivative_algebra.py
+      - name: Run checker-owned controls and skeleton tests
+        run: python -m unittest tests/test_endpoint_checker_skeleton.py
+      - name: Build and independently check Arb interval record
+        run: >-
+          python -m unittest
+          tests/test_endpoint_interval_certificate.py
+      - name: Run independent expectations
+        run: python -m unittest controls/test_sphere_expectations.py
+      - name: Run implementation-calling endpoint controls
+        run: python -m unittest controls/test_endpoint_evaluator.py
+      - name: Import diagnostic modules
+        run: PYTHONPATH=diagnostics python -c "import oblate_endpoint_convergence_decimal; import oblate_axis_native_decimal; import oblate_fold_scan"
+      - name: Run non-binding endpoint margin diagnostic
+        run: python diagnostics/oblate_endpoint_margin.py
+      - name: Run non-binding fold diagnostic
+        run: python diagnostics/oblate_fold_scan.py
+      - name: Run non-binding axis nondegeneracy diagnostic
+        run: PYTHONPATH=. python diagnostics/oblate_axis_nondegeneracy.py
+      - name: Run non-binding transverse-index diagnostic
+        run: PYTHONPATH=. python diagnostics/oblate_transverse_index.py

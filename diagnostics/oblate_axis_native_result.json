@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "evidence_class": "DIAGNOSTIC_ONLY",
+  "derivation_class": "HIGH_PRECISION",
+  "quantity": "lambda_axis_ob",
+  "definition": "zero of partial_t g_axis_ob(0,lambda), evaluated as the Richardson limit of [g(h,lambda)-g(-h,lambda)]/(2h)",
+  "implementation": "Python Decimal; native axial stationary equation; split standalone tanh-sinh; centered differences; Richardson extrapolation",
+  "source_path": "diagnostics/oblate_axis_native_decimal.py",
+  "dependency": "diagnostics/oblate_endpoint_convergence_decimal.py",
+  "cases": [
+    {
+      "decimal_precision": 50,
+      "tanh_sinh_step": "0.04",
+      "initial_h": "0.02",
+      "richardson_levels": 7,
+      "lambda_axis_ob": "0.407958860300946364249105870185525699383171749254021986222480",
+      "slope_residual": "-5.3295055647582514998892635697518623674862E-58",
+      "trusted_decimal_digits": 37,
+      "precision_note": "Digits after the 37-digit stable prefix are retained as raw output and are not claimed accurate."
+    },
+    {
+      "decimal_precision": 80,
+      "tanh_sinh_step": "0.025",
+      "initial_h": "0.02",
+      "richardson_levels": 9,
+      "lambda_axis_ob": "0.407958860300946364249105870185525699331505374751647281456150421319312696874551667373148701",
+      "slope_residual": "-6.2450738641948532086382203391875859488488923571582357282E-89",
+      "agreement_with_independent_mpmath_dps60_digits": 45,
+      "independent_mpmath_dps60_value": "0.407958860300946364249105870185525699331505375",
+      "precision_note": "The 80-digit Decimal path agrees with the independent mpmath dps=60 recomputation for 45 decimal digits; remaining displayed digits are raw output."
+    }
+  ],
+  "stable_reported_prefix": "0.4079588603009463642491058701855256993",
+  "prior_candidate": "0.40795886030094636425",
+  "comparison": "The native result agrees with the prior chat-supplied candidate through all 20 recorded decimal places.",
+  "conclusion": "lambda_axis_ob now has two computational sources. This remains high-precision diagnostic evidence, not a certified enclosure.",
+  "audit_note": "Project-owner audit on 2026-08-25 confirmed the two-source claim and identified the valid-digit distinction recorded per case."
+}

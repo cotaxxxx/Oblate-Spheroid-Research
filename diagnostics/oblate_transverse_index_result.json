@@ -1,0 +1,91 @@
+{
+  "schema": "oblate-transverse-index-diagnostic-v1",
+  "evidence_class": [
+    "DIAGNOSTIC_ONLY",
+    "NOT_BINDING"
+  ],
+  "derivation_class": "HIGH_PRECISION",
+  "dps": 40,
+  "quantity": "Q_perp_ob = E_rr(0,t,lambda) for p=(r,0,lambda*t)",
+  "samples": [
+    {
+      "lambda": "0.42",
+      "t": "0.32994852396489091931827",
+      "z": "0.138578380065254186113674",
+      "Q_perp_ob": "1.51884101617011264067095983426"
+    },
+    {
+      "lambda": "0.45",
+      "t": "0.57937085196773054590677",
+      "z": "0.260716883385478745658046",
+      "Q_perp_ob": "1.42791757601278040859118305937"
+    },
+    {
+      "lambda": "0.50",
+      "t": "0.780278395843017172134583",
+      "z": "0.390139197921508586067292",
+      "Q_perp_ob": "1.26396352995524085430200538001"
+    },
+    {
+      "lambda": "0.55",
+      "t": "0.890989997139444984689863",
+      "z": "0.490044498426694741579425",
+      "Q_perp_ob": "1.09683773482332762711106974248"
+    },
+    {
+      "lambda": "0.60",
+      "t": "0.959901002039686994422032",
+      "z": "0.575940601223812196653219",
+      "Q_perp_ob": "0.93461642283855084335054419813"
+    },
+    {
+      "lambda": "0.63",
+      "t": "0.989077544497075513788765",
+      "z": "0.623118853033157573686922",
+      "Q_perp_ob": "0.841458073702606192910847809713"
+    },
+    {
+      "lambda": "0.6435",
+      "t": "0.99996533870835978755843",
+      "z": "0.64347769545882952329385",
+      "Q_perp_ob": "0.800759421280471617679998040973"
+    },
+    {
+      "lambda": "0.64354",
+      "t": "0.999995631271953238086911",
+      "z": "0.64353718854875278683845",
+      "Q_perp_ob": "0.800640068840038671150565054635"
+    },
+    {
+      "lambda": "0.643545",
+      "t": "0.999999416777790236120867",
+      "z": "0.643544624670263017504404",
+      "Q_perp_ob": "0.800625150416996106074941655916"
+    },
+    {
+      "lambda": "0.6435457",
+      "t": "0.999999946727716273287892",
+      "z": "0.643545665716850878494448",
+      "Q_perp_ob": "0.800623061849812521316462751658"
+    }
+  ],
+  "observed_minimum_Q_perp_ob": "0.800623061849812521316462751658",
+  "interpretation": "The center transverse Hessian is positive at lambda_axis_ob, and the sampled noncentral branch connects to it with positive transverse Hessian. Combined with negative axial second variation, this supports Morse index 1 at the sampled noncentral points and a purely axial center degeneracy.",
+  "producer": {
+    "repository": "cotaxxxx/bg-oblate-spheroid",
+    "branch": "implementation/endpoint-regular-axis-v1",
+    "source_commit": "2879ab2cdbd928d9d6c82c649d483846e2f25191",
+    "diagnostic_blob_sha": "a69c08624c0f1274788c04588dee88dbf3c57c04",
+    "workflow_run_number": 79,
+    "workflow_run_id": 32848101773,
+    "workflow_conclusion": "success"
+  },
+  "claim_limit": "Finite sampling does not prove positivity on the full branch, exclude additional stationary points, or provide a certified enclosure.",
+  "center_axis": {
+    "lambda": "0.4079588603009463642491058701855256993",
+    "t": "0",
+    "z": "0",
+    "Q_perp_ob": "1.55240199118209364660319412195"
+  },
+  "boundary_entry_limit_diagnostic": "The sequence through lambda=0.6435457 approaches a positive finite value near 0.800623 and does not trend toward zero."
+}

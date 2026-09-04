@@ -1,0 +1,64 @@
+{
+  "schema": "bg-oblate-spheroid.endpoint-local-interval-contract.v1",
+  "status": {
+    "evidence_class": "NOT_BINDING",
+    "derivation_class": "PROTOTYPE",
+    "is_certificate": false
+  },
+  "source_function": {
+    "name": "B_ob",
+    "definition": "lim_{t->1-} partial_t E_lambda(t)",
+    "analytic_reduction": "analysis/endpoint_kernel_lemma.md"
+  },
+  "parameter": {
+    "name": "lambda",
+    "certification_domain": {
+      "lower": {"numerator": 5, "denominator": 8},
+      "upper": {"numerator": 33, "denominator": 50}
+    },
+    "diagnostic_newton_waypoint": {
+      "lower": {"numerator": 16, "denominator": 25},
+      "upper": {"numerator": 13, "denominator": 20},
+      "binding": false
+    }
+  },
+  "required_enclosures": [
+    {
+      "quantity": "B_ob(5/8)",
+      "required_relation": "upper_bound < 0"
+    },
+    {
+      "quantity": "B_ob(33/50)",
+      "required_relation": "lower_bound > 0"
+    },
+    {
+      "quantity": "B_ob_prime([5/8,33/50])",
+      "required_relation": "lower_bound > 0"
+    }
+  ],
+  "conclusion_if_all_checks_pass": "Conditional on the endpoint analytic lemma, B_ob has exactly one zero in [5/8,33/50].",
+  "required_analytic_preconditions": [
+    "The endpoint-regular two-chart kernel represents B_ob and is continuous in lambda.",
+    "Differentiation under the integral gives the recorded B_ob_prime kernel.",
+    "Identifying the zero with the interior census branch additionally requires the t->1 one-sided limit/interchange lemma."
+  ],
+  "refinement_policy": {
+    "method": "interval_newton",
+    "starts_only_after_broad_bracket_passes": true,
+    "may_pass_through_diagnostic_waypoint": true,
+    "reuses_certified_derivative_enclosure": true
+  },
+  "excluded_claims": [
+    "No global uniqueness claim outside [5/8,33/50].",
+    "No certified decimal value for the zero.",
+    "No exclusion of other stationary points away from the boundary functional.",
+    "No analytic lemma is established by the machine result.",
+    "The diagnostic Newton waypoint is not a fallback certificate."
+  ],
+  "producer_checker_separation": {
+    "producer_output_required": true,
+    "checker_reconstructs_enclosures": true,
+    "checker_precision_not_less_than_producer": true,
+    "clean_room_run_required_for_certified_status": true
+  }
+}

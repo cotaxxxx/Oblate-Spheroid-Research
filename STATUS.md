@@ -1,6 +1,6 @@
 # Research Status
 
-Updated: 2026-08-25
+Updated: 2026-08-26
 
 ## Global status
 
@@ -44,18 +44,32 @@ The following values are candidate evidence, not certified enclosures:
 
 ```text
 lambda_entry_ob = 0.6435457703666799690435  [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
-lambda_axis_ob  = 0.40795886030094636425    [HIGH_PRECISION; mpmath dps=40; tanh-sinh]
-b_ob_prime      = +1.10246                  [HIGH_PRECISION; centered difference h=1e-12]
-gt_boundary_ob  = -1.45623                  [HIGH_PRECISION; one-sided Richardson difference]
+lambda_axis_ob  = 0.4079588603009463642491058701855256993  [HIGH_PRECISION; two-source agreement]
+b_ob_prime      = +1.10246                  [HIGH_PRECISION; two-source agreement]
+gt_boundary_ob  = -1.45623019               [HIGH_PRECISION; mpmath dps=50; one-sided differences]
 entry_slope_ob  = 0.757064                  [HIGH_PRECISION; ratio b_ob_prime/(-gt_boundary_ob)]
 b_ob(1)         = pi^2/32                   [EXACT]
 ```
 
-These computations were supplied through chat and are candidate evidence under
-the two-layer certification rule. `lambda_axis_ob` independently agrees with
-an earlier floating-point search near `0.40796`; `lambda_entry_ob` currently
-has one computational source. Independent agreement does not promote either
-value to `CERTIFIED_ENCLOSURE`.
+The original values were supplied through chat and remain candidate evidence
+under the two-layer certification rule. `lambda_axis_ob` now has two direct
+computational sources: the original `mpmath` evaluation (`dps=40`,
+tanh-sinh) and a native axial-equation calculation of
+`partial_t g_axis_ob(0,lambda)=0` using Python `Decimal`, split standalone
+tanh-sinh quadrature, centered slopes, and Richardson extrapolation at 50 and
+80 decimal digits. The two native precision settings agree through the stable
+prefix printed above, and the result agrees with the original recorded value
+through all 20 of its decimal places. `lambda_entry_ob` also has an
+independent Decimal/tanh-sinh reproduction of the endpoint equation.
+
+The `b_ob_prime` candidate now has a second numerical source: the binary64
+Simpson fold diagnostic reproduces local difference ratios approximately
+`1.10247` to `1.10250` across the boundary sign change, consistent with
+the prior high-precision value `1.10246`. The endpoint derivative candidate
+uses the independently audited one-sided sequence
+`-1.45550032, -1.45622003, -1.45623006, -1.45623019, -1.45623019` for
+steps `1e-4, 1e-6, 1e-8, 1e-10, 1e-12`. None of these agreements promotes
+a value to `CERTIFIED_ENCLOSURE`.
 
 Expected signs:
 
@@ -70,11 +84,244 @@ Measured diagnostic values for the first two signs were approximately
 to reproduce the signs requires investigation; agreement does not constitute
 certification.
 
+## Full-window axial census
+
+An independent binary64 composite-Simpson scan sampled the full positive axial
+branch window at `lambda=0.408` and at 0.01 increments from `0.410` through
+`0.640`, followed by the existing fine endpoint refinement.
+
+At all 25 full-window samples:
+
+- exactly one sign-changing root was observed on `0<t<1`;
+- the root increased monotonically from `t=0.019825...` to `t=0.997268...`;
+- `partial_t g_axis_ob` at the root was negative;
+- no additional positive-axis root or interior-fold signature was observed.
+
+The endpoint refinement continues this branch to `t=1` at
+`lambda_entry_ob`. GitHub Actions run #85 succeeded. The machine-readable
+record is
+[diagnostics/oblate_fold_scan_result.json](diagnostics/oblate_fold_scan_result.json).
+
+This remains `DIAGNOSTIC_ONLY / NOT_BINDING`. Finite sampling cannot exclude
+an arbitrarily narrow root pair, prove negativity between nodes, or exclude
+off-axis meridian stationary points. A binding conclusion requires interval
+coverage of the full branch region and its complement.
+
+## Precision-robustness correction
+
+A precision-dependent endpoint failure was reproduced in the prototype
+`b_ob` evaluator. The former `64*mp.eps` post-division slack admitted or
+rejected a rounded value of `gamma` non-monotonically as the requested
+precision changed. Failures were observed at dps 30, 35, 60, and 80.
+
+The regression test was committed before the implementation correction. The
+endpoint geometry now evaluates the exact factorization
+
+```text
+1 - gamma^2
+  = (2 - s^2)*(1 - (1 - lambda^2)*s^2)^2/(w^2*qhat).
+```
+
+This exposes the endpoint factor `2-s^2` and avoids forming a quotient that
+can round above one. A tanh-sinh node whose rounded `s^2` exceeds 2 only by
+at most `sqrt(eps)` is projected to the exact endpoint; a larger excursion
+fails closed.
+
+Correction checkpoint:
+
+```text
+branch head = 5cc212d47145704d39cb486df28eefc2e3938d79
+workflow run = #43, success
+status       = PROTOTYPE / NOT_AUDITED
+```
+
+The project owner independently checked the factorization and reran the
+corrected evaluator at ten precision settings from dps 20 through 120. All
+previously failing settings completed, and the observed error decreased from
+approximately `1e-22` to `1e-122` with increasing precision. Values at
+`lambda=0.408` and the reported root agreed across dps 30, 50, and 80.
+This verifies the robustness correction but does not promote the evaluator or
+any numerical value to `AUDITED_SOURCE`, `CERTIFIED_ENCLOSURE`, or
+`CERTIFIED`.
+
+The earlier split-versus-unsplit quadrature comparison is now optional
+diagnostic work rather than a blocking obligation, because the unsplit
+quadrature displays precision-proportional convergence over the tested range.
+
+A second occurrence of the same robustness defect was subsequently found in
+the interior `g_axis_ob` path for `t<1`. The case
+`g_axis_ob(0.99,0.63)` reproduced the former dps-dependent failure pattern.
+The general identity
+
+```text
+1 - gamma^2
+  = (1 - mu^2)*((1 - lambda^2)*mu + lambda^2*t)^2/(w^2*q)
+```
+
+now replaces the direct quotient on that path. It reduces exactly to the
+endpoint factorization when `t=1`. A dps 30, 50, and 80 regression was
+committed before the implementation change. GitHub Actions run #61 succeeded,
+and the previously recorded center-axis nondegeneracy sequence was unchanged
+at all printed digits. The correction checkpoint is
+`c9fb76ebdb94fd16bdbe9414107693952874cc9f`. Evidence status remains
+`PROTOTYPE / NOT_AUDITED`.
+
+## Candidate center-axis nondegeneracy
+
+A 50-dps centered-difference and Richardson diagnostic at
+`lambda_axis_ob` produced
+
+```text
+A_ob(lambda_axis_ob)       = -5.55e-25
+A_ob_prime(lambda_axis_ob) = +2.491132481221525520635103855...
+C_ob                       = -0.261396885193674917352806250...
+-A_ob_prime/C_ob           = +9.530077144476257310077726938...
+```
+
+Here `A_ob(lambda)=partial_t g_axis_ob(0,lambda)` and `C_ob` is the
+coefficient of `t^3` in the odd expansion of `g_axis_ob` at the center.
+The raw sequences converge with stable positive sign for `A_ob_prime` and
+stable negative sign for `C_ob`. The candidate normal form is therefore
+
+```text
+t^2 approximately 9.5300771445*(lambda-lambda_axis_ob),
+```
+
+so the candidate noncentral axial branch lies on the
+`lambda > lambda_axis_ob` side, consistent with absorption into the center as
+lambda decreases. The full diagnostic record is
+[diagnostics/oblate_axis_nondegeneracy_result.json](diagnostics/oblate_axis_nondegeneracy_result.json).
+
+Evidence status remains `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
+`HIGH_PRECISION`. GitHub Actions run #53 succeeded. These calculations do not
+prove nondegeneracy or supply certified coefficient enclosures.
+
+## Candidate transverse index on the axial branch
+
+For a transverse displacement `p=(r,0,lambda*t)`, the second derivative
+`Q_perp_ob=E_rr(0,t,lambda)` was reduced analytically to a one-dimensional
+azimuthally averaged integral and evaluated at seven positive-axis branch
+points.
+
+```text
+lambda    t                     z=lambda*t            Q_perp_ob
+0.42      0.3299485239648909    0.1385783800652542    +1.5188410161701126
+0.45      0.5793708519677305    0.2607168833854787    +1.4279175760127804
+0.50      0.7802783958430172    0.3901391979215086    +1.2639635299552409
+0.55      0.8909899971394450    0.4900444984266947    +1.0968377348233276
+0.60      0.9599010020396870    0.5759406012238122    +0.9346164228385508
+0.63      0.9890775444970755    0.6231188530331576    +0.8414580737026062
+0.6435    0.9999653387083598    0.6434776954588295    +0.8007594212804716
+0.64354   0.9999956312719532    0.6435371885487528    +0.8006400688400387
+0.643545  0.9999994167777902    0.6435446246702630    +0.8006251504169961
+0.6435457 0.9999999467277163    0.6435456657168509    +0.8006230618498125
+```
+
+At the center-axis threshold, the direct center evaluation gives
+
+```text
+Q_perp_ob(0,lambda_axis_ob) = +1.552401991182093646603194122...
+```
+
+This is close to the first branch sample `+1.518841...` at `lambda=0.42`
+and supports continuous connection of the branch transverse eigenvalue to the
+positive center transverse eigenvalue. Thus the candidate center degeneracy is
+purely axial: the axial eigenvalue vanishes while the transverse double
+eigenvalue remains positive.
+
+At the boundary-entry end, the sequence
+`lambda=0.6435, 0.64354, 0.643545, 0.6435457` gives
+
+```text
+Q_perp_ob = 0.8007594, 0.8006401, 0.8006252, 0.8006231.
+```
+
+The values approach a positive finite limit rather than zero. This supports a
+purely axial boundary entry: no simultaneous transverse degeneracy is observed.
+
+All sampled transverse eigenvalues are positive and remain separated from
+zero. Together with the negative axial second variation, this supports Morse
+index 1 for the sampled noncentral stationary points. The machine-readable
+record is
+[diagnostics/oblate_transverse_index_result.json](diagnostics/oblate_transverse_index_result.json).
+
+Evidence status is `DIAGNOSTIC_ONLY / NOT_BINDING`; derivation class is
+`HIGH_PRECISION`. GitHub Actions runs #67, #73, and #79 succeeded. Finite sampling does not
+prove positivity on the entire branch and does not exclude additional
+stationary points.
+
+## Endpoint analytic reduction and exact controls
+
+The boundary functional is now defined explicitly as the one-sided limit
+`B_ob(lambda)=lim[t->1-] partial_t E_lambda(t)`. The direct endpoint integral,
+including cone weight and Jacobian, is derived in
+[analysis/endpoint_kernel_lemma.md](analysis/endpoint_kernel_lemma.md).
+
+The reduction uses two analytic charts split at `s=1`. This is necessary
+because `u=1-gamma^2` has an internal double zero at
+`s^2=1/(1-lambda^2)` throughout the present oblate window. The note fixes the
+positive branch of `gamma`, records uniform denominator and chart bounds,
+includes the full endpoint-order checks, and justifies differentiation under
+the integral on compact rational lambda intervals. It also distinguishes the
+fixed-ball static normalization from any metric or gradient-flow choice.
+
+Exact rational controls were added before an interval implementation. They
+check the complement identity, endpoint values, internal double zero, seam
+targets, and the `A*gamma_t` factorization without calling an integrator or
+the prototype evaluator. GitHub Actions run #95 succeeded, with these controls
+executed before all implementation-calling checks.
+
+The endpoint-local source checkpoint
+`3406baad993701758a74ca9b42976412ca27b781` is `AUDITED_SOURCE`.
+Its seven load-bearing controls are recorded as six exact families plus one
+implementation-calling quadrature family. The audit receipt and remaining
+producer-stage limitations are fixed in [AUDIT_PIN.md](AUDIT_PIN.md).
+
+Evidence remains `DIAGNOSTIC_ONLY / NOT_BINDING`. No interval enclosure or
+uniqueness claim has been produced; `AUDITED_SOURCE` applies only to the
+pinned source bytes and is not a numerical certification.
+
 ## Open obligations
 
-- implement the endpoint-regular axial evaluator;
+- intervalize the audited endpoint-regular axial source;
+- share the transformed `s**3` weight between production density and the
+  implementation-calling bookkeeping control;
+- make the future Arb checker rerun the bookkeeping control on producer data
+  instead of trusting its `PASS` label;
 - certify existence, uniqueness, and transversality of `lambda_entry_ob`;
 - certify `b_ob_prime > 0` and `gt_boundary_ob < 0`;
 - certify the center-axis degeneracy and nondegenerate pitchfork coefficients;
-- exclude interior folds and additional meridian stationary points;
+- exclude interior folds and additional meridian stationary points globally;
 - keep the `lambda -> 0` uniform tail outside the present finite-window claim.
+
+## Arb endpoint-local implementation candidate
+
+An Arb producer and a source-independent checker are now implemented on top
+of the pinned audited analytic source. The producer emits 1024-panel-per-unit
+cell records at 160-bit precision. The checker ignores producer PASS labels
+and final sums and independently reconstructs series tails, kernel ranges,
+cell integrals, totals, and the three binding signs.
+
+The first end-to-end candidate run gave:
+
+~~~text
+B_ob(5/8)              subset [-0.02548935, -0.01580721]
+B_ob(33/50)            subset [ 0.01336182,  0.02259274]
+B_ob_prime([5/8,33/50]) subset [ 0.41835218,  1.88100252]
+~~~
+
+Thus the machine path presently separates all three required quantities from
+zero and returns the conditional conclusion that B_ob has exactly one zero
+in [5/8,33/50]. The record also rechecks transformed quadrature bookkeeping
+on the producer partition, while the mpmath implementation-calling control
+shares its s**3 weight with the production energy density.
+
+Classification remains `NOT_BINDING / PROTOTYPE` for this new implementation
+unit. The enclosures must not be called CERTIFIED until the producer/checker
+source is independently audited, pinned, and rerun through the clean-room
+receipt chain.
+
+The receipt conclusion is explicitly conditional on the endpoint analytic
+lemma and on the one-sided `t -> 1` limit/interchange needed to identify the
+zero with the boundary passage of the interior census branch. That latter
+identification remains an analytic obligation.

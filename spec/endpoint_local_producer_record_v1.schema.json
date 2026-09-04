@@ -1,0 +1,522 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bg-oblate-spheroid.endpoint-local-producer-record.v1",
+  "title": "Oblate endpoint local producer record",
+  "description": "NOT_BINDING pre-implementation schema. A conforming record is not a certificate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "provenance",
+    "precision",
+    "contract",
+    "controls",
+    "evaluations"
+  ],
+  "properties": {
+    "schema": {
+      "const": "bg-oblate-spheroid.endpoint-local-producer-record.v1"
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_class",
+        "derivation_class",
+        "is_certificate"
+      ],
+      "properties": {
+        "evidence_class": {
+          "const": "NOT_BINDING"
+        },
+        "derivation_class": {
+          "const": "PROTOTYPE"
+        },
+        "is_certificate": {
+          "const": false
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_commit",
+        "producer_sha256",
+        "checker_sha256",
+        "prototype_sha256",
+        "controls_sha256",
+        "contract_sha256",
+        "workflow_sha256",
+        "requirements_sha256",
+        "wheel_filename",
+        "wheel_sha256"
+      ],
+      "properties": {
+        "source_commit": {
+          "$ref": "#/$defs/git_sha"
+        },
+        "producer_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "checker_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "prototype_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "controls_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "contract_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "workflow_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "requirements_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "wheel_filename": {
+          "type": "string",
+          "minLength": 1
+        },
+        "wheel_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "precision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "producer_bits",
+        "checker_bits"
+      ],
+      "properties": {
+        "producer_bits": {
+          "type": "integer",
+          "minimum": 64
+        },
+        "checker_bits": {
+          "type": "integer",
+          "minimum": 64
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lambda_lower",
+        "lambda_upper"
+      ],
+      "properties": {
+        "lambda_lower": {
+          "const": "5/8"
+        },
+        "lambda_upper": {
+          "const": "33/50"
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoint_values",
+        "global_complement",
+        "internal_double_zero",
+        "seam_rational_targets",
+        "A_gamma_t_factorization",
+        "gamma_lambda_factorization",
+        "quadrature_bookkeeping"
+      ],
+      "properties": {
+        "endpoint_values": {
+          "const": "PASS"
+        },
+        "global_complement": {
+          "const": "PASS"
+        },
+        "internal_double_zero": {
+          "const": "PASS"
+        },
+        "seam_rational_targets": {
+          "const": "PASS"
+        },
+        "A_gamma_t_factorization": {
+          "const": "PASS"
+        },
+        "gamma_lambda_factorization": {
+          "const": "PASS"
+        },
+        "quadrature_bookkeeping": {
+          "const": "PASS"
+        }
+      }
+    },
+    "evaluations": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/evaluation"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {"label": {"const": "left_endpoint"}},
+            "required": ["label"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {"label": {"const": "right_endpoint"}},
+            "required": ["label"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {"label": {"const": "derivative_domain"}},
+            "required": ["label"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "rational": {
+      "type": "string",
+      "pattern": "^-?[0-9]+/[1-9][0-9]*$"
+    },
+    "s_coordinate": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/rational"
+        },
+        {
+          "const": "sqrt2"
+        }
+      ]
+    },
+    "arb_ball": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "midpoint",
+        "radius"
+      ],
+      "properties": {
+        "midpoint": {
+          "type": "string"
+        },
+        "radius": {
+          "type": "string"
+        }
+      }
+    },
+    "series": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "function",
+        "degree",
+        "partial_sum",
+        "remainder_bound"
+      ],
+      "properties": {
+        "function": {
+          "enum": [
+            "Phi",
+            "Psi",
+            "Psi_prime"
+          ]
+        },
+        "degree": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial_sum": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "remainder_bound": {
+          "$ref": "#/$defs/arb_ball"
+        }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "s_interval",
+        "lambda_interval",
+        "chart",
+        "u_construction",
+        "series"
+      ],
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "s_interval": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/s_coordinate"
+            },
+            {
+              "$ref": "#/$defs/s_coordinate"
+            }
+          ],
+          "items": false
+        },
+        "lambda_interval": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/rational"
+            },
+            {
+              "$ref": "#/$defs/rational"
+            }
+          ],
+          "items": false
+        },
+        "chart": {
+          "enum": [
+            "gamma_lower",
+            "u_upper"
+          ]
+        },
+        "u_construction": {
+          "enum": [
+            "not_used",
+            "factorized_complement"
+          ]
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/series"
+          }
+        },
+        "kernel_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "lambda_derivative_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "weighted_integral_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        },
+        "weighted_derivative_integral_enclosure": {
+          "$ref": "#/$defs/arb_ball"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "chart": {
+                "const": "gamma_lower"
+              }
+            },
+            "required": [
+              "chart"
+            ]
+          },
+          "then": {
+            "properties": {
+              "u_construction": {
+                "const": "not_used"
+              },
+              "series": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "chart": {
+                "const": "u_upper"
+              }
+            },
+            "required": [
+              "chart"
+            ]
+          },
+          "then": {
+            "properties": {
+              "u_construction": {
+                "const": "factorized_complement"
+              },
+              "series": {
+                "minItems": 2,
+                "allOf": [
+                  {
+                    "contains": {
+                      "properties": {"function": {"const": "Phi"}},
+                      "required": ["function"]
+                    },
+                    "minContains": 1,
+                    "maxContains": 1
+                  },
+                  {
+                    "contains": {
+                      "properties": {"function": {"const": "Psi"}},
+                      "required": ["function"]
+                    },
+                    "minContains": 1,
+                    "maxContains": 1
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "lambda_interval",
+        "purpose",
+        "cells",
+        "reported_sum"
+      ],
+      "properties": {
+        "label": {
+          "enum": [
+            "left_endpoint",
+            "right_endpoint",
+            "derivative_domain"
+          ]
+        },
+        "lambda_interval": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/rational"
+            },
+            {
+              "$ref": "#/$defs/rational"
+            }
+          ],
+          "items": false
+        },
+        "purpose": {
+          "enum": [
+            "B_ob",
+            "B_ob_prime"
+          ]
+        },
+        "cells": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/cell"
+          }
+        },
+        "reported_sum": {
+          "$ref": "#/$defs/arb_ball"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"label": {"enum": ["left_endpoint", "right_endpoint"]}},
+            "required": ["label"]
+          },
+          "then": {
+            "properties": {
+              "purpose": {"const": "B_ob"},
+              "cells": {
+                "items": {
+                  "required": [
+                    "kernel_enclosure",
+                    "weighted_integral_enclosure"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {"required": ["lambda_derivative_enclosure"]},
+                      {"required": ["weighted_derivative_integral_enclosure"]}
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"label": {"const": "derivative_domain"}},
+            "required": ["label"]
+          },
+          "then": {
+            "properties": {
+              "purpose": {"const": "B_ob_prime"},
+              "cells": {
+                "items": {
+                  "required": [
+                    "lambda_derivative_enclosure",
+                    "weighted_derivative_integral_enclosure"
+                  ],
+                  "not": {
+                    "anyOf": [
+                      {"required": ["kernel_enclosure"]},
+                      {"required": ["weighted_integral_enclosure"]}
+                    ]
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {"chart": {"const": "u_upper"}},
+                        "required": ["chart"]
+                      },
+                      "then": {
+                        "properties": {
+                          "series": {
+                            "contains": {
+                              "properties": {
+                                "function": {"const": "Psi_prime"}
+                              },
+                              "required": ["function"]
+                            },
+                            "minContains": 1,
+                            "maxContains": 1
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
