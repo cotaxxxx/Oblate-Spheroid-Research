@@ -38,9 +38,33 @@ PINNED_ENVIRONMENT_FIELDS = (
     "packages",
     "platform",
     "uname",
-    "lscpu_head",
+    "lscpu_canonical",
     "os_release",
 )
+EXPECTED_LSCPU_KEY_ORDER = (
+    "Architecture",
+    "CPU op-mode(s)",
+    "Address sizes",
+    "Byte Order",
+    "CPU(s)",
+    "On-line CPU(s) list",
+    "Vendor ID",
+    "Model name",
+    "CPU family",
+    "Model",
+    "Thread(s) per core",
+    "Core(s) per socket",
+    "Socket(s)",
+    "Stepping",
+    "Frequency boost",
+    "CPU max MHz",
+    "CPU min MHz",
+    "BogoMIPS",
+    "Flags",
+)
+LSCPU_EXCLUSION_KEYS = {"CPU(s) scaling MHz", "CPU MHz"}
+EXPECTED_LSCPU_EXCLUDED = ("CPU(s) scaling MHz",)
+_LAST_LSCPU_TRACE = None
 
 
 def utc_now():
@@ -139,6 +163,11 @@ class Ledger:
             os.fsync(handle.fileno())
         self.records.append(record)
         self.last_hash = record_hash
+        if record_type in ("header", "segment_begin", "segment_end") and _LAST_LSCPU_TRACE:
+            self.append("lscpu_raw_trace", {
+                "for_record_type": record_type,
+                **_LAST_LSCPU_TRACE,
+            })
         return record
 
 
@@ -146,12 +175,64 @@ def git_blob(path):
     return run_text(["git", "hash-object", path])
 
 
+def _lscpu_key(raw_line):
+    return raw_line.split(b":", 1)[0].strip().decode("ascii")
+
+
+def _canonicalize_lscpu(raw):
+    lines = raw.splitlines(keepends=True)[:20]
+    keys = []
+    excluded = []
+    kept = []
+    for line in lines:
+        key = _lscpu_key(line)
+        if key in LSCPU_EXCLUSION_KEYS:
+            excluded.append(key)
+        else:
+            keys.append(key)
+            kept.append(line)
+    return b"".join(kept), tuple(keys), tuple(excluded)
+
+
+def capture_lscpu_identity(raw_record_dir=None):
+    global _LAST_LSCPU_TRACE
+    env = dict(os.environ)
+    env["LC_ALL"] = "C"
+    raws = []
+    for _ in range(2):
+        raw = subprocess.run(
+            ["lscpu"], check=True, stdout=subprocess.PIPE, env=env
+        ).stdout
+        raws.append(b"".join(raw.splitlines(keepends=True)[:20]))
+    if raw_record_dir is not None:
+        raw_record_dir = Path(raw_record_dir)
+        raw_record_dir.mkdir(parents=True, exist_ok=True)
+        for index, raw in enumerate(raws, 1):
+            (raw_record_dir / f"lscpu_{index}.txt").write_bytes(raw)
+    parsed = [_canonicalize_lscpu(raw) for raw in raws]
+    canonical = [item[0] for item in parsed]
+    key_orders = [item[1] for item in parsed]
+    excluded = [item[2] for item in parsed]
+    failures = []
+    if canonical[0] != canonical[1]:
+        failures.append("LSCPU_CANONICAL_MISMATCH")
+    if any(keys != EXPECTED_LSCPU_KEY_ORDER for keys in key_orders):
+        failures.append("LSCPU_KEY_ORDER")
+    if any(keys != EXPECTED_LSCPU_EXCLUDED for keys in excluded):
+        failures.append("LSCPU_EXCLUDED_SET")
+    if failures:
+        raise SystemExit("PIN_IDENTITY_FAIL " + ",".join(failures))
+    canonical_sha256 = hashlib.sha256(canonical[0]).hexdigest()
+    _LAST_LSCPU_TRACE = {
+        "canonical_sha256": canonical_sha256,
+        "raw_sha256": [hashlib.sha256(raw).hexdigest() for raw in raws],
+    }
+    return {"lscpu_canonical": canonical_sha256}
+
+
 def environment_snapshot(pin_spec):
     blobs = {path: git_blob(path) for path in sorted(pin_spec["blob_paths"])}
-    try:
-        lscpu = run_text(["lscpu"]).splitlines()[:20]
-    except Exception:
-        lscpu = []
+    lscpu_identity = capture_lscpu_identity()
     freeze = run_text([sys.executable, "-m", "pip", "freeze", "--all"]).splitlines()
     packages = {}
     package_names = pin_spec.get("package_names", ["mpmath", "python-" + "fl" + "int"])
@@ -182,7 +263,7 @@ def environment_snapshot(pin_spec):
         "packages": packages,
         "platform": platform.platform(),
         "uname": platform.uname()._asdict(),
-        "lscpu_head": lscpu,
+        **lscpu_identity,
         "os_release": os_release,
         "wheel_sha256": wheels,
     }
@@ -206,6 +287,8 @@ def verify_identity(identity, pin_spec):
     if identity["wheel_sha256"] != pin_spec["wheel_sha256"]:
         failures.append("WHEELS")
     expected_environment = pin_spec.get("expected_environment")
+    if isinstance(expected_environment, dict) and "lscpu_head" in expected_environment:
+        failures.append("RAW_LSCPU_PIN_FORBIDDEN")
     if not isinstance(expected_environment, dict):
         failures.append("EXPECTED_ENVIRONMENT_MISSING")
     else:
