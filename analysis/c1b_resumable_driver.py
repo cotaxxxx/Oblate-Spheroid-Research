@@ -147,6 +147,7 @@ class Ledger:
         self.last_hash = previous
 
     def append(self, record_type, payload):
+        global _LAST_LSCPU_TRACE
         sequence = len(self.records)
         record_hash = hash_payload(sequence, record_type, self.last_hash, payload)
         record = {
@@ -164,9 +165,11 @@ class Ledger:
         self.records.append(record)
         self.last_hash = record_hash
         if record_type in ("header", "segment_begin", "segment_end") and _LAST_LSCPU_TRACE:
+            trace = _LAST_LSCPU_TRACE
+            _LAST_LSCPU_TRACE = None
             self.append("lscpu_raw_trace", {
                 "for_record_type": record_type,
-                **_LAST_LSCPU_TRACE,
+                **trace,
             })
         return record
 
@@ -196,6 +199,10 @@ def _canonicalize_lscpu(raw):
 
 def capture_lscpu_identity(raw_record_dir=None):
     global _LAST_LSCPU_TRACE
+    if raw_record_dir is None:
+        raw_record_dir = os.environ.get("C1B_PREFLIGHT_RECORD_DIR")
+    if not raw_record_dir:
+        raise SystemExit("PIN_IDENTITY_FAIL LSCPU_RAW_RECORD_MISSING")
     env = dict(os.environ)
     env["LC_ALL"] = "C"
     raws = []
@@ -204,11 +211,10 @@ def capture_lscpu_identity(raw_record_dir=None):
             ["lscpu"], check=True, stdout=subprocess.PIPE, env=env
         ).stdout
         raws.append(b"".join(raw.splitlines(keepends=True)[:20]))
-    if raw_record_dir is not None:
-        raw_record_dir = Path(raw_record_dir)
-        raw_record_dir.mkdir(parents=True, exist_ok=True)
-        for index, raw in enumerate(raws, 1):
-            (raw_record_dir / f"lscpu_{index}.txt").write_bytes(raw)
+    raw_record_dir = Path(raw_record_dir)
+    raw_record_dir.mkdir(parents=True, exist_ok=True)
+    for index, raw in enumerate(raws, 1):
+        (raw_record_dir / f"lscpu_{index}.txt").write_bytes(raw)
     parsed = [_canonicalize_lscpu(raw) for raw in raws]
     canonical = [item[0] for item in parsed]
     key_orders = [item[1] for item in parsed]

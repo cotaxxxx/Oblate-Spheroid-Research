@@ -98,7 +98,7 @@ def identity():
         "packages": {"stub": "1"},
         "platform": "smoke-platform",
         "uname": {"system": "smoke"},
-        "lscpu_head": ["Model name: smoke"],
+        "lscpu_canonical": "d" * 64,
         "os_release": ["NAME=smoke"],
         "wheel_sha256": {"stub.whl": "c" * 64},
     }
