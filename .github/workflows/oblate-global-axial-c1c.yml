@@ -1,0 +1,122 @@
+name: Oblate global axial C1c lower-half exclusion
+
+"on":
+  push:
+    branches:
+      - implementation/gt-boundary-two-chart
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  global-axial-c1c-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Record checked-out head and amendment pin
+        run: |
+          git rev-parse HEAD
+          git status --short
+          git hash-object analysis/GLOBAL_AXIAL_C1C_PRE_RUN_AMENDMENT.md
+          git hash-object producer/global_axial_c1c_producer.py
+          git hash-object checker/global_axial_c1c_checker.py
+          git hash-object .github/workflows/oblate-global-axial-c1c.yml
+          cat analysis/GLOBAL_AXIAL_C1C_PRE_RUN_AMENDMENT.md
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned prototype dependency
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-prototype.txt
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run inherited C0a four-group raw audit
+        run: PYTHONPATH=. python analysis/c0a_four_group_raw_audit.py
+      - name: Run C1c producer
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=. python producer/global_axial_c1c_producer.py | tee c1c-producer.log
+      - name: Run C1c checker
+        shell: bash
+        run: |
+          set -o pipefail
+          PYTHONPATH=. python checker/global_axial_c1c_checker.py | tee c1c-checker.log
+      - name: Compare producer and checker gates
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def rows(path, prefix):
+              return [x.split() for x in Path(path).read_text().splitlines()
+                      if x.startswith(prefix)]
+
+          def one(path, prefix):
+              found = rows(path, prefix)
+              if len(found) != 1:
+                  raise SystemExit(f"{path}: expected one {prefix!r}, got {len(found)}")
+              return found[0]
+
+          pp, cp = "c1c-producer.log", "c1c-checker.log"
+          p_stages = rows(pp, "C1C_G3_STAGE")
+          c_stages = rows(cp, "C1C_G3_STAGE")
+          if p_stages != c_stages:
+              raise SystemExit(f"stage unresolved/panel mismatch: {p_stages} != {c_stages}")
+
+          p_boxes = rows(pp, "C1C_G3_WORST_BOX")
+          c_boxes = rows(cp, "C1C_G3_WORST_BOX")
+          def box_key(row):
+              if row[2] == "NONE":
+                  return tuple(row[:3])
+              return tuple(row[:10])
+          if [box_key(x) for x in p_boxes] != [box_key(x) for x in c_boxes]:
+              raise SystemExit(f"worst-box mismatch: {p_boxes} != {c_boxes}")
+
+          p_upper = {x[1]: " ".join(x[2:]) for x in rows(pp, "C1C_G3_WORST_UPPER")}
+          c_upper = {x[1]: " ".join(x[2:]) for x in rows(cp, "C1C_G3_WORST_UPPER")}
+          if p_upper.keys() != c_upper.keys():
+              raise SystemExit(f"worst-upper stage mismatch: {p_upper} != {c_upper}")
+
+          def point_interval_sign(text):
+              # python-flint renders arb.upper() as a certified point interval:
+              # negative "[-... +/- ...]", positive "[... +/- ...]",
+              # zero-containing "[+/- ...]".
+              text = text.strip()
+              if text.startswith("[-"):
+                  return -1
+              if text.startswith("[+/-"):
+                  return 0
+              if text.startswith("["):
+                  return 1
+              raise SystemExit(f"unrecognized arb.upper() rendering: {text!r}")
+
+          unresolved = {x[1]: int(x[x.index("unresolved") + 1]) for x in p_stages}
+          for label in p_upper:
+              psign = point_interval_sign(p_upper[label])
+              csign = point_interval_sign(c_upper[label])
+              if (unresolved[label] == 0) != (psign < 0 and csign < 0):
+                  raise SystemExit(
+                      f"{label}: sign/unresolved inconsistency: "
+                      f"unresolved={unresolved[label]} "
+                      f"producer_upper={p_upper[label]} checker_upper={c_upper[label]}"
+                  )
+
+          p_stage = one(pp, "C1C_G3_FIRST_PASS")
+          c_stage = one(cp, "C1C_G3_FIRST_PASS")
+          p_final = one(pp, "LOGICAL_FINAL_C1C_MACHINE")
+          c_final = one(cp, "LOGICAL_FINAL_C1C_MACHINE")
+          if p_stage[1:] != c_stage[1:]:
+              raise SystemExit(f"first-stage mismatch: {p_stage} != {c_stage}")
+          if p_final[1] != "PASS" or c_final[1] != "PASS":
+              raise SystemExit(f"machine gate unresolved: {p_final} / {c_final}")
+          print("C1C_AGREEMENT_FIELDS unresolved,worst_box,panel_evaluations")
+          print("C1C_WORST_UPPER_POLICY sign_checked_not_value_equal")
+          print("C1C_FOUR_GROUP_WIDTH_MAX AGREEMENT_EXCLUDED mag_t_derived")
+          print("C1C_PRODUCER_CHECKER_AGREEMENT PASS", "first_stage", p_stage[1])
+          print("C1C_ASSEMBLY_STATUS PENDING_C1B_ANCHOR_AND_EXACT_COVER")
+          PY

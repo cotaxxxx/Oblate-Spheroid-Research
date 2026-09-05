@@ -1,0 +1,37 @@
+name: Oblate C1b B_ob bridge gate
+
+"on":
+  push:
+    branches:
+      - implementation/gt-boundary-two-chart
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  c1b-bob-bridge-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Record checked-out head and contracts
+        run: |
+          git rev-parse HEAD
+          git hash-object analysis/GLOBAL_AXIAL_C1B_PRE_RUN_AMENDMENT.md
+          git hash-object analysis/GLOBAL_AXIAL_C1B_BOB_BRIDGE_CONTRACT.md
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned prototype dependency
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-prototype.txt
+      - name: Install hash-pinned Arb binary wheel
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: --requirement requirements-interval.txt
+      - name: Run C1b B_ob bridge producer
+        run: PYTHONPATH=. python producer/global_axial_c1b_bob_producer.py
+      - name: Run C1b B_ob bridge checker
+        run: PYTHONPATH=. python checker/global_axial_c1b_bob_checker.py
